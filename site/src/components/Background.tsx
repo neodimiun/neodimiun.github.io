@@ -131,6 +131,19 @@ export function Background({ runwayId }: Props) {
         ctx.globalCompositeOperation = "lighter"
         ctx.fillStyle = g
         ctx.fillRect(0, 0, w, h)
+
+        // Keep the scan line as the leading edge: nothing below it is
+        // revealed except a short feather, so the glow only lights what
+        // the scanner has already passed.
+        const feather = Math.max(8, 0.018 * h)
+        const cut = ctx.createLinearGradient(0, 0, 0, h)
+        cut.addColorStop(0, "rgba(255,255,255,1)")
+        cut.addColorStop(Math.min(1, y / h), "rgba(255,255,255,1)")
+        cut.addColorStop(Math.min(1, (y + feather) / h), "rgba(255,255,255,0)")
+        cut.addColorStop(1, "rgba(255,255,255,0)")
+        ctx.globalCompositeOperation = "destination-in"
+        ctx.fillStyle = cut
+        ctx.fillRect(0, 0, w, h)
         ctx.globalCompositeOperation = "source-over"
       }
 

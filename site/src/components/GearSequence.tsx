@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import { runwayProgress } from "../runway"
+import type { GearPart, GearScene } from "../gear3d"
 
 const FRAME_COUNT = 48
 /** Portion of the runway spent scrubbing the dolly; the rest holds the last frame. */
 const SCRUB_END = 0.6
+/** Where the radiograph (3D) has fully taken over from the photograph. */
+const XRAY_IN = 0.68
 
 type Callout = {
   id: string
@@ -12,14 +15,15 @@ type Callout = {
   at: number
   x: number
   y: number
+  model: GearPart
 }
 
 const CALLOUTS: Callout[] = [
-  { id: "chrome", process: "Chrome", part: "Oleo piston", at: 0.62, x: 0.445, y: 0.45 },
-  { id: "peen", process: "Shot peen", part: "Torque links", at: 0.7, x: 0.335, y: 0.36 },
-  { id: "cad", process: "Cadmium", part: "Steel fittings", at: 0.78, x: 0.605, y: 0.2 },
-  { id: "nickel", process: "Sulfamate nickel", part: "Bores and journals", at: 0.86, x: 0.4, y: 0.7 },
-  { id: "ccc", process: "Conversion coat", part: "Wheel, aluminum", at: 0.93, x: 0.74, y: 0.86 },
+  { id: "chrome", process: "Chrome", part: "Oleo piston", at: 0.72, x: 0.445, y: 0.45, model: "piston" },
+  { id: "peen", process: "Shot peen", part: "Torque links", at: 0.78, x: 0.335, y: 0.36, model: "links" },
+  { id: "cad", process: "Cadmium", part: "Steel fittings", at: 0.84, x: 0.605, y: 0.2, model: "fittings" },
+  { id: "nickel", process: "Sulfamate nickel", part: "Bores and journals", at: 0.9, x: 0.4, y: 0.7, model: "axle" },
+  { id: "ccc", process: "Conversion coat", part: "Wheel, aluminum", at: 0.95, x: 0.74, y: 0.86, model: "wheel" },
 ]
 
 const RUNWAY_ID = "gear-runway"
@@ -46,6 +50,9 @@ export function GearSequence() {
   const listRefs = useRef<(HTMLLIElement | null)[]>([])
   const frameOut = useRef<HTMLElement>(null)
   const seqOut = useRef<HTMLElement>(null)
+  const modeOut = useRef<HTMLElement>(null)
+  const plateRef = useRef<HTMLDivElement>(null)
+  const threeRef = useRef<HTMLDivElement>(null)
   const [reduced, setReduced] = useState(false)
 
   useEffect(() => {
@@ -73,7 +80,28 @@ export function GearSequence() {
     let lastDrawn = -1
     let progress = 0
     let smooth = 0
+    let gear: GearScene | null = null
+    let gearWanted = false
     const dpr = Math.min(1.5, window.devicePixelRatio || 1)
+    const plate = plateRef.current
+    const mount = threeRef.current
+
+    const loadGear = () => {
+      if (gearWanted || !mount) return
+      gearWanted = true
+      import("../gear3d")
+        .then((mod) => {
+          try {
+            gear = mod.createGearScene(mount)
+            start()
+          } catch {
+            gear = null
+          }
+        })
+        .catch(() => {
+          gear = null
+        })
+    }
 
     const resize = () => {
       canvas.width = Math.max(1, Math.round(stage.clientWidth * dpr))
@@ -82,6 +110,7 @@ export function GearSequence() {
     }
 
     const load = () => {
+      loadGear()
       if (loading) return
       loading = true
       // Load the last frame first (it is the one that holds), then the rest.
@@ -127,22 +156,45 @@ export function GearSequence() {
         }
       }
 
+      // Photograph to radiograph: the dark plate fades in and the 3D gear
+      // takes over the hold phase. Without WebGL the photo simply holds.
+      const xray = gear ? Math.min(1, Math.max(0, (p - SCRUB_END) / (XRAY_IN - SCRUB_END))) : 0
+      if (plate) plate.style.opacity = String(xray)
+      stage.classList.toggle("is-dark", xray > 0.5)
+      if (gear) {
+        const t = Math.min(1, Math.max(0, (p - SCRUB_END) / (1 - SCRUB_END)))
+        gear.setProgress(t)
+        if (mount) mount.style.opacity = String(xray)
+        if (xray > 0) gear.render()
+      }
+
       const holding = p >= SCRUB_END - 0.02
+      const activeParts = new Set<GearPart>()
+      const anchors = gear && xray > 0.5 ? gear.anchors() : null
       calloutRefs.current.forEach((el, i) => {
         if (!el) return
         const c = CALLOUTS[i]
         const show = holding && p >= c.at
-        const fade = show ? Math.min(1, (p - c.at) / 0.05) : 0
+        const fade = show ? Math.min(1, (p - c.at) / 0.04) : 0
+        if (show) activeParts.add(c.model)
         el.style.opacity = String(fade)
         el.style.transform = `translate(-10%, -50%) translateY(${(1 - fade) * 6}px)`
-        el.style.left = `${(rect.dx + c.x * rect.dw) / dpr}px`
-        el.style.top = `${(rect.dy + c.y * rect.dh) / dpr}px`
+        if (anchors) {
+          const a = anchors[c.model]
+          el.style.left = `${a.x}px`
+          el.style.top = `${a.y}px`
+        } else {
+          el.style.left = `${(rect.dx + c.x * rect.dw) / dpr}px`
+          el.style.top = `${(rect.dy + c.y * rect.dh) / dpr}px`
+        }
         const li = listRefs.current[i]
         if (li) li.classList.toggle("on", show)
       })
+      if (gear) gear.setActive(activeParts)
 
       if (frameOut.current) frameOut.current.textContent = String(want + 1).padStart(2, "0")
       if (seqOut.current) seqOut.current.textContent = `${String(Math.round(p * 100)).padStart(3, "0")}%`
+      if (modeOut.current) modeOut.current.textContent = xray > 0.5 ? "Radiograph" : "Optical"
     }
 
     const frame = () => {
@@ -180,6 +232,7 @@ export function GearSequence() {
 
     const onResize = () => {
       resize()
+      gear?.resize()
       readScroll()
       start()
     }
@@ -194,6 +247,8 @@ export function GearSequence() {
       io.disconnect()
       window.removeEventListener("scroll", readScroll)
       window.removeEventListener("resize", onResize)
+      gear?.dispose()
+      gear = null
     }
   }, [reduced])
 
@@ -213,6 +268,8 @@ export function GearSequence() {
             </>
           )}
           <div className="gear-scrim" aria-hidden />
+          <div ref={plateRef} className="gear-plate" aria-hidden />
+          <div ref={threeRef} className="gear-3d-mount" aria-hidden />
 
           {CALLOUTS.map((c, i) => (
             <div
@@ -254,7 +311,7 @@ export function GearSequence() {
                   >
                     <span className="idx">{String(i + 1).padStart(2, "0")}</span>
                     <span>
-                      {c.process} <span className="text-black/45">/ {c.part}</span>
+                      {c.process} <span className="gear-part text-black/45">/ {c.part}</span>
                     </span>
                   </li>
                 ))}
@@ -266,6 +323,9 @@ export function GearSequence() {
                   </span>
                   <span>
                     Seq <b ref={seqOut}>000%</b>
+                  </span>
+                  <span>
+                    Mode <b ref={modeOut}>Optical</b>
                   </span>
                 </div>
               )}

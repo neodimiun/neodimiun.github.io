@@ -3,6 +3,7 @@ import { headingActive } from "./SectionStill"
 import { LabRail } from "./LabRail"
 import { SECTION_IDS } from "../toc"
 import { useScrollActive, useScrollCurrent } from "../hooks/useScrollCurrent"
+import { useReveal } from "../hooks/useReveal"
 
 function Usp({ n }: { n: string }) {
   return <>USP {"<" + n + ">"}</>
@@ -41,7 +42,7 @@ const ARCHIVE: { id: string; title: string; body: ReactNode }[] = [
     title: "Nutrients",
     body: (
       <>
-        SM 4500-N C-2011 (total nitrogen by flow injection), SM 4500-NH₃ G (ammonia), SM 4500-N<sub>org</sub> D (total Kjeldahl nitrogen), SM 4500-P F (total phosphorus as P).
+        SM 4500-N C-2011 (total nitrogen by flow injection), SM 4500-NH<sub>3</sub> G (ammonia), SM 4500-N<sub>org</sub> D (total Kjeldahl nitrogen), SM 4500-P F (total phosphorus as P).
       </>
     ),
   },
@@ -68,7 +69,11 @@ const ARCHIVE: { id: string; title: string; body: ReactNode }[] = [
   {
     id: "lab-archive-5",
     title: "General and physical",
-    body: "SM 4500-H⁺ B (pH), SM 2320 B (alkalinity), SM 2510 B (conductivity).",
+    body: (
+      <>
+        SM 4500-H<sup>+</sup> B (pH), SM 2320 B (alkalinity), SM 2510 B (conductivity).
+      </>
+    ),
   },
   {
     id: "lab-archive-6",
@@ -92,44 +97,59 @@ const ARCHIVE: { id: string; title: string; body: ReactNode }[] = [
 ]
 
 const LAB_IDS = [...LEAD.map((item) => item.id), "lab-archive"]
+const LEAD_NUM = ["M1", "M2", "M3", "M4"]
 
 export function Lab() {
   const active = useScrollActive(LAB_IDS)
   const sectionOn = useScrollCurrent(SECTION_IDS) === "lab"
+  useReveal("lab")
 
   return (
     <section id="lab" className="relative z-[2] bg-[#f4f4f4] px-5 sm:px-8 md:px-10 pt-16 pb-20 sm:pt-20 sm:pb-24">
-      <div className="max-w-[1200px] mx-auto lg:grid lg:grid-cols-[minmax(0,38rem)_minmax(15rem,1fr)] lg:gap-16">
+      <div className="max-w-[1200px] mx-auto lg:grid lg:grid-cols-[minmax(0,40rem)_minmax(15rem,1fr)] lg:gap-16">
         <div>
+          <div className="label-row mb-4 reveal">
+            <span>
+              <span className="num">09</span> / Lab methods
+            </span>
+            <span className="meta">Specification sheet · four disciplines, one archive</span>
+          </div>
           <h2
-            className={`mb-8 text-[22px] sm:text-[28px] text-black tracking-tight ${headingActive(sectionOn)}`}
-            style={{ fontFamily: "var(--font-heading)", fontWeight: 400 }}
+            className={`mb-8 text-[22px] sm:text-[28px] text-black tracking-tight reveal ${headingActive(sectionOn)}`}
+            style={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}
           >
             Lab Methods
           </h2>
-          {LEAD.map((item) => (
-            <article key={item.id} id={item.id} className="mb-8 last:mb-0 scroll-mt-14">
-              <h3
-                className={`text-[16px] sm:text-[18px] font-medium mb-2 text-black ${headingActive(sectionOn && active.includes(item.id))}`}
-              >
-                {item.title}
-              </h3>
-              <p className="text-[15px] sm:text-[17px] leading-[1.65] text-black">{item.body}</p>
-            </article>
-          ))}
+          <dl className="spec spec-lead reveal">
+            {LEAD.map((item, i) => (
+              <div key={item.id} id={item.id} className="spec-row py-4! scroll-mt-14">
+                <dt className="flex gap-2">
+                  <span>{LEAD_NUM[i]}</span>
+                </dt>
+                <dd>
+                  <h3
+                    className={`text-[16px] sm:text-[17px] font-medium mb-1.5 text-black ${headingActive(sectionOn && active.includes(item.id))}`}
+                  >
+                    {item.title}
+                  </h3>
+                  <p className="text-[14.5px] sm:text-[15.5px] leading-[1.6] text-black">{item.body}</p>
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-          <details id="lab-archive" className="lab-archive mt-10 scroll-mt-14">
+          <details id="lab-archive" className="lab-archive mt-8 scroll-mt-14 reveal">
             <summary className={headingActive(sectionOn && active.includes("lab-archive"))}>
-              Methods archive
+              M5 · Methods archive, by method number
             </summary>
-            <div className="mt-6">
-              {ARCHIVE.map((item) => (
-                <article key={item.id} id={item.id} className="mb-8 last:mb-0 scroll-mt-14">
-                  <h3 className="text-[16px] sm:text-[18px] font-medium mb-2 text-black">{item.title}</h3>
-                  <p className="text-[15px] sm:text-[17px] leading-[1.65] text-black">{item.body}</p>
-                </article>
+            <dl className="spec mt-5">
+              {ARCHIVE.map((item, i) => (
+                <div key={item.id} id={item.id} className="spec-row scroll-mt-14">
+                  <dt>{`A${i + 1}`} · {item.title}</dt>
+                  <dd className="text-[14px]! leading-[1.55]!">{item.body}</dd>
+                </div>
               ))}
-            </div>
+            </dl>
           </details>
         </div>
         <LabRail activeIds={sectionOn ? active : []} />

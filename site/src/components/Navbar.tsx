@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { LAB_TOC, MENU, PATH_TOC, SECTION_IDS } from "../toc"
+import { LINKS } from "../links"
 import { useScrollActive, useScrollCurrent } from "../hooks/useScrollCurrent"
 
 const PATH_IDS = PATH_TOC.map((item) => item.id)
@@ -38,7 +39,7 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 sm:px-8 py-1.5 sm:py-2 bg-white/90">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 sm:px-8 py-1.5 sm:py-2 bg-white/90 backdrop-blur-[2px]">
         <a
           href="#top"
           className="relative z-50 inline-flex items-center justify-center text-black hover:opacity-60 transition-opacity"
@@ -51,6 +52,18 @@ export function Navbar() {
             className="h-[35px] sm:h-10 w-auto"
           />
         </a>
+
+        <div className="status-strip hidden md:flex gap-6" aria-label="Status">
+          <span>
+            Now / <b>Senior Engineer, M&amp;PT · Collins Aerospace</b>
+          </span>
+          <a href={LINKS.immutableqc} target="_blank" rel="noopener noreferrer">
+            Building / <b>ImmutableQC v0.1</b>
+          </a>
+          <span>
+            Site / <b>Opa-Locka, FL</b>
+          </span>
+        </div>
 
         <button
           type="button"
@@ -79,7 +92,7 @@ export function Navbar() {
 
       {open ? (
         <div className="fixed inset-0 z-40 bg-white overflow-y-auto">
-          <div className="min-h-full px-8 sm:px-12 pt-16 pb-16 max-w-xl mx-auto text-center md:max-w-lg md:mx-0 md:ml-auto md:px-16">
+          <div className="min-h-full px-8 sm:px-12 pt-16 pb-16 max-w-xl mx-auto text-center md:max-w-lg md:mx-0 md:ml-auto md:px-16 md:text-left">
             {MENU.map((section) => (
               <div key={section.id} className="mb-10">
                 <a
@@ -88,6 +101,7 @@ export function Navbar() {
                   className={`${itemClass} text-[28px] sm:text-[32px] mb-3 ${
                     currentSection === section.id ? "underline underline-offset-4 decoration-1" : ""
                   }`}
+                  style={{ fontFamily: "var(--font-heading)", fontWeight: 500, letterSpacing: "-0.02em" }}
                 >
                   {section.label}
                 </a>
@@ -98,12 +112,17 @@ export function Navbar() {
                         <a
                           href={child.href}
                           onClick={close}
-                          className={`${itemClass} text-[16px] sm:text-[17px] ${
+                          className={`${itemClass} text-[15px] sm:text-[16px] ${
                             childActive(section.id, child.id)
                               ? "text-black underline underline-offset-4 decoration-1"
                               : "text-black/70"
                           }`}
                         >
+                          {child.num ? (
+                            <span className="mono-plain text-[11px] tracking-[0.08em] text-black/45 mr-2">
+                              {child.num}
+                            </span>
+                          ) : null}
                           {child.label}
                         </a>
                       </li>
@@ -112,6 +131,17 @@ export function Navbar() {
                 ) : null}
               </div>
             ))}
+            <div className="mt-12 pt-6 border-t border-black/15">
+              <a
+                href={LINKS.immutableqc}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={close}
+                className="mono text-[11px] text-black/60 hover:text-black"
+              >
+                immutableqc.com · open alpha
+              </a>
+            </div>
           </div>
         </div>
       ) : null}

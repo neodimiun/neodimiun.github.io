@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { gearX, runwayProgress } from "../runway"
 
-const CALLOUTS = [
-  { id: "oleo", label: "Oleo", at: 0.32, x: 0.68, y: 0.38 },
-  { id: "bogie", label: "Bogie", at: 0.52, x: 0.74, y: 0.66 },
-  { id: "wheel", label: "Wheel", at: 0.70, x: 0.78, y: 0.84 },
-] as const
-
 type Props = {
   runwayId: string
 }
@@ -15,7 +9,6 @@ export function Background({ runwayId }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const scanRef = useRef<HTMLDivElement>(null)
   const tickRef = useRef<HTMLDivElement>(null)
-  const calloutRefs = useRef<(HTMLDivElement | null)[]>([])
   const [reduced, setReduced] = useState(() =>
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -95,9 +88,6 @@ export function Background({ runwayId }: Props) {
         wrap.style.webkitMaskImage = "none"
         if (scan) scan.style.opacity = "0"
         if (tick) tick.style.opacity = "0"
-        calloutRefs.current.forEach((el) => {
-          if (el) el.style.opacity = "0"
-        })
         raf = requestAnimationFrame(frame)
         return
       }
@@ -130,6 +120,19 @@ export function Background({ runwayId }: Props) {
         g.addColorStop(1, "rgba(255,255,255,0)")
         ctx.globalCompositeOperation = "lighter"
         ctx.fillStyle = g
+        ctx.fillRect(0, 0, w, h)
+
+        // Keep the scan line as the leading edge: nothing below it is
+        // revealed except a short feather, so the glow only lights what
+        // the scanner has already passed.
+        const feather = Math.max(8, 0.018 * h)
+        const cut = ctx.createLinearGradient(0, 0, 0, h)
+        cut.addColorStop(0, "rgba(255,255,255,1)")
+        cut.addColorStop(Math.min(1, y / h), "rgba(255,255,255,1)")
+        cut.addColorStop(Math.min(1, (y + feather) / h), "rgba(255,255,255,0)")
+        cut.addColorStop(1, "rgba(255,255,255,0)")
+        ctx.globalCompositeOperation = "destination-in"
+        ctx.fillStyle = cut
         ctx.fillRect(0, 0, w, h)
         ctx.globalCompositeOperation = "source-over"
       }
@@ -168,14 +171,6 @@ export function Background({ runwayId }: Props) {
         tick.style.opacity = scanActive ? (short ? "0.4" : "0.65") : "0"
       }
 
-      calloutRefs.current.forEach((el, i) => {
-        if (!el) return
-        const c = CALLOUTS[i]
-        const show = p >= c.at && p < 0.99
-        const fade = show ? Math.min(1, (p - c.at) / 0.08) : 0
-        el.style.opacity = String(fade)
-        el.style.transform = `translateY(${(1 - fade) * 6}px)`
-      })
 
       raf = requestAnimationFrame(frame)
     }
@@ -283,20 +278,6 @@ export function Background({ runwayId }: Props) {
       <div className="hero-scrim" aria-hidden />
       <div className="hero-grain" aria-hidden />
 
-      {CALLOUTS.map((c, i) => (
-        <div
-          key={c.id}
-          ref={(el) => {
-            calloutRefs.current[i] = el
-          }}
-          className="hero-callout"
-          style={{ left: `${c.x * 100}%`, top: `${c.y * 100}%` }}
-          aria-hidden
-        >
-          <span className="hero-callout-tick" />
-          <span className="hero-callout-label">{c.label}</span>
-        </div>
-      ))}
     </>
   )
 }

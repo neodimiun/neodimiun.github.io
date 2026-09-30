@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react"
 import { gearX, runwayProgress } from "../runway"
 
 const CALLOUTS = [
-  { id: "oleo", label: "Oleo", at: 0.32, x: 0.68, y: 0.38 },
-  { id: "bogie", label: "Bogie", at: 0.52, x: 0.74, y: 0.66 },
-  { id: "wheel", label: "Wheel", at: 0.70, x: 0.78, y: 0.84 },
+  // `at` is the runway progress at which the scan edge (0.06 + p * 0.88)
+  // has passed the callout's y, so a label never appears ahead of the scanner.
+  { id: "oleo", label: "Oleo", at: 0.38, x: 0.68, y: 0.38 },
+  { id: "bogie", label: "Bogie", at: 0.7, x: 0.74, y: 0.66 },
+  { id: "wheel", label: "Wheel", at: 0.9, x: 0.78, y: 0.84 },
 ] as const
 
 type Props = {

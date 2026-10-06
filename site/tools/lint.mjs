@@ -131,7 +131,7 @@ function pageRules(cfg) {
     const Q = cfg.facts.iqc || {}
     if (once.length !== 1) E(`[data-once="iqc"] must exist exactly once (found ${once.length})`)
     else {
-      if (t(slot('tagline')) !== `Immutable QC — ${Q.tagline}`) E(`the IQC tagline is "${t(slot('tagline'))}", not "Immutable QC — ${Q.tagline}" (facts iqc.tagline)`)
+      if (t(slot('tagline')) !== `Immutable QC: ${Q.tagline}`) E(`the IQC tagline is "${t(slot('tagline'))}", not "Immutable QC: ${Q.tagline}" (facts iqc.tagline)`)
       if (t(slot('sentence')) !== cfg.iqcSentence) E(`the IQC sentence is not ${cfg.iqcSentenceId} from site.config.mjs`)
       if (t(slot('status')) !== Q.status) E(`the IQC status line is not facts iqc.status`)
       if (t(slot('roadmap')) !== Q.roadmap) E(`the IQC roadmap line is not facts iqc.roadmap`)

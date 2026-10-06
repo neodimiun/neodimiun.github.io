@@ -47,7 +47,8 @@ export const site = {
   place: 'South Florida',
   email: 'jose@joseqc.com',
   linkedin: 'https://www.linkedin.com/in/jf42',
-  github: 'https://github.com/neodimiun',
+  github: 'https://github.com/fabreu08', // most active
+  github2: 'https://github.com/neodimiun', // hosts this site
   iqcUrl: 'https://immutableqc.com',
   iqcCode: null, // Q10: the repository link; also needs gate G6b
   title: 'José A. Fernández Abreu · Materials & Process Engineer',

@@ -402,7 +402,7 @@ async function bundle(ctx, scopeChapters, page) {
 
 // ------------------------------------------------------------------------------------------------ page assembly
 function jsonld(site) {
-  return JSON.stringify({ '@context': 'https://schema.org', '@type': 'Person', name: site.name, jobTitle: site.role, url: site.origin + '/', email: `mailto:${site.email}`, sameAs: [site.linkedin, site.github], homeLocation: { '@type': 'Place', name: site.place } })
+  return JSON.stringify({ '@context': 'https://schema.org', '@type': 'Person', name: site.name, jobTitle: site.role, url: site.origin + '/', email: `mailto:${site.email}`, sameAs: [site.linkedin, site.github, site.github2], homeLocation: { '@type': 'Place', name: site.place } })
 }
 // favicon: the header mark (shell/icons.svg #i-mark) in ink on paper, written to <out>/favicon.svg
 function favicon() {

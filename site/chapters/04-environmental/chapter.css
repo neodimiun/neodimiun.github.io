@@ -1,0 +1,118 @@
+/* Chapter 04 Environmental science (Team ENV). Tokens only; every selector starts with #environmental.
+   Fig. 6 "The Run" (SPEC-C §7.4): SVG geometry in a 360 × 450 view box that fills the 4:5 plate; in-plot text is DOM (A6),
+   positioned in % of the same box. States are CSS only: transform + opacity, 600 ms zoom/restack, 240 ms fades. */
+/* Title: one sentence per unit, so balance breaks only between the pair; a unit wider than the column (< 360 px) wraps inside itself.
+   At 44 px "Area says how much." is ~499 px and columns 1–5 are 491 px (≥ 1400), so on the grid the title may also run into the
+   empty gap before column 6 (the figure starts at column 7). */
+#environmental #env-t .snt{display:inline-block}
+@media (min-width:1024px){#environmental #env-t{margin-right:calc(-1 * var(--gap))}}
+#environmental #fig-chromatogram .plate{container-type:inline-size}
+#environmental .cg{position:absolute;inset:0;width:100%;height:100%;fill:none}
+#environmental .cg path{vector-effect:non-scaling-stroke;stroke-linejoin:round}
+#environmental .cg .f{fill:var(--plate)} /* a <use> of the line: inherits this fill; the line it clones keeps its stroke */
+#environmental .cg .ln{stroke:var(--steel);stroke-width:1}
+#environmental .cg .seg{stroke:var(--fg);stroke-width:1.5;stroke-linecap:round}
+#environmental .cg .ar{fill:var(--a-mark)}
+#environmental .cg .ig{stroke:var(--a);stroke-width:1}
+#environmental .cg .sf{fill:var(--a-mark);opacity:.28}
+#environmental .cg .sl{stroke:var(--a);stroke-width:1.5;stroke-dasharray:4 2}
+#environmental .cg .win{fill:var(--acc-tint)}
+#environmental .cg .ax{stroke:var(--steel);stroke-width:1}
+#environmental .cg .sb{stroke:var(--fg);stroke-width:1}
+#environmental .cg .ld{stroke:var(--steel);stroke-width:1;stroke-dasharray:1 2}
+#environmental .cg .fb{fill:var(--a-mark);opacity:.5}
+/* the waterfall: injection k sits DX·k right and DY·k up; zoomed states overlay every injection on one baseline */
+#environmental .cg .zm,#environmental .cg .trk,#environmental .cg .spk{transform-box:view-box;transform-origin:0 0}
+#environmental .cg .k1{transform:translate(6px,-21px)}
+#environmental .cg .k2{transform:translate(12px,-42px)}
+#environmental .cg .k3{transform:translate(18px,-63px)}
+#environmental .cg .k4{transform:translate(24px,-84px)}
+#environmental .cg .k5{transform:translate(30px,-105px)}
+#environmental .cg .k6{transform:translate(36px,-126px)}
+#environmental .fig:not([data-state=sample]) .zm{transform:translate(-1231.25px,-184px) scale(9,1.5)}
+#environmental .fig:not([data-state=sample]) .trk{transform:none}
+/* zoomed: no data beyond the 2.75–3.75 min axis (x 58–337); the clip moves with the zoom */
+#environmental .fig:not([data-state=sample]) .cr{x:58px;width:279px}
+/* the spiked injection rests at the sample's height (scaleY = 2.610 / 4.421 = 0.5904 about the baseline) and grows */
+#environmental .cg .spk{transform:translateY(368px) scaleY(.5904) translateY(-368px);opacity:0}
+#environmental .fig[data-state=spike] .spk{transform:none;opacity:1}
+#environmental .s-std,#environmental .s-spk,#environmental .s-zoom{opacity:0;visibility:hidden}
+#environmental .fig[data-state=std] .s-std,#environmental .fig[data-state=spike] .s-spk,
+#environmental .fig:not([data-state=sample]) .s-zoom{opacity:1;visibility:visible}
+#environmental .fig:not([data-state=sample]) .s-stack{opacity:0;visibility:hidden}
+#environmental .fig:not([data-state=sample]) .f{opacity:0;visibility:hidden}
+#environmental .fig[data-state=std] .ar,#environmental .fig[data-state=std] .ig,#environmental .fig[data-state=spike] .ig,
+#environmental .fig[data-state=spike] .trk:not(.k0){opacity:0}
+#environmental .fig[data-state=std] .seg{stroke:var(--a)}
+/* text never sits over moving imagery: the old state's labels fade out (240 ms), then the geometry zooms or restacks (600 ms),
+   then the new state's labels fade in (240 ms). Motion off: everything is instant. */
+html.motion #environmental .cg .zm,html.motion #environmental .cg .trk,html.motion #environmental .cg .spk{transition:transform .6s var(--ease) .24s,opacity var(--t-fade) var(--ease) .24s}
+html.motion #environmental .cg .cr{transition:x .6s var(--ease) .24s,width .6s var(--ease) .24s}
+html.motion #environmental .cg .ar,html.motion #environmental .cg .ig{transition:opacity var(--t-fade) var(--ease) .24s}
+/* the occluding fills are the costly paint at ×9: they leave with the old labels and return with the new ones, never moving */
+html.motion #environmental .cg .f{transition:opacity var(--t-fade) var(--ease) .84s,visibility 0s .84s}
+html.motion #environmental .fig:not([data-state=sample]) .f{transition:opacity var(--t-fade) var(--ease),visibility 0s var(--t-fade)}
+html.motion #environmental .s-std,html.motion #environmental .s-spk,html.motion #environmental .s-zoom,html.motion #environmental .s-stack{transition:opacity var(--t-fade) var(--ease),visibility 0s var(--t-fade)}
+html.motion #environmental .fig[data-state=std] .s-std,html.motion #environmental .fig[data-state=spike] .s-spk,
+html.motion #environmental .fig:not([data-state=sample]) .s-zoom,html.motion #environmental .fig[data-state=sample] .s-stack{transition:opacity var(--t-fade) var(--ease) .84s,visibility 0s .84s}
+/* armed (motion on, below the fold): the intro reveals these; no transitions while armed (Replay from a zoomed state snaps) */
+html.motion #environmental .fig.pre .trk:not(.k0),html.motion #environmental .fig.pre .k0 > .f,html.motion #environmental .fig.pre .seg,
+html.motion #environmental .fig.pre .ar,html.motion #environmental .fig.pre .ig,html.motion #environmental .fig.pre .s-stack{opacity:0}
+html.motion #environmental .fig.pre *{transition:none!important}
+
+/* DOM labels: 11 px (10.5 px on figures under 330 px, 11.5 px on desktop plates), ground halo, never scaled; placed clear of
+   every stroke (tools/paths.mjs clearance check) */
+#environmental .lb{position:absolute;inset:0;pointer-events:none}
+#environmental .lb i{position:absolute;left:calc(var(--x) * 100% / 360);top:calc(var(--y) * 100% / 450);font:400 11px/1 var(--mono);color:var(--fg-2);white-space:nowrap;font-variant-numeric:tabular-nums;transform:translateY(-50%);
+  text-shadow:1px 0 var(--plate),-1px 0 var(--plate),0 1px var(--plate),0 -1px var(--plate),1px 1px var(--plate),-1px -1px var(--plate),1px -1px var(--plate),-1px 1px var(--plate)}
+#environmental .lb .e{transform:translate(-100%,-50%)}
+#environmental .lb .m{transform:translate(-50%,-50%)}
+#environmental .lb .a{color:var(--a)}
+#environmental .lb .k,#environmental .lb .pk{color:var(--fg)}
+#environmental .lb .pk.a{color:var(--a);font-weight:500}
+#environmental .lb .pk{transform:translate(calc(var(--ld,6px) + 3px),-50%)}
+#environmental .lb .pk::before{content:'';position:absolute;right:calc(100% + 3px);top:50%;width:var(--ld,6px);border-top:1px dotted var(--fg-2)}
+/* peak names sit in strips no trace enters (tools/paths.mjs measures it); the plate-coloured box is only a safety knockout */
+#environmental .lb .pk{background:var(--plate);box-shadow:2px 0 var(--plate),-2px 0 var(--plate)}
+/* fluoride and chloride: under the sample baseline, on an elbow leader down from the peak's foot (w: name to the west) */
+#environmental .lb .dn{transform:translate(6px,-50%)}
+#environmental .lb .dn::before{right:calc(100% + 1px);top:auto;bottom:50%;width:4px;height:var(--lv);border-top:0;border-left:1px dotted var(--fg-2);border-bottom:1px dotted var(--fg-2)}
+#environmental .lb .dn.w{transform:translate(calc(-100% - 6px),-50%)}
+#environmental .lb .dn.w::before{right:auto;left:calc(100% + 1px);border-left:0;border-right:1px dotted var(--fg-2)}
+#environmental .lb .bt{transform:translateY(-100%)}
+#environmental .lb .wd{font-weight:inherit}
+@container fig (width >= 330px){#environmental .lb .nw{display:none}}
+#environmental .lb .two{line-height:1.3}
+#environmental .lb sub{font-size:.75em}
+@container fig (width < 330px){#environmental .lb i{font-size:10.5px}#environmental .lb .wd{display:none}}
+@container fig (width >= 450px){#environmental .lb i{font-size:11.5px}}
+
+/* hover reading (fine pointer only): a hairline time cursor on the front trace, created by chapter.js */
+#environmental .cur{position:absolute;inset:0;pointer-events:none;z-index:1}
+#environmental .cur[hidden]{display:none}
+#environmental .cur .h{position:absolute;left:0;top:8.9%;height:72.9%;border-left:1px solid var(--fg-2)}
+#environmental .cur .d{position:absolute;left:-3px;top:-3px;width:7px;height:7px;border-radius:50%;background:var(--fg);box-shadow:0 0 0 2px var(--plate)}
+#environmental .cur .t{position:absolute;left:0;top:30px;font:500 11px/1 var(--mono);color:var(--fg);white-space:nowrap;background:var(--plate);padding:3px 4px;font-variant-numeric:tabular-nums}
+
+/* readout: one panel per state, stacked in one grid cell (the block never changes height); legend swatches */
+#environmental #fig-chromatogram .readout{display:grid}
+#environmental #fig-chromatogram .readout .p{grid-area:1 / 1;visibility:hidden;display:flex;flex-direction:column;row-gap:6px;min-width:0}
+#environmental #fig-chromatogram[data-state=sample] .p-smp,#environmental #fig-chromatogram[data-state=std] .p-std,
+#environmental #fig-chromatogram[data-state=spike] .p-spk{visibility:visible}
+#environmental #fig-chromatogram .readout .row{display:flex;align-items:baseline;column-gap:8px;width:100%}
+#environmental #fig-chromatogram .readout .val{white-space:nowrap}
+#environmental #fig-chromatogram .sw{width:14px;height:9px;flex:none;align-self:center;box-sizing:border-box;border-radius:7px 7px 0 0 / 9px 9px 0 0}
+#environmental #fig-chromatogram .sw-p{background:var(--a-mark)}
+#environmental #fig-chromatogram .sw-s{border:1.5px solid var(--steel);border-bottom:0}
+#environmental #fig-chromatogram .sw-k{border:1.5px dashed var(--a);border-bottom:0}
+#environmental #fig-chromatogram .calc{margin-top:2px;font:400 11px/1.5 var(--mono);color:var(--fg-2)}
+#environmental #fig-chromatogram .calc span{display:block}
+#environmental #fig-chromatogram .calc b{font-weight:500;color:var(--fg)}
+@container fig (width >= 450px){#environmental #fig-chromatogram .calc{font-size:11.5px}}
+@container fig (width < 340px){
+  #environmental #fig-chromatogram .readout .row{flex-wrap:wrap;row-gap:4px}
+  #environmental #fig-chromatogram .readout .status{flex:1 0 100%;justify-content:flex-end}
+}
+/* controls: tighter buttons below 400 px keep Standards · Sample · Spike · Replay on one row (310 px of 358 at 390);
+   Replay is icon-only under 330 px (shell figure.css), so the row fits 288 px */
+@container fig (width < 400px){#environmental #fig-chromatogram .ctrl button{padding:0 9px;letter-spacing:.04em}}

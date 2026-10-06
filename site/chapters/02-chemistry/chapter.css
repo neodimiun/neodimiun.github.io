@@ -1,0 +1,76 @@
+/* Chapter 02 Chemistry (Team CHEM). Tokens only; every selector starts with [data-ch=chem] or #chemistry. */
+
+/* ---- Fig. 3 burette. The drawing (host: posters + the shared canvas) sits between two 28 px corner rows, so the four
+   corner labels never sit over the moving scale at any width (at 288–380 px plates the tube would run under them).
+   The host's top and bottom 12 px fade into the plate. Posters are square and cover the host (scaled to its height),
+   which frames exactly what the canvas draws at any host aspect: the camera's vertical field is fixed. */
+#chemistry #fig-burette .host{top:28px;bottom:28px;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,black 12px,black calc(100% - 12px),transparent);
+  mask-image:linear-gradient(to bottom,transparent,black 12px,black calc(100% - 12px),transparent)}
+/* the line of sight: two index ticks on the host's centre row (Path A's pink ticks) */
+#chemistry #fig-burette .eye{position:absolute;z-index:2;top:calc(50% - 1px);width:14px;height:2px;background:var(--a-mark);pointer-events:none}
+#chemistry #fig-burette .eye.l{left:0}
+#chemistry #fig-burette .eye.r{right:0}
+/* readout: a status change only changes the leader's length; on narrow figures the status takes its own line at every
+   state, so the strip never changes height while the eye moves */
+#chemistry #fig-burette .readout .status{min-width:0}
+@container fig (width < 340px){#chemistry #fig-burette .readout .status{flex:1 0 100%;justify-content:flex-end}}
+#chemistry #fig-burette .ctrl button{min-width:72px}
+
+/* reduced motion / Motion off: the three-panel small multiples stand in for the live view in every state; the panel the
+   buttons chose is underlined in the accent (and the readout names it) */
+#chemistry #fig-burette .plate{container-type:size} /* cqw below = the plate's width (its size never depends on content) */
+/* the label rows hug the letterboxed 6:5 image (image height = plate width / 1.2, at most the host minus the rows) */
+#chemistry #fig-burette .tri-l{display:none;position:absolute;z-index:2;left:0;right:0;top:50%;height:min(100% - 56px,100cqw / 1.2 + 44px);transform:translateY(-50%);flex-direction:column;justify-content:space-between;pointer-events:none}
+#chemistry #fig-burette .tri-l p{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));text-align:center;font:400 11px/1 var(--mono);letter-spacing:.06em;color:var(--fg-2);font-variant-numeric:tabular-nums}
+#chemistry #fig-burette .tri-l .t{text-transform:uppercase}
+#chemistry #fig-burette .tri-l .v{color:var(--fg)}
+#chemistry #fig-burette .tri-l span{justify-self:center;padding:3px 0 4px;border-bottom:2px solid transparent;white-space:nowrap}
+#chemistry #fig-burette .tri-l .v span{padding:4px 0 3px;border-bottom:0;border-top:2px solid transparent}
+#chemistry #fig-burette .host > .poster[data-for="tri"] img{top:22px;bottom:22px;height:calc(100% - 44px);object-fit:contain}
+html.js:not(.motion) #chemistry #fig-burette .host > .poster:not([data-for="tri"]){visibility:hidden;opacity:0}
+html.js:not(.motion) #chemistry #fig-burette .host > .poster[data-for="tri"]{visibility:visible;opacity:1}
+html.js:not(.motion) #chemistry #fig-burette .host{-webkit-mask-image:none;mask-image:none}
+html.js:not(.motion) #chemistry #fig-burette .tri-l{display:flex}
+html.js:not(.motion) #chemistry #fig-burette .eye{display:none}
+#chemistry #fig-burette[data-state="above"] .tri-l [data-for="above"],#chemistry #fig-burette[data-state="level"] .tri-l [data-for="level"],
+#chemistry #fig-burette[data-state="below"] .tri-l [data-for="below"]{color:var(--a);border-color:var(--a)}
+
+/* ---- Fig. 4 calibration (fig--mini, 4:3). The 400:248 drawing box is centred in the plate minus 8 px sides and the
+   28 px corner rows: 258 × 160 at a 288 px plate, 342 × 212 at 358, 464 × 288 at 480. Labels are DOM (A6). */
+#chemistry #fig-calibration .draw{position:absolute;inset:0;margin:auto;width:min(100cqw - 16px,(75cqw - 56px) * 400 / 248);height:min((100cqw - 16px) * 248 / 400,75cqw - 56px)}
+#chemistry #fig-calibration .draw > svg,#chemistry #fig-calibration .late > svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#chemistry #fig-calibration .late{position:absolute;inset:0}
+#chemistry #fig-calibration .draw svg path,#chemistry #fig-calibration .draw svg rect{vector-effect:non-scaling-stroke}
+#chemistry #fig-calibration .grid{fill:none;stroke:var(--hair);stroke-width:1;stroke-dasharray:1 3}
+#chemistry #fig-calibration .axis{fill:none;stroke:var(--fg-2);stroke-width:.8}
+#chemistry #fig-calibration .fit,#chemistry #fig-calibration .fit2{fill:none;stroke:var(--fg);stroke-width:1.3}
+#chemistry #fig-calibration .pt{fill:var(--fg)}
+#chemistry #fig-calibration .band{fill:var(--acc-tint);opacity:.75}
+#chemistry #fig-calibration .bandedge{fill:none;stroke:var(--a-mark);stroke-width:1}
+#chemistry #fig-calibration .chk{fill:var(--paper);stroke:var(--a);stroke-width:1.6}
+#chemistry #fig-calibration .lead{fill:none;stroke:var(--fg-2);stroke-width:.8}
+#chemistry #fig-calibration .pl{position:absolute;z-index:1;font:400 11px/1 var(--mono);color:var(--fg-2);white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none}
+#chemistry #fig-calibration .xt{transform:translate(-50%,6px)}
+#chemistry #fig-calibration .yt{transform:translate(calc(-100% - 6px),-50%)}
+#chemistry #fig-calibration .xa{transform:translate(-100%,calc(11px + 1em))}
+#chemistry #fig-calibration .ya{transform:translate(6px,-1px)}
+#chemistry #fig-calibration .chk-l{color:var(--fg);transform:translate(calc(-100% - 2px),calc(-100% - 2px));display:flex;gap:.6ch;align-items:center}
+#chemistry #fig-calibration .chk-l > span{display:inline-flex;align-items:center;gap:2px}
+#chemistry #fig-calibration .chk-l .i{width:1em;height:1em}
+#chemistry #fig-calibration .r-l{color:var(--fg);transform:translate(-100%,-50%)}
+#chemistry #fig-calibration .lim-l{transform:translate(0,-50%)}
+@container fig (width < 330px){
+  #chemistry #fig-calibration .pl{font-size:10.5px}
+  #chemistry #fig-calibration .chk-l{flex-direction:column;align-items:flex-end;gap:2px}
+}
+/* entry (SPEC-C §5.3): arm() adds .pre only when motion is on and the figure starts below the fold. The readout is never
+   pre-hidden, so 99.0 is on the page while Fig. 4 waits in the intro queue (A15). */
+html.motion #chemistry #fig-calibration.pre .fit,html.motion #chemistry #fig-calibration.pre .pt,html.motion #chemistry #fig-calibration.pre .late{opacity:0}
+/* readout strips on narrow figures (< 340 px): labels never wrap; the status takes its own right-aligned line at every
+   state, so the strip's height never changes */
+@container fig (width < 340px){
+  #chemistry #fig-calibration .readout .row{flex-wrap:wrap;row-gap:4px}
+  #chemistry #fig-calibration .readout .status{flex:1 0 100%;justify-content:flex-end}
+  #chemistry #fig-calibration .readout .row + .row{margin-top:6px}
+}

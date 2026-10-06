@@ -1,0 +1,28 @@
+{
+ "slug": "environmental",
+ "code": "env",
+ "no": "04",
+ "nav": "Environmental science",
+ "navShort": "Environmental",
+ "years": "2015–2018",
+ "contents": "Advanced Environmental Laboratories",
+ "indexContents": "AEL",
+ "figures": [
+  {
+   "id": "chromatogram",
+   "kind": "dom",
+   "states": [
+    "std",
+    "sample",
+    "spike"
+   ],
+   "final": "sample"
+  }
+ ],
+ "facts": [
+  "env.key"
+ ],
+ "generators": [
+  "tools/paths.mjs"
+ ]
+}

@@ -1,0 +1,95 @@
+/* Chapter 05 IT (Team IT). Tokens only; every selector starts with #it. Fig. 7 "The System Model" (SPEC-C §8.4).
+   Two build-time SVG variants (regular 360 × 450 = 4:5, narrow 360 × 480 = 3:4) fill the plate; ONE trigger switches the
+   narrow variant, the 3:4 plate, the short labels and the icon-only Replay: @container fig (width < 330px) (D7).
+   In-plot text is DOM (A6): placed in % of the drawing box, never scaled. States are CSS over the authored final (trace);
+   swaps are instant (no transitions). Strokes are non-scaling: tests 2.25 px, 2.75 px on plates ≥ 480 px. */
+#it .plate{container:itp / inline-size}
+#it .sm,#it .ov{position:absolute;inset:0;width:100%;height:100%;display:block;fill:none;overflow:visible}
+#it .dfs{position:absolute;width:0;height:0;overflow:hidden}
+#it .vn{display:none}
+@container fig (width < 330px){
+  #it .plate{aspect-ratio:3/4}
+  #it .vr{display:none}
+  #it .vn{display:block}
+}
+#it .sm *,#it .ov *{vector-effect:non-scaling-stroke}
+#it .sm .pm{vector-effect:none;stroke:white;stroke-width:12}
+#it .pl{fill:var(--surface);stroke:var(--steel);stroke-width:1}
+#it .w{stroke:var(--fg);stroke-width:1}
+#it .w.f{stroke:var(--steel);stroke-dasharray:2 3}
+#it .t{stroke:var(--fg);stroke-width:2.25;stroke-linejoin:round}
+#it .fan{stroke:var(--fg);stroke-width:1;stroke-dasharray:3 2.5}
+#it .pr{stroke:var(--fg);stroke-width:1.25;stroke-dasharray:1 3;stroke-linecap:round}
+#it .fa{stroke:var(--fail);stroke-width:2.25;stroke-dasharray:5 4}
+#it .fh{fill:var(--fail)}
+#it .rb{fill:var(--plate);stroke:var(--fail);stroke-width:1.25;stroke-dasharray:3 2.5}
+#it .fx{stroke:var(--a-mark);stroke-width:2.25;stroke-linejoin:round}
+#it .fxh{fill:var(--a-mark);stroke:none}
+#it .ah{fill:var(--fg)}
+#it .bk{stroke:var(--fg);stroke-width:1.25}
+#it .led{fill:var(--a-mark)}
+#it .sm use{fill:var(--surface);stroke:var(--fg);color:var(--fg);stroke-width:1.25}
+#it .sm use.f{stroke:var(--steel);color:var(--steel)}
+@container itp (width >= 480px){
+  #it .t,#it .fa,#it .fx{stroke-width:2.75}
+}
+
+/* DOM labels (A6): 11 px, 12 px on plates ≥ 480 px; --x/--y regular, --xn/--yn narrow, in view-box units */
+#it .lb,#it .lb .g{position:absolute;inset:0;pointer-events:none}
+#it .lb .l{position:absolute;left:calc(var(--x) * 100% / 360);top:calc(var(--y) * 100% / 450);transform:translateY(-50%);
+  font:400 11px/1.2 var(--mono);letter-spacing:0;color:var(--fg-2);white-space:nowrap;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:4px}
+@container fig (width < 330px){
+  #it .lb .l{left:calc(var(--xn, var(--x)) * 100% / 360);top:calc(var(--yn, var(--y)) * 100% / 480)}
+}
+@container itp (width >= 480px){#it .lb .l{font-size:12px}}
+#it .lb .e{transform:translate(-100%,-50%)}
+#it .lb .m{transform:translate(-50%,-50%)}
+#it .lb .r{left:auto;right:12px}
+#it .lb .nr{right:calc(16px + 1em)}
+#it .lb .tn{left:auto;right:calc(24px + 9ch + 1em)}
+#it .lb .pn,#it .lb .cn .l,#it .lb .sy b{color:var(--fg);font-weight:500}
+#it .lb b{font-weight:500}
+#it .lb .ok{color:var(--a)}
+#it .lb .bad{color:var(--fail)}
+#it .lb .r .i{color:var(--a)}
+#it .lb .v7 .tr .i{color:var(--fail)}
+#it .lb .tr,#it .lb .fx{display:inline-flex;align-items:center;gap:4px}
+#it .lb .fe .fx{display:inline}
+#it .lb .ip,#it .lb .bk,#it .lb .dq{color:var(--fg)}
+#it .wn{display:none}
+@container fig (width < 330px){
+  #it .wr,#it .lb .tn,#it .lb .sx{display:none}
+  #it .wn{display:inline}
+  #it .lb .fe .tr{display:none}
+}
+
+/* readout: the third row (fix only) always holds its line box, so the block height never changes */
+#it .readout .row > .lbl:first-child{min-width:11ch}
+#it .readout .val{min-width:var(--w, auto)}
+#it .readout .status .i{width:12px;height:12px}
+#it .readout .status:not(.is-true){color:var(--fg-2)}
+#it .readout .status:not(.is-true) .i{visibility:hidden}
+#it .readout .row{white-space:nowrap}
+#it .fig:not([data-state=fix]) .readout .dn{visibility:hidden}
+@container fig (width < 330px){#it .readout,#it .readout .row{column-gap:6px}}
+
+/* states (instant): model = documented office; trace = authored final; fix = same tests after the fix */
+#it .fig[data-state=model] .t,#it .fig[data-state=model] .pr,#it .fig[data-state=model] .a8,#it .fig[data-state=model] .a10,#it .fig[data-state=model] .a12,#it .fig[data-state=model] .a15,#it .fig[data-state=model] .a18,#it .fig[data-state=model] .a19,#it .fig[data-state=model] .a20{visibility:hidden}
+#it .fig:not([data-state=model]) .mo{visibility:hidden}
+#it .fig:not([data-state=fix]) .fx{display:none}
+#it .fig[data-state=fix] .lb .tr,#it .fig[data-state=fix] .lb .dq,#it .fig[data-state=fix] .fa,#it .fig[data-state=fix] .fh{display:none}
+#it .fig[data-state=fix] .rb{stroke:var(--steel)}
+#it .fig[data-state=fix] .sm use.f7{stroke:var(--fg);color:var(--fg)}
+
+/* fine-pointer reading: hovering the L3 result shows the four echoes (chapter.js swaps the text) */
+/* late:start */
+@media (hover:hover) and (pointer:fine){#it .lb .v3{pointer-events:auto;cursor:default}}
+/* late:end */
+#it .plate.raw .tn3{visibility:hidden}
+
+/* controls: Replay is icon-only on figures under 330 px (shell figure.css; the row Model · Trace · Fix · Replay fits 288 px) */
+
+/* intro (motion on, armed below the fold): what the 21 animations reveal starts hidden; play() removes .pre */
+html.motion #it .fig.pre .a5,html.motion #it .fig.pre .a6,html.motion #it .fig.pre .a8,html.motion #it .fig.pre .a10,html.motion #it .fig.pre .a12,html.motion #it .fig.pre .a15,html.motion #it .fig.pre .a16,html.motion #it .fig.pre .a18,html.motion #it .fig.pre .a19,html.motion #it .fig.pre .a20,html.motion #it .fig.pre .a21{opacity:0}
+html.motion #it .fig.pre .pl,html.motion #it .fig.pre .t{stroke-dasharray:0 9999}
+html.motion #it .fig.pre .pm{stroke-dasharray:0 1}

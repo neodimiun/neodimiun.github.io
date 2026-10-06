@@ -1,0 +1,10 @@
+/* print.css (DS lead): posters not canvases, resin printed as paper, methods open, final states */
+@media print{
+  :root,.on-resin,.site-ft{--surface:#fff;--plate:#fff;--fg:#000;--fg-2:#333;--hair:#999;--a:#000;--a-mark:#000;--a-fill:#000;--a-on:#fff}
+  .site-hd,.idx-dlg,.ctrl,.motion-t,.skip,.hud{display:none!important}
+  .host > canvas{display:none!important}
+  .ch,.fig-band,.site-ft,.on-resin{background:#fff!important;color:#000!important}
+  .methods > *{display:block}
+  .fig{break-inside:avoid}
+  a{color:#000!important}
+}

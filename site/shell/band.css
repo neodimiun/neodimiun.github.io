@@ -1,0 +1,15 @@
+/* band.css (DS lead): resin = "looking into an instrument". Two uses: a full-bleed band inside a paper chapter
+   (.fig-band, Fig. 2) and a whole resin chapter (.ch-band, chapter 06, added by the build from chapter.json "band"). */
+.fig-band{background:var(--surface);color:var(--fg);margin:48px calc(-1 * var(--gutter)) 0;padding:48px var(--gutter)}
+.band-in{max-width:var(--max);margin:0 auto}
+.band-in > * + *{margin-top:24px}
+@media (min-width:1024px){
+  .fig-band{margin:64px 0 0;padding:64px var(--gutter)}
+  .band-in{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gap);align-items:start;grid-template-rows:repeat(6,auto) 1fr}
+  .band-in > *{grid-column:8 / 13;margin-top:0}
+  .band-in > .fig{grid-column:1 / 7;grid-row:1 / 8}
+}
+.on-resin .methods[open]{background:var(--resin-plate)}
+.ch-band{padding-bottom:96px}
+.on-resin a{color:var(--a)}
+.on-resin ::selection{background:var(--a);color:var(--resin)}

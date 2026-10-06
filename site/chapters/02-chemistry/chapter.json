@@ -1,0 +1,27 @@
+{
+ "slug": "chemistry",
+ "code": "chem",
+ "no": "02",
+ "nav": "Chemistry",
+ "years": "2018–2025",
+ "contents": "SFWMD · City of Boca Raton",
+ "figures": [
+  {
+   "id": "burette",
+   "kind": "gl",
+   "states": ["above", "level", "below"],
+   "initial": "level",
+   "final": "level",
+   "reduced": "tri",
+   "sizes": "(min-width:1024px) 600px, (min-width:600px) 744px, calc(125vw - 96px)"
+  },
+  {
+   "id": "calibration",
+   "kind": "dom",
+   "states": ["drawn"],
+   "final": "drawn"
+  }
+ ],
+ "facts": ["chem.burette", "chem.cal"],
+ "generators": ["tools/calibration-svg.mjs"]
+}

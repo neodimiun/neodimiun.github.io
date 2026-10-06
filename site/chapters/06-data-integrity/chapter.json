@@ -1,0 +1,29 @@
+{
+ "slug": "data-integrity",
+ "code": "di",
+ "no": "06",
+ "nav": "Data integrity",
+ "years": "2015–",
+ "contents": "the thread through all of them",
+ "band": true,
+ "figures": [
+  {
+   "id": "record",
+   "kind": "dom",
+   "states": [
+    "recorded",
+    "changed",
+    "resigned"
+   ],
+   "final": "recorded",
+   "lazy": "ledger.js"
+  }
+ ],
+ "facts": [
+  "ledger"
+ ],
+ "generators": [
+  "tools/ledger-html.mjs"
+ ],
+ "indexContents": ""
+}

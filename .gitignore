@@ -1,4 +1,16 @@
 .DS_Store
-site/node_modules
-site/dist
-**/*.tsbuildinfo
+node_modules/
+
+# build scratch (bundle entries, late.css, lock, build reports, check screenshots, the dev site in .build/www)
+site/.build/
+
+# outputs of a build run with --out=. (the production build writes to the repo root instead)
+site/index.html
+site/404.html
+site/dev-*.html
+site/favicon.svg
+site/assets/
+site/posters/
+site/js/
+site/js-dev/
+site/build-report*.json

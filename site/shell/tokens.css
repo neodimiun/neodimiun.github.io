@@ -1,0 +1,37 @@
+/* tokens.css (DS lead) — SYSTEM-C §2.4 + SPEC-C A19. The ONLY file allowed to use svh / vh units. */
+:root{
+  color-scheme: light;
+  --paper:#F5F3EE; --ground:#ECE8E1; --ink:#131413; --graphite:#55585C; --rule:#D4CFC6; --steel:#7E848A; --fail:#A8321E;
+  --resin:#0C0D0F; --resin-plate:#15171A; --resin-rule:#2A2D31; --polished:#E8E9EA; --resin-muted:#A3A8AD; --fail-dk:#FF8F6B;
+  --eng:#8A4B0F;   --eng-mark:#B0721C;   --eng-tint:#F2E4D2;   --eng-dk:#D4A04C;
+  --chem:#B8215F;  --chem-mark:#D63A78;  --chem-tint:#F7D3E2;  --chem-dk:#F08AB4;
+  --micro:#5B2D90; --micro-mark:#7B4FC4; --micro-tint:#E6DEF2; --micro-dk:#C4A2EE;
+  --env:#1F4FB0;   --env-mark:#3566E0;   --env-tint:#DDE5F6;   --env-dk:#73AEFF;
+  --it:#3A6B12;    --it-mark:#4B8F1C;    --it-tint:#E2EBD5;    --it-dk:#96D85E;
+  --di:#006E5A;    --di-mark:#009278;    --di-tint:#D5ECE5;    --di-dk:#52D6B6;
+  --display:'Archivo', 'Archivo C', 'Archivo C fb', sans-serif;
+  --serif:'Newsreader', 'Newsreader C', 'Newsreader C fb', serif;
+  --mono:'IBM Plex Mono', 'Plex Mono C', 'Plex Mono C fb', ui-monospace, monospace;
+  --ease:cubic-bezier(.2,.7,.2,1); --t-hover:120ms; --t-state:200ms; --t-fade:240ms; --t-seam:600ms;
+  --max:1224px; --gutter:clamp(16px, 3.2vw + 4px, 64px); --header:56px; --gap:24px;
+  /* one svh token (A19): a test can pin it to emulate a URL-bar collapse */
+  --svh:1vh;
+  /* surface-semantic layer: components use ONLY these */
+  --surface:var(--paper); --plate:var(--ground); --fg:var(--ink); --fg-2:var(--graphite); --hair:var(--rule);
+  --acc:var(--ink); --acc-mark:var(--steel); --acc-tint:var(--ground); --acc-dk:var(--polished);
+  --a:var(--acc); --a-mark:var(--acc-mark); --a-fill:var(--acc); --a-on:var(--paper); --a-hover:var(--acc-tint);
+}
+@supports (height:1svh){ :root{ --svh:1svh } }
+@media (min-width:1280px){ :root{ --gap:32px } }
+/* SYSTEM-C §4.2: 16 px gutters below 768 (the clamp alone gives 16.5 at 390, 17.2 at 412) */
+@media (max-width:767px){ :root{ --gutter:16px } }
+[data-ch=eng]  {--acc:var(--eng);  --acc-mark:var(--eng-mark);  --acc-tint:var(--eng-tint);  --acc-dk:var(--eng-dk)}
+[data-ch=chem] {--acc:var(--chem); --acc-mark:var(--chem-mark); --acc-tint:var(--chem-tint); --acc-dk:var(--chem-dk)}
+[data-ch=micro]{--acc:var(--micro);--acc-mark:var(--micro-mark);--acc-tint:var(--micro-tint);--acc-dk:var(--micro-dk)}
+[data-ch=env]  {--acc:var(--env);  --acc-mark:var(--env-mark);  --acc-tint:var(--env-tint);  --acc-dk:var(--env-dk)}
+[data-ch=it]   {--acc:var(--it);   --acc-mark:var(--it-mark);   --acc-tint:var(--it-tint);   --acc-dk:var(--it-dk)}
+[data-ch=di]   {--acc:var(--di);   --acc-mark:var(--di-mark);   --acc-tint:var(--di-tint);   --acc-dk:var(--di-dk)}
+[data-ch]{--a:var(--acc); --a-mark:var(--acc-mark); --a-fill:var(--acc); --a-hover:var(--acc-tint)}
+.on-resin{--surface:var(--resin); --plate:var(--resin-plate); --fg:var(--polished); --fg-2:var(--resin-muted);
+  --hair:var(--resin-rule); --a:var(--acc-dk); --a-mark:var(--acc-dk); --a-fill:var(--acc-dk); --a-on:var(--resin);
+  --a-hover:color-mix(in srgb, var(--acc-dk) 16%, var(--resin)); --fail:var(--fail-dk)}

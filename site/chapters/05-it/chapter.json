@@ -1,0 +1,26 @@
+{
+ "slug": "it",
+ "code": "it",
+ "no": "05",
+ "nav": "IT",
+ "years": "2008–2015",
+ "contents": "CompMedic · Miami Dade College",
+ "figures": [
+  {
+   "id": "layers",
+   "kind": "dom",
+   "states": [
+    "model",
+    "trace",
+    "fix"
+   ],
+   "final": "trace"
+  }
+ ],
+ "facts": [
+  "it.key"
+ ],
+ "generators": [
+  "tools/layers-svg.mjs"
+ ]
+}

@@ -1,28 +1,25 @@
 {
-  "name": "site",
+  "name": "joseqc-site",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "description": "Source and build for joseqc.com, José A. Fernández Abreu's site.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:pages": "tsc -b && vite build && cp dist/index.html ../index.html && rm -rf ../assets && cp -r dist/assets ../assets && cp dist/favicon.svg ../favicon.svg && cp dist/home-mark.png ../home-mark.png",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "build": "node build.mjs --out=..",
+    "dev": "node build.mjs --watch --fast --serve",
+    "lint": "node tools/lint.mjs index.html --root=..",
+    "check": "node tools/check.mjs index --root=..",
+    "facts": "node data/facts.assert.mjs"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "tailwindcss": "^4.3.3"
+    "esbuild": "0.28.2",
+    "three": "0.186.1"
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.4",
-    "oxlint": "^1.75.0",
-    "typescript": "~6.0.2",
-    "vite": "^8.2.0"
+    "playwright": "1.56.1"
   }
 }

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{build.title}}</title>
+<meta name="description" content="{{site.description}}">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F5F3EE">
+<link rel="canonical" href="{{site.origin}}/">
+<link rel="icon" href="{{build.favicon}}" type="image/svg+xml">
+{{build.og}}
+<script>{{build.prepaint}}</script>
+{{build.preloads}}
+<style>{{build.css}}</style>
+{{build.printcss}}
+<script type="application/ld+json">{{build.jsonld}}</script>
+</head>
+<body>
+{{build.sprite}}
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-hd" id="top">
+  <div class="hd-row">
+    <a class="brand" href="{{build.home}}#top" aria-label="{{site.name}}, top of page">{{icon:mark}}<span class="nm">{{site.name}}</span></a>
+    {{build.locator}}
+    {{build.idxbtn}}
+    <a class="hd-contact hd-mono" href="#contact"><span class="u">Contact</span></a>
+    <a class="hd-email hd-mono" href="mailto:{{site.email}}"><span class="u">Email</span></a>
+  </div>
+  {{build.strip}}
+</header>
+{{build.dialog}}
+<main id="main">
+{{build.chapters}}
+</main>
+{{build.contact}}
+<footer class="site-ft">
+  <div class="in">
+    <p class="who">{{site.name}} · {{site.place}}</p>
+    <p class="note">Views are my own and do not represent my employer. Immutable QC is an independent project built on my own time; it is not affiliated with or endorsed by my employer.</p>
+    {{#if build.figs}}<p class="note">All figures are simulated and rendered in your browser; their numbers are computed, not animated.</p>{{/if}}
+    <p class="note">Set in Archivo, Newsreader and IBM Plex Mono (SIL Open Font License).</p>
+    <p class="row"><button class="motion-t" type="button" aria-pressed="true" data-motion>Motion: <span class="v">on</span></button></p>
+    <p class="row"><a href="mailto:{{site.email}}">Email</a> <a href="{{site.linkedin}}">LinkedIn</a> <a href="{{site.github}}">GitHub</a>{{#if build.iqcVisit}} <a href="{{site.iqcUrl}}">immutableqc.com {{icon:arrow-ne}}</a>{{/if}} <span>© {{site.year}}</span></p>
+  </div>
+</footer>
+{{build.hud}}
+{{build.script}}
+</body>
+</html>

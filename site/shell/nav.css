@@ -1,0 +1,50 @@
+/* nav.css (DS lead): sticky header, desktop locator, phone index button + six-segment strip, index dialog (SYSTEM-C §4.5, SPEC-C §3.2) */
+.site-hd{position:sticky;top:0;z-index:40;height:var(--header);background:var(--paper);color:var(--ink);border-bottom:1px solid var(--rule)}
+.site-hd::before{content:'';position:absolute;left:0;right:0;bottom:100%;height:4px;background:var(--paper)}
+.hd-row{height:100%;max-width:calc(var(--max) + 2 * var(--gutter));margin:0 auto;padding:0 var(--gutter);display:flex;align-items:center;gap:12px}
+.site-hd a{color:var(--ink);text-decoration:none}
+.brand{display:inline-flex;align-items:center;gap:10px;min-height:44px;flex:none}
+.brand .i{width:28px;height:28px}
+.brand .nm{font:620 16px/1 var(--display);white-space:nowrap}
+.hd-mono{font:400 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.hd-contact,.hd-email{display:inline-flex;align-items:center;min-height:44px;padding:0 2px;flex:none}
+.hd-contact .u,.hd-email .u{border-bottom:1px solid var(--steel);padding-bottom:2px}
+/* late:start */
+@media (hover:hover){.hd-contact:hover .u,.hd-email:hover .u{border-color:var(--ink)}}
+/* forced colors: every underline is CanvasText, so the current chapter's is thicker (same box height) */
+@media (forced-colors:active){.loc a[aria-current] .n{border-bottom-width:4px;padding-bottom:3px}}
+/* late:end */
+/* desktop locator */
+.loc{display:none;align-items:center;margin-left:auto;gap:4px}
+.loc ol{display:flex}
+.loc a{display:inline-flex;align-items:center;min-height:44px;min-width:32px;justify-content:center;font:400 12px/1 var(--mono);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.loc a .n{padding:4px 2px 5px;border-bottom:2px solid var(--rule);transition:border-color var(--t-hover)}
+.loc a[aria-current] .n,.loc a:hover .n,.loc a:focus-visible .n{border-color:var(--acc-mark)}
+/* the label slot holds the longest chapter name (--lw characters, set by the build; Plex Mono is monospaced, so a
+   character is 1ch plus the .06em tracking): a hover or a chapter change can never move a number */
+.loc-lbl{display:inline-flex;gap:8px;font:400 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--graphite);white-space:nowrap}
+.loc-lbl .v,.idx .l,.idx .s{display:inline-block;min-width:calc(var(--lw) * (1ch + .06em))}
+.idx .s{--lw:var(--sw)}
+.loc-lbl .v{transition:opacity var(--t-hover)}
+.loc-lbl .v.swap{opacity:0}
+.hd-contact{margin-left:16px}
+/* index button (below 1024) */
+.idx{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 8px;margin-left:auto;border:1px solid var(--steel);border-radius:2px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.idx .i{width:12px;height:12px}
+.idx .s{display:none}
+.hd-email{margin-left:4px}
+.strip{position:absolute;left:0;right:0;bottom:-1px;height:3px;display:flex}
+.strip i{flex:1;background:var(--acc-mark);opacity:.28;transition:opacity var(--t-state)}
+.strip i.on{opacity:1}
+@media (min-width:1024px){
+  .loc{display:flex}.idx,.hd-email,.strip{display:none}
+}
+@media (min-width:600px) and (max-width:1023px){.idx .i{display:none}.hd-contact{display:none}}
+/* 600–679 px: name + "Index 04/06 · Environmental science" + Email is 626 px, so the word "Index" goes first */
+@media (max-width:679px){.idx .k{display:none}}
+@media (max-width:599px){
+  .brand .nm,.hd-contact{display:none}
+  .idx .l{display:none}.idx .s{display:inline-block}
+}
+@media (max-width:359px){.idx .nm{display:none}}
+/* the index dialog styles live in dialog.css, which ships in late.css (main.js loads it before the first open) */

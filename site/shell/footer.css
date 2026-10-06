@@ -1,0 +1,21 @@
+/* footer.css (DS lead): contact (paper, neutral) + footer (resin) — SYSTEM-C §4.7, SPEC-C §10 */
+.contact{padding:96px var(--gutter);max-width:calc(var(--max) + 2 * var(--gutter));margin:0 auto;scroll-margin-top:-88px}
+.contact .seam{margin-bottom:24px}
+.contact .seam::after{background:var(--ink)}
+.contact .line{margin-top:16px;max-width:30ch;font:420 clamp(24px,2.6vw,34px)/1.25 var(--serif)}
+.contact .email{display:inline-block;margin-top:24px;font:620 clamp(26px,4vw,56px)/1.05 var(--display);letter-spacing:-.01em;color:var(--ink);text-decoration:none;border-bottom:2px solid var(--steel);overflow-wrap:anywhere}
+@media (hover:hover){.contact .email:hover{border-color:var(--ink)}}
+.contact .links{margin-top:20px;display:flex;flex-wrap:wrap;column-gap:20px;font:400 12.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.contact .links a{display:inline-flex;align-items:center;gap:4px;min-height:44px}
+.contact .es{margin-top:16px;font-style:italic;color:var(--graphite)}
+.site-ft{background:var(--resin);color:var(--polished);--fg:var(--polished);--fg-2:var(--resin-muted);--a:var(--polished);padding:48px var(--gutter) 40px}
+.site-ft .in{max-width:var(--max);margin:0 auto;display:grid;gap:16px}
+.site-ft a{color:var(--polished);text-decoration-color:var(--resin-muted)}
+.site-ft .who{font:400 11.5px/1.6 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.site-ft .note{max-width:62ch;font:420 15px/1.55 var(--serif);color:var(--resin-muted)}
+.site-ft .row{display:flex;flex-wrap:wrap;align-items:center;column-gap:20px;row-gap:4px;font:400 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--resin-muted)}
+.site-ft .row a{display:inline-flex;align-items:center;gap:4px;min-height:44px}
+.motion-t{appearance:none;background:none;border:1px solid var(--resin-muted);border-radius:2px;color:var(--polished);min-height:44px;padding:0 12px;font:500 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.motion-t[disabled]{opacity:.7;cursor:default}
+html:not(.js) .motion-t{display:none}
+.site-ft :focus-visible{outline-color:var(--polished)}

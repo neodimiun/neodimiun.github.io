@@ -1,0 +1,26 @@
+{
+ "slug": "microbiology",
+ "code": "micro",
+ "no": "03",
+ "nav": "Microbiology",
+ "years": "2018, 2025",
+ "contents": "Aveva · University of Florida",
+ "figures": [
+  {
+   "id": "disinfectant",
+   "kind": "dom",
+   "states": [
+    "plated",
+    "incubated",
+    "counted"
+   ],
+   "final": "counted"
+  }
+ ],
+ "facts": [
+  "micro.key"
+ ],
+ "generators": [
+  "tools/f5-layout.mjs"
+ ]
+}

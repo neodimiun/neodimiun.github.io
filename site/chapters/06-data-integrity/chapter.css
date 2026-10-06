@@ -1,0 +1,183 @@
+/* Chapter 06 Compliance & data integrity (Team DI). The whole chapter is resin (.ch-band.on-resin, added by the build).
+   Tokens only; every selector starts with #data-integrity. SPEC-C §9.4: fixed row heights (CLS 0, identical across states),
+   spine x = 10.5 px, hashes 8 hex (6 below 360 px); line 3's optional parts are chosen by the plate's width (below). */
+
+/* ---- Immutable QC block (outside the 90 words; client corrections 2026-10-06): tagline (the one "tokeniz"), the
+   sentence (the one "blockchain"), the honest status directly under it, then the roadmap line (the one "Filecoin") */
+#data-integrity .iqc{margin-top:28px;padding-left:16px;border-left:2px solid var(--a-mark)}
+#data-integrity .iqc .tag{font:620 20px/1.25 var(--display);text-wrap:balance}
+#data-integrity .iqc>*+*{margin-top:6px}
+#data-integrity .iqc .stat,#data-integrity .iqc .own{font:400 12px/1.6 var(--mono);color:var(--fg-2)}
+#data-integrity .iqc .next{margin-top:12px;font-size:16px;color:var(--fg-2)}
+#data-integrity .iqc .go a{display:inline-flex;align-items:center;gap:6px;min-height:44px;font:500 13px/1 var(--mono);letter-spacing:.02em}
+#data-integrity .iqc .go .i{width:14px;height:14px}
+
+/* ---- Fig. 8 plate: height from fixed rows, not an aspect ratio */
+#data-integrity .fig--plate .plate{aspect-ratio:auto;width:100%;padding:40px 10px 34px 6px}
+@media (min-width:600px){#data-integrity .fig--plate .plate{padding:44px 24px 40px 16px}}
+#data-integrity .ledger{font:400 11.5px/17px var(--mono);font-variant-numeric:tabular-nums;color:var(--fg-2);letter-spacing:0}
+#data-integrity .ledger > li{position:relative;padding-left:28px}
+#data-integrity .gen{height:34px}
+#data-integrity .rec{height:76px}
+#data-integrity .hd{height:44px}
+#data-integrity .anc{height:40px}
+@media (min-width:600px){#data-integrity .rec{height:70px}}
+@media (min-width:1024px){#data-integrity .rec{height:78px}#data-integrity .anc{height:44px}}
+
+/* spine: each item draws the segment from its node (y 9) to the next item's node; the head's ends at the seat apex */
+#data-integrity .lk{position:absolute;left:0;top:9px;width:21px;height:100%;overflow:visible;pointer-events:none}
+#data-integrity .hd > .lk{height:calc(100% - 9px)}
+#data-integrity .lk line{stroke:var(--a);stroke-width:1.5;fill:none}
+#data-integrity .lk .bad{stroke:var(--fail);stroke-dasharray:.36 .28 .36;opacity:0}
+#data-integrity .lk use{color:var(--fail);opacity:0}
+#data-integrity .brk > .lk .ok{opacity:0}
+#data-integrity .brk > .lk .bad,#data-integrity .brk > .lk use{opacity:1}
+/* nodes: genesis and head are SVG squares turned 45°; records are rings */
+#data-integrity svg.nd{position:absolute;left:3.5px;top:2px;width:14px;height:14px;overflow:visible}
+#data-integrity .gen svg.nd rect{fill:var(--plate);stroke:var(--steel);stroke-width:1.5}
+#data-integrity .hd svg.nd rect{fill:var(--a);stroke:var(--a);stroke-width:1.5}
+#data-integrity span.nd{position:absolute;left:5px;top:3.5px;width:11px;height:11px;border:1.5px solid var(--a);border-radius:50%;background:var(--plate)}
+
+/* line 1: chapter (accent bar + number + name) ···· value unit */
+#data-integrity .l1{display:flex;align-items:baseline;gap:8px;height:18px;font-size:13px;line-height:18px;color:var(--fg);white-space:nowrap}
+#data-integrity .gen .l1,#data-integrity .hd .l1{font-size:11.5px}
+#data-integrity .gen .l1{font-size:13px}
+#data-integrity .gen sub{font-size:11px;line-height:0;vertical-align:-3px;margin-left:.5px}
+#data-integrity .kicker .yrs{white-space:nowrap}
+#data-integrity .nm{min-width:0;overflow:hidden;text-overflow:ellipsis}
+#data-integrity .bar{display:inline-block;width:3px;height:13px;margin-right:8px;vertical-align:-2px;background:var(--c)}
+#data-integrity .c-eng{--c:var(--eng-dk)}#data-integrity .c-chem{--c:var(--chem-dk)}#data-integrity .c-micro{--c:var(--micro-dk)}
+#data-integrity .c-env{--c:var(--env-dk)}#data-integrity .c-it{--c:var(--it-dk)}
+#data-integrity .lead{flex:1 1 8px;min-width:8px;align-self:center;border-bottom:1px dotted var(--hair);transform:translateY(2px)}
+#data-integrity .vu{flex:none}
+#data-integrity .val{font:500 15px/18px var(--mono)}
+#data-integrity .unit{font-size:12.5px;color:var(--fg-2)}
+#data-integrity .chg{text-decoration:underline 2px var(--fail);text-underline-offset:3px}
+/* line 2: figure link · quantity. The link's hit area is 44 px tall without moving anything: overflow:clip with a
+   15 px clip margin keeps the ellipsis but no longer clips that area (where supported; elsewhere it is the line's 15 px) */
+#data-integrity .l2{margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@supports (overflow-clip-margin:15px){#data-integrity .l2{overflow:clip;overflow-clip-margin:15px}}
+#data-integrity .l2 a{position:relative;color:var(--fg-2);text-decoration-color:var(--steel)}
+#data-integrity .l2 a::after{content:'';position:absolute;left:-6px;right:-6px;top:-14px;bottom:-14px}
+/* late:start */
+@media (hover:hover){#data-integrity .l2 a:hover{color:var(--fg)}}
+/* late:end */
+/* line 3: link hash (+ what it was) · signature ···· status. Only a hash may shorten (to 6 hex below 360 px) and only the
+   leader shrinks; every optional part is shown by the plate's width (@container fig: Fig. 8's plate is the figure's full
+   width), never by the viewport, so the 1024–1279 two-column plate (463–579 px) is handled like a phone of that width:
+   "link " ≥ 380 · notes ≥ 420 · .was ≥ 540 on failing rows, ≥ 572 on rewritten rows (widest row in each state, Plex Mono,
+   measured; tools/verify.mjs sweeps 320–1920 px in every state and the no-crypto.subtle path). */
+#data-integrity .l3{display:flex;align-items:baseline;gap:6px;margin-top:2px;white-space:nowrap}
+#data-integrity .l3 .lead{min-width:0}
+#data-integrity .h{flex:none;overflow:hidden;text-overflow:ellipsis}
+#data-integrity .hx{color:var(--fg)}
+#data-integrity .lw,#data-integrity .lf,#data-integrity .was,#data-integrity .st .note{display:none}
+#data-integrity .was{margin-left:1ch}
+/* re-signed / relinked are hindsight (a comparison with the build), not a verifier result: muted, never the accent */
+#data-integrity .st .note{color:var(--fg-2)}
+@container fig (width >= 380px){#data-integrity .lw{display:inline}}
+@container fig (width >= 420px){#data-integrity .st .note{display:inline}}
+@container fig (width >= 540px){#data-integrity .rec.bad .was{display:inline}}
+@container fig (width >= 572px){#data-integrity .rec.rw .was{display:inline}}
+/* late:start (fallback path only: ships in late.css, which loads as Fig. 8 comes within 1.5 screens, data-needs-late) */
+/* no crypto.subtle (.nosub): the signature column reads "checked at build", 51 px wider, so the thresholds move */
+#data-integrity .nosub .sb{display:none}
+@container fig (width >= 348px){#data-integrity .nosub .sb{display:inline}}
+/* …and it is not a browser result, so it never turns red: the status word ("altered") carries the failure */
+#data-integrity .nosub .rec.sigbad .sig{color:inherit}
+@container fig (width < 400px){#data-integrity .nosub .lw{display:none}}
+@container fig (width < 480px){#data-integrity .nosub .st .note{display:none}}
+@container fig (width < 560px){#data-integrity .nosub .rec.bad .was{display:none}}
+@container fig (width < 624px){#data-integrity .nosub .rec.rw .was{display:none}}
+/* late:end */
+#data-integrity .sig{flex:none}
+#data-integrity .sig::before{content:'· '}
+#data-integrity .st{flex:none;color:var(--a)}
+#data-integrity .ledger .i{width:12px;height:12px;vertical-align:-1px}
+#data-integrity .st .i{margin-right:4px}
+#data-integrity .hd .k{letter-spacing:.08em;text-transform:uppercase}
+@media (min-width:600px){
+  #data-integrity .lf{display:inline}
+  #data-integrity .l2{margin-top:2px}
+}
+@media (min-width:1024px){
+  #data-integrity .l1{font-size:14px}
+  #data-integrity .val{font-size:18px;line-height:20px}
+  #data-integrity .unit{font-size:13px}
+  #data-integrity .ledger,#data-integrity .hd .l1{font-size:12px}
+  #data-integrity .l2{margin-top:5px}
+  #data-integrity .l3{margin-top:4px}
+}
+@media (max-width:359px){
+  #data-integrity .fig--plate .plate{padding:40px 6px 34px 4px}
+  #data-integrity .ledger{font-size:11px}
+  #data-integrity .hd .l1{font-size:11px}
+  #data-integrity .gen sub{font-size:10.5px}
+  #data-integrity .l2,#data-integrity .l3{font-size:10.5px}
+  #data-integrity .l2{letter-spacing:-.2px}
+  #data-integrity .gen .hx,#data-integrity .hd .hx{display:inline-block;max-width:7ch;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+  #data-integrity .l3 .h{max-width:7ch}
+  #data-integrity .sig::before{content:none}
+  #data-integrity .ledger > li{padding-left:24px}
+  #data-integrity .l3{gap:5px}
+  #data-integrity .readout .row{column-gap:4px}
+  #data-integrity .readout .status{letter-spacing:.02em}
+}
+
+/* verifier classes (set from the verifier output, never by a button) */
+#data-integrity .rec.bad .st,#data-integrity .rec.bad .hx,#data-integrity .rec.sigbad .sig{color:var(--fail)}
+#data-integrity .rec.bad span.nd{border-color:var(--fail)}
+#data-integrity .rec.rw .hx{color:var(--fg-2)}
+#data-integrity .hd.bad .hx,#data-integrity .hd.bad .st{color:var(--fail)}
+#data-integrity .hd.bad svg.nd rect{fill:var(--plate);stroke:var(--fail)}
+
+/* the anchor: fixed-support symbol (10 × 7 seat, 1.5 px ground, 45° hatch every 6 px) + the stamp beside it.
+   When the head no longer matches, the seat drops 20 px away from the spine (transform only) */
+#data-integrity .seat{position:absolute;left:0;top:0;width:21px;height:14px;overflow:visible}
+#data-integrity .seat .tri{fill:var(--plate);stroke:var(--a);stroke-width:1.5;stroke-linejoin:miter}
+#data-integrity .seat .gl{stroke:var(--a);stroke-width:1.5}
+#data-integrity .seat .ht{stroke:var(--a);stroke-width:1;opacity:.55}
+#data-integrity .anc.brk .seat{transform:translateY(20px)}
+#data-integrity .anc.brk .seat .tri{stroke:var(--fail)}
+html.motion #data-integrity .seat{transition:transform var(--t-state) var(--ease)}
+#data-integrity .stamp{position:absolute;left:28px;top:-6px;display:inline-flex;flex-wrap:wrap;align-items:center;column-gap:8px;row-gap:4px;padding:7px 10px 6px;font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--a);white-space:nowrap}
+#data-integrity .stamp svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#data-integrity .stamp rect{fill:none;stroke:var(--a);stroke-width:1.5}
+#data-integrity .stamp .hx{font-weight:400;letter-spacing:0;text-transform:none;color:var(--fg)}
+#data-integrity .stamp .sim{font-weight:400;letter-spacing:.06em;color:var(--fg-2)}
+#data-integrity .stamp .sim::before{content:'· '}
+@media (max-width:359px){
+  #data-integrity .stamp{top:-4px;padding:5px 8px;font-size:11px}
+  #data-integrity .stamp{display:inline-grid;grid-template-columns:auto auto;justify-items:start}
+  #data-integrity .stamp .hx{display:inline-block;max-width:7ch;overflow:hidden;text-overflow:ellipsis}
+  #data-integrity .stamp .sim{grid-column:1 / -1}
+  #data-integrity .stamp .sim::before{content:none}
+}
+
+/* ---- control label, readout (2 rows), controls (2 × 2 below 600 px) */
+#data-integrity #ctrl-l{margin-top:16px;max-width:52ch;font:420 15px/1.45 var(--serif);color:var(--fg)}
+/* late:start */
+html:not(.js) #data-integrity #ctrl-l{display:none}
+/* late:end */
+#data-integrity .readout{display:block;margin-top:12px;border-top:1px solid var(--hair)}
+#data-integrity .readout .row{min-height:32px;padding:6px 0;border-bottom:1px solid var(--hair)}
+#data-integrity .readout .lbl{min-width:8ch}
+#data-integrity .readout .val{min-width:9ch;text-align:left}
+#data-integrity .readout .status .i{width:12px;height:12px}
+#data-integrity .readout .status[data-v=y]{color:var(--a)}
+#data-integrity .readout .status[data-v=n]{color:var(--fail)}
+@media (max-width:599px){
+  html.js #data-integrity .ctrl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  #data-integrity .ctrl button{margin:0!important;padding:0 8px}
+}
+/* Replay keeps its label in the 2 × 2 grid (140 px cells at 288 px): undo the shell's icon-only rule for figures < 330 px */
+#data-integrity .ctrl .replay{width:auto}
+#data-integrity .ctrl .replay .rt{display:inline}
+
+/* ---- intro: armed (.pre) only when motion is on and the figure starts below the fold; play() removes it at once */
+html.motion #data-integrity .fig.pre .ledger > li,html.motion #data-integrity .fig.pre .readout .val,html.motion #data-integrity .fig.pre .readout .status{opacity:0}
+/* no JS: the caption claims no browser check (the readout and rows say checked at build) */
+/* late:start */
+html:not(.js) #data-integrity .cb{display:none}
+/* late:end */
+

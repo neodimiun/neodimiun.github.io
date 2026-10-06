@@ -1,0 +1,54 @@
+<!-- Chapter 01 Engineering (Team ENG). Copy: SPEC-C §3.1 and §4.1 (final). Figures: Path B's ×200 field (Fig. 1, hero) and
+     ×500 eyepiece band (Fig. 2), on the shared stage (field.gl.js). Authored in the final states (etched; measured), so no-JS
+     and first paint are correct. Every number comes from facts.json ({{fact:…}}) or field.model.js. -->
+<section class="ch" id="engineering" data-ch="eng" aria-labelledby="eng-t">
+  <div class="hero">
+    <p class="kicker eyebrow"><span class="ey"><span class="nw">José A. Fernández Abreu</span> <span class="nw">Materials &amp; Process Engineer</span> <span class="nw">Bilingual</span></span></p>
+    <h1><span class="s">Under the finish,</span> <span class="s">the structure.</span> <span class="s">Under the number,</span> <span class="s">the record.</span></h1>
+    <figure class="fig fig--plate fig--field" id="fig-field" data-fig="field" data-kind="gl" data-states="polished etched" data-state="etched" data-final="etched" data-initial="polished" style="--aspect: 1/1; --bar: {{fact:eng.field.scaleUm}} / {{fact:eng.field.fieldUm}}">
+      <div class="plate">
+        <div class="host">{{poster:field polished "Simulated micrograph: solution-annealed 316L stainless steel polished to a mirror at ×200, featureless apart from a scatter of small dark inclusions."}}{{poster:field etched "Simulated micrograph: the same 316L after etching, at ×200. Equiaxed austenite grains with thin dark boundaries, straight annealing twins and grain-to-grain shades of gray."}}</div>
+        <svg class="ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="50"/><path d="M50-1.4V-4.4M50 101.4v3M-1.4 50h-3M101.4 50h3"/></svg>
+        <span class="corner tl">{{fig:field}}</span><span class="corner tr">{{fact:eng.field.mag}}</span><span class="corner bl">{{fact:eng.field.alloy}}</span><span class="corner br">Simulated</span>
+      </div>
+      <div class="fig-row">
+        <div class="ctrl" role="group" aria-label="Specimen state"><button type="button" aria-pressed="false" data-set="polished">Polished</button><button type="button" aria-pressed="true" data-set="etched">Etched</button></div>
+        <div class="scalebar" role="img" aria-label="Scale bar, {{fact:eng.field.scaleUm}} micrometers"><span class="bar"></span><span class="lbl" aria-hidden="true">{{fact:eng.field.scaleUm}} µm</span></div>
+      </div>
+      <p class="sr-only" aria-live="polite" data-live></p>
+      <figcaption><b>{{fig:field}}</b> · Solution-annealed 316L, polished then etched · ×200 nominal · simulated. The etch shows the structure under the finish. Shown: <span class="stw" data-w="polished."><span class="state">etched</span>.</span></figcaption>
+    </figure>
+    <p class="dek">I engineer special processes for aerospace landing gear. I got here through water chemistry, pharmaceutical microbiology, environmental testing and IT support, asking one question the whole way: is this number true, and what has to happen because of it?</p>
+    <p class="links"><a href="mailto:{{site.email}}">{{site.email}}</a><span class="sep">·</span><a href="{{site.linkedin}}">LinkedIn</a></p>
+    <p class="now"><span class="c">{{site.now.label}} · {{site.now.date}} —</span> <span class="c">{{site.now.role}},</span> <span class="c">{{site.now.org}}</span></p>
+    {{contents}}
+  </div>
+  <div class="seam" aria-hidden="true"></div>
+  <header class="ch-head">
+    <p class="kicker"><span class="no">01</span> — Engineering <span class="yrs">· 2026–present</span></p>
+    <h2 id="eng-t">Now I answer for the process.</h2>
+    <ul class="roles"><li><span class="org">Collins Aerospace, Landing Systems</span> <i>Senior Engineer, Materials &amp; Process Technologies</i> <span class="yr">2026–present</span></li><li><span class="org">Collins Aerospace</span> <i>Chemical Process Laboratory</i> <span class="yr">2026</span></li></ul>
+  </header>
+  <div class="ch-body"><p>The deliberate turn. In every lab before this one, the solution in front of me was the sample. In the Chemical Process Laboratory it was the tool: a bath whose chemistry decides whether a part meets spec. Now I own the special processes on landing gear: plating, conversion coating, passivation. I own the tests that prove a finish will do its job, and the corrective action when results drift. Site focal for Nadcap special-process audits.</p></div>
+  <details class="methods"><summary><span class="k">Methods</span> · special processes · testing</summary><p>Testing that proves a finish will do its job: corrosion resistance, water break, paint and bend adhesion, hydrogen embrittlement, heat resistance, microhardness, porosity. Applied to conversion coating, passivation, cadmium, sulfamate nickel, chrome and brush plating. Process solutions tested against specification and control schedule; critical parameters trended. {{figref:indent}}: Vickers, ASTM E384 / ISO 6507-1. F = {{fact:eng.hv.loadKgf}} kgf = 4.903 N; <span class="db">d<span class="m">̄</span></span> = ({{fact:eng.hv.d1}} + {{fact:eng.hv.d2}}) / 2 = {{fact:eng.hv.dbar}} µm; HV = 1.8544 × {{fact:eng.hv.loadKgf}} / 0.07175<sup>2</sup> = 180.1, reported {{fact:eng.hv}} HV0.5.</p></details>
+  <div class="fig-band on-resin"><div class="band-in">
+    <div class="band-text"><h3>A hardness number is two diagonals and a formula.</h3><p>Trusting it a year from now takes the record.</p></div>
+    <figure class="fig fig--band fig--field" id="fig-indent" data-fig="indent" data-kind="gl" data-states="etched indented measured" data-state="measured" data-final="measured" data-initial="etched" style="--aspect: 1/1; --bar: 50 / 280">
+      <div class="plate">
+        <div class="host">{{poster:indent etched "Simulated micrograph: etched, solution-annealed 316L at ×500, grains and annealing twins in focus."}}{{poster:indent indented "Simulated micrograph: a dark, four-faceted Vickers indentation pressed into etched 316L at ×500."}}{{poster:indent measured "Simulated micrograph: the Vickers indentation at ×500 with two pairs of measuring lines on its corners: d1 71.4 µm, d2 72.1 µm, 180 HV0.5."}}{{poster:indent tri "Three simulated ×500 fields of 316L, two above and one below: etched; indented; measured, with crosshairs on the corners, d1 71.4 µm, d2 72.1 µm, 180 HV0.5."}}</div>
+        <svg class="ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="50"/><path d="M50-1.4V-4.4M50 101.4v3M-1.4 50h-3M101.4 50h3"/></svg>
+        <div class="tri-l" aria-hidden="true"><span>Etched</span><span>Indented</span><span>Measured</span></div>
+        <span class="corner tl">{{fig:indent}}</span><span class="corner tr"><span class="nw">{{fact:eng.hv.mag}} ·</span> <span class="nw t2">{{fact:eng.hv.unit}}</span></span><span class="corner bl">{{fact:eng.field.alloy}}</span><span class="corner br">Simulated</span>
+      </div>
+      <div class="readout" aria-hidden="true">
+        <div class="row r1"><span class="g"><span class="lbl">d<sub>1</sub></span> <b class="val" style="--w:4ch" data-r="d1">{{fact:eng.hv.d1}}</b> <span class="unit">µm</span></span><span class="g"><span class="lbl">d<sub>2</sub></span> <b class="val" style="--w:4ch" data-r="d2">{{fact:eng.hv.d2}}</b> <span class="unit">µm</span></span><span class="g"><span class="lbl"><span class="db">d<span class="m">̄</span></span></span> <b class="val" style="--w:5ch" data-r="dm">{{fact:eng.hv.dbar}}</b> <span class="unit">µm</span></span></div>
+        <div class="row r2"><span class="lbl">HV = 1854.4 · F / <span class="db">d<span class="m">̄</span></span><sup>2</sup> =</span> <b class="val" style="--w:3ch" data-fact-readout="eng.hv">{{fact:eng.hv}}</b> <span class="unit">{{fact:eng.hv.unit}}</span><span class="lead"></span><span class="status is-true">{{icon:check}}<span class="w">Measured</span></span></div>
+      </div>
+      <div class="ctrl" role="group" aria-label="Indent"><button type="button" aria-pressed="false" data-set="etched">Etched</button><button type="button" aria-pressed="false" data-set="indented">Indented</button><button type="button" aria-pressed="true" data-set="measured">Measured</button><button type="button" class="replay" aria-label="Replay">{{icon:replay}}<span class="t">Replay</span></button></div>
+      <div class="scalebar" role="img" aria-label="Scale bar, 50 micrometers"><span class="bar"></span><span class="lbl" aria-hidden="true">50 µm<span class="per"> · each field</span></span></div>
+      <p class="sr-only" aria-live="polite" data-live></p>
+      <figcaption><b>{{fig:indent}}</b> · Solution-annealed 316L, etched and indented · Vickers HV0.5, ASTM E384 method · ×500 nominal · simulated. Two diagonals, one formula. Shown: <span class="stw" data-w="measured."><span class="state">measured</span>.</span></figcaption>
+    </figure>
+  </div></div>
+  <p class="bridge">Before I owned the process, I measured it.</p>
+</section>

@@ -1,0 +1,66 @@
+{
+ "pub": "046181919976eb7423d828ec726bb2bad668475965c21fc2fda7c0bddc053375455f27f8321c684a9a0742ff665c9c1a6e9d8a09e98000ea8035d1a60b9d646f6f",
+ "anchor": "0ce54cb978b68fc2e20c9600ac9c01051f56be5d55de9538da82fac01d0f0811",
+ "records": [
+  {
+   "rec": "01",
+   "fig": "indent",
+   "q": "Vickers hardness, 316L",
+   "v": "180",
+   "u": "HV0.5",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "r": "1c5ec779ab07ae437884481785ad9f74d50aa284a44bd56b21d59c53c4c57c68",
+   "h": "e7819b8700f867850c29be78b9a5d5622fa3bd0ff60d8fe28389e8d2789be79e",
+   "sig": "0e5178047e13fc63121981aba15e56bb2f2fbaf162d31e822d4ad95df25a438d12e144435ae49dc26faac21201b938d771bad4cee00271381f54a47018a2fa92"
+  },
+  {
+   "rec": "02",
+   "fig": "burette",
+   "q": "Burette reading at eye level",
+   "v": "24.06",
+   "u": "mL",
+   "prev": "e7819b8700f867850c29be78b9a5d5622fa3bd0ff60d8fe28389e8d2789be79e",
+   "r": "2a993f9ea30d6be3d368d007f002ebff7537ba089fd8bfd5ebbbd2aaf026e0dc",
+   "h": "ed94e67f8483662f2c3c483779439c62a7e512b2ccd69b61537919ee0656d418",
+   "sig": "73b844345996ef696ebc2dac62ffbfcbbe38a6e2d4bb4609a157785be07e7d9227b554077306ca9607473592028a7e2e4e30f090ec96025571dd2c65ddf6d321"
+  },
+  {
+   "rec": "03",
+   "fig": "disinfectant",
+   "q": "Disinfectant log reduction",
+   "v": "4.16",
+   "u": "log",
+   "prev": "ed94e67f8483662f2c3c483779439c62a7e512b2ccd69b61537919ee0656d418",
+   "r": "c5a9d6bd6dc65616204d2186d9bd08bad42897038f6eb69d5d3afd838da8befb",
+   "h": "3cfcb1e05f9cb9b4f6cfbdc105069ef2b273116303c507d86a509e245fd5c9cc",
+   "sig": "9963603d9422ac25e8242159a5f7412fd5de7595565909ae518f882bb787d0223271fcd906fef0e779ddde82f0012ba612fce8e7aa5d8568ca4df9b95dee1a32"
+  },
+  {
+   "rec": "04",
+   "fig": "chromatogram",
+   "q": "Nitrate as N, drinking water",
+   "v": "3.48",
+   "u": "mg/L",
+   "prev": "3cfcb1e05f9cb9b4f6cfbdc105069ef2b273116303c507d86a509e245fd5c9cc",
+   "r": "f4c6c5b314597cfd35f668abb6bbe79b44174e4abbd9b761c54e447e12ccc688",
+   "h": "77f35d66baf4142856ed2bb96357c1cad1c50e769e6e20043cb6411f3c4e0d13",
+   "sig": "01875ff0c26b63a1feb1d6aa48107c98b3be830a18be1363bf86d4d0e9be5b69f6bdc0e77b840062b96d7f615e761e46a3fea790246d68983294c2f436d420fa"
+  },
+  {
+   "rec": "05",
+   "fig": "layers",
+   "q": "Ping by address, PC-3",
+   "v": "18",
+   "u": "ms",
+   "prev": "77f35d66baf4142856ed2bb96357c1cad1c50e769e6e20043cb6411f3c4e0d13",
+   "r": "d01396fa7e12e9effe2c130eeee32a7df7a649c028b3dd762aaee6be1c829448",
+   "h": "0ce54cb978b68fc2e20c9600ac9c01051f56be5d55de9538da82fac01d0f0811",
+   "sig": "2426e9e791615df9bd0f465d7b6ff873055fe810b14e8fa360a3eaefc44c6b67fd0a87fbaa8688c2b7f32cabbd93feaf1115efda0984b4707330e0ff16769bff"
+  }
+ ],
+ "tamper": {
+  "rec": "02",
+  "v": "24.60",
+  "sig": "0937aa0922c5b66ed8b6e590490335f332ffe04f1d2a12b648f2fccf02b73a01688708675bade28069711fce62d7957bb94c75e51cd3ecd3131c217273eaabe2"
+ }
+}

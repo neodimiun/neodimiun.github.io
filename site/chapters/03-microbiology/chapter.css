@@ -1,0 +1,146 @@
+/* Chapter 03 Microbiology (Team MICRO). Tokens only; every selector starts with #microbiology. Fig. 5 per SPEC-C §6.5. */
+
+/* figure-internal colours (DS-approved agar / colony palette, SYSTEM-C §6.2; SPEC-C §6.5 "SVG per dish") */
+#microbiology{
+  --plate-agar-0:#EFE4BC; --plate-agar-1:#E9DAA8; --plate-agar-2:#D6BE80; --plate-grid:#5A4A1E; --plate-wall:#9AA0A6;
+  --plate-col-0:#FFF9EA; --plate-col-1:#F3DEA8; --plate-col-2:#D3A85A; --plate-col-edge:#B98A3C; --plate-sub:#DDBB6C;
+}
+
+/* ---- plate: 10:9 at 480 px and up (§6.5: 596 × 536.4 at 1440). Below 480 px the 11 px text rows and the 72 px ladder
+   take about 284 px whatever the width, so a 9:10 plate (397.8 at 390) would shrink the dishes to 135 px. There the plate
+   is (one dish column + 284 px) tall instead: a function of the width only (CLS 0), and the dishes keep the full column
+   (161 px at 390, 146 at 360, 126 at 320; plates 358 × 445, 328 × 436, 288 × 431). The plate is a size container; the stage takes what the corners,
+   tallies and ladder leave, and each dish is the largest square that fits its column. */
+#microbiology #fig-disinfectant{--aspect:10/9}
+#microbiology #fig-disinfectant .plate{aspect-ratio:var(--aspect);container:f5 / size;display:flex;flex-direction:column;padding:27px 12px 25px}
+@container fig (width < 480px){#microbiology #fig-disinfectant .plate{aspect-ratio:auto;height:calc((100cqi - 36px) / 2 + 284px)}}
+@container fig (width < 356px){#microbiology #fig-disinfectant .plate{height:calc((100cqi - 36px) / 2 + 290px)}}
+@container fig (width < 320px){#microbiology #fig-disinfectant .plate{height:calc((100cqi - 36px) / 2 + 305px)}}
+#microbiology #fig-disinfectant .stage{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto minmax(0,1fr) auto auto;column-gap:12px}
+#microbiology #fig-disinfectant .dish{grid-row:1 / span 3;display:grid;grid-template-rows:subgrid;min-width:0}
+#microbiology #fig-disinfectant .dish .dh{display:block;margin:0 0 4px;font:400 11px/1.25 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-2);text-wrap:balance}
+@container f5 (width < 340px){#microbiology #fig-disinfectant .dish .dh{letter-spacing:.02em}}
+#microbiology #fig-disinfectant .petri{display:block;height:100%;width:auto;max-width:100%;aspect-ratio:1;justify-self:center;overflow:visible}
+/* landscape and tablet (600–1023 px): each dish is capped at 240 px (§6.5), so a 10:9 plate would leave ~100 px of empty
+   agar-less ground around the dishes. The plate is the capped dish plus the fixed rows instead (a function of the width only). */
+@media (min-width:600px) and (max-width:1023px){
+  #microbiology #fig-disinfectant .petri{max-width:min(100%,240px)}
+  #microbiology #fig-disinfectant .plate{aspect-ratio:auto;height:calc(min(240px, (100cqi - 36px) / 2) + 270px)}
+}
+
+/* ---- dish SVG (units: mm; viewBox −47…47) */
+#microbiology #fig-disinfectant .a0{stop-color:var(--plate-agar-0)}
+#microbiology #fig-disinfectant .a1{stop-color:var(--plate-agar-1)}
+#microbiology #fig-disinfectant .a2{stop-color:var(--plate-agar-2)}
+#microbiology #fig-disinfectant .c0{stop-color:var(--plate-col-0)}
+#microbiology #fig-disinfectant .c1{stop-color:var(--plate-col-1)}
+#microbiology #fig-disinfectant .c2{stop-color:var(--plate-col-2)}
+#microbiology #fig-disinfectant .lid{fill:none;stroke:var(--steel);stroke-width:.5px;vector-effect:non-scaling-stroke;opacity:.35}
+#microbiology #fig-disinfectant .agar{fill:url(#f5-ag)}
+#microbiology #fig-disinfectant .grid{fill:none;stroke:var(--plate-grid);stroke-opacity:.16;stroke-width:.6px;vector-effect:non-scaling-stroke}
+#microbiology #fig-disinfectant .w1{fill:none;stroke:var(--plate-wall);stroke-width:.5px;vector-effect:non-scaling-stroke}
+#microbiology #fig-disinfectant .w2{fill:none;stroke:var(--steel);stroke-width:.5px;vector-effect:non-scaling-stroke}
+#microbiology #fig-disinfectant .gc circle{fill:url(#f5-co);stroke:var(--plate-col-edge);stroke-width:.16}
+#microbiology #fig-disinfectant .gc ellipse{fill:var(--plate-sub);fill-opacity:.9}
+#microbiology #fig-disinfectant .gm circle{fill:var(--a-mark);fill-opacity:.92}
+
+/* ---- tallies: the count beside its unit and plating, then the arithmetic row (one .after group for both dishes) */
+#microbiology #fig-disinfectant .tally{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:6px;align-items:end;margin:6px 0 0;font:400 12px/1.25 var(--mono);font-variant-numeric:tabular-nums;color:var(--fg-2)}
+#microbiology #fig-disinfectant .tally .n{grid-row:1 / span 2;min-width:3ch;font:500 clamp(22px,6.4cqi,30px)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--fg)}
+#microbiology #fig-disinfectant .tally .u{color:var(--fg)}
+#microbiology #fig-disinfectant .eqs{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;margin-top:4px}
+#microbiology #fig-disinfectant .eqs p{margin:0;font:400 12px/1.35 var(--mono);font-variant-numeric:tabular-nums;color:var(--fg-2)}
+#microbiology #fig-disinfectant .eqs .m{display:block}
+#microbiology #fig-disinfectant .eqs .m.s{display:none}
+#microbiology #fig-disinfectant .eqs .eq{display:block;color:var(--fg)}
+#microbiology #fig-disinfectant .nw{white-space:nowrap}
+#microbiology #fig-disinfectant sup,#microbiology #fig-disinfectant sub{font-size:.75em;line-height:0}
+@container f5 (width < 480px){
+  #microbiology #fig-disinfectant .eqs p,#microbiology #fig-disinfectant .tally{font-size:11px}
+  #microbiology #fig-disinfectant .eqs .m.l{display:none}
+  #microbiology #fig-disinfectant .eqs .m.s{display:block}
+}
+
+/* ---- the log ladder: marks in % of the inner track (x(v) = 20 + v·(w − 40)/7), DOM labels placed with the same rule */
+#microbiology #fig-disinfectant .lw{flex:none;margin-top:6px}
+#microbiology #fig-disinfectant .lad{position:relative;height:72px}
+#microbiology #fig-disinfectant .ladder{display:block;margin:0 20px;width:calc(100% - 40px);height:72px;overflow:visible}
+#microbiology #fig-disinfectant .ladder line{vector-effect:non-scaling-stroke}
+#microbiology #fig-disinfectant .drop{stroke:var(--hair);stroke-width:1px}
+#microbiology #fig-disinfectant .crit{stroke:var(--fg-2);stroke-width:2px;stroke-dasharray:4 3}
+#microbiology #fig-disinfectant .ach{stroke:var(--a-mark);stroke-width:4px}
+#microbiology #fig-disinfectant .ax,#microbiology #fig-disinfectant .tk{stroke:var(--steel);stroke-width:1px}
+#microbiology #fig-disinfectant .dc{fill:var(--fg)}
+#microbiology #fig-disinfectant .dd{fill:var(--a-mark)}
+#microbiology #fig-disinfectant .tv,#microbiology #fig-disinfectant .lb{position:absolute;left:calc(20px + var(--x) * (100% - 40px));font:400 11px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--fg-2);white-space:nowrap;pointer-events:none}
+#microbiology #fig-disinfectant .tv{top:59px;transform:translateX(-50%)}
+#microbiology #fig-disinfectant .lb{transform:translate(calc(-100% - 4px),-50%)}
+#microbiology #fig-disinfectant .ba{top:18px;color:var(--a)}
+/* the criterion label sits on a ground knockout: the 2.11 drop hairline passes behind it at every width */
+#microbiology #fig-disinfectant .bc{top:33px;padding:1px 3px;background:var(--plate);transform:translate(calc(-100% - 1px),-50%)}
+/* narrow plates (inner < 380, i.e. phones to 430): "4.16 log achieved" would run within 12 px of the plate's left edge, so it sits above its bar, starting at x(2.11) */
+@container f5 (width < 380px){#microbiology #fig-disinfectant .ba{top:6px;transform:translate(0,-50%)}}
+#microbiology #fig-disinfectant .ladder-t{margin:2px 0 0;font:400 11px/1.3 var(--mono);color:var(--fg-2);font-variant-numeric:tabular-nums}
+#microbiology #fig-disinfectant .ladder-t .lg{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+#microbiology #fig-disinfectant .ladder-t .i{width:10px;height:10px;color:var(--a-mark)}
+/* which ladder dot is which, in words as well as colour (the black dot is the control, the accent dot the disinfected coupon) */
+#microbiology #fig-disinfectant .ladder-t .kc{color:var(--fg)}
+#microbiology #fig-disinfectant .ladder-t .kd{color:var(--a)}
+
+/* ---- fine-pointer readings (no script): unrounded values on the ladder dots, the criterion end and the readout value */
+#microbiology #fig-disinfectant .hit{position:absolute;z-index:3;left:calc(20px + var(--x) * (100% - 40px));top:var(--y);width:20px;height:20px;transform:translate(-50%,-50%)}
+#microbiology #fig-disinfectant .tip{display:none;position:absolute;z-index:4;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);padding:4px 6px;background:var(--fg);color:var(--surface);font:400 11px/1 var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none}
+#microbiology #fig-disinfectant .hit.dc .tip{transform:translateX(-85%)}
+#microbiology #fig-disinfectant .readout .row{position:relative}
+#microbiology #fig-disinfectant .readout .tip{left:0;transform:none}
+/* late:start */
+@media (hover:hover) and (pointer:fine){
+  #microbiology #fig-disinfectant .hit:hover .tip,#microbiology #fig-disinfectant .readout .val:hover ~ .tip{display:block}
+  #microbiology #fig-disinfectant .hit,#microbiology #fig-disinfectant .readout .val{cursor:help}
+}
+/* late:end */
+
+/* ---- readout: one status per state (CSS on data-state; the counted one carries the accent and the check icon). Below
+   400 px each quantity is a deliberate two-line block: the label alone, then value · unit · leader · status. Every
+   state fills the same two lines, so the strip's height never changes. */
+#microbiology #fig-disinfectant .status > .sc,#microbiology #fig-disinfectant .status > .sp,#microbiology #fig-disinfectant .status > .si{display:none;align-items:center;gap:4px}
+#microbiology #fig-disinfectant[data-state="counted"] .status > .sc,#microbiology #fig-disinfectant[data-state="plated"] .status > .sp,
+#microbiology #fig-disinfectant[data-state="incubated"] .status > .si{display:inline-flex}
+/* the text run, not the 12 px check, sets .sc's baseline (align-items:baseline; the icon re-centres itself), so all
+   three variants share one baseline and line box and the row never grows by a pixel in Counted (§14 item 39) */
+#microbiology #fig-disinfectant .status > .sc{color:var(--a);align-items:baseline}
+#microbiology #fig-disinfectant .status .i{width:12px;height:12px;align-self:center}
+@container fig (width < 400px){
+  #microbiology #fig-disinfectant .readout{row-gap:10px}
+  #microbiology #fig-disinfectant .readout .row{display:grid;grid-template-columns:auto auto minmax(12px,1fr) auto;align-items:baseline;column-gap:8px;row-gap:2px}
+  #microbiology #fig-disinfectant .readout .lbl{grid-column:1 / -1}
+  #microbiology #fig-disinfectant .readout .val{min-width:0;text-align:left}
+}
+
+/* ---- controls: Replay is icon-only below 330 px (same trigger as Fig. 7); tighter buttons keep one row at 288 px */
+@container fig (width < 400px){#microbiology #fig-disinfectant .ctrl button{padding:0 8px;letter-spacing:.04em}}
+@container fig (width < 330px){
+  #microbiology #fig-disinfectant .ctrl button{padding:0 8px;letter-spacing:0}
+  #microbiology #fig-disinfectant .corner{letter-spacing:.02em}
+}
+
+/* ---- states (JS writes data-state and text only). Every result keeps its space and changes opacity only (CLS 0). */
+#microbiology #fig-disinfectant[data-state="plated"] .gc > g,
+#microbiology #fig-disinfectant:not([data-state="counted"]) .gm > g,
+#microbiology #fig-disinfectant:not([data-state="counted"]) .plate .after,
+#microbiology #fig-disinfectant:not([data-state="counted"]) .status.of{opacity:0}
+html.motion #microbiology #fig-disinfectant:not(.intro) .gc > g,html.motion #microbiology #fig-disinfectant:not(.intro) .gm > g,html.motion #microbiology #fig-disinfectant:not(.intro) .plate .after,html.motion #microbiology #fig-disinfectant:not(.intro) .status.of{transition:opacity var(--t-state) var(--ease)}
+/* entry (§6.5): arm() adds .pre only when motion is on and the figure starts below the fold */
+html.motion #microbiology #fig-disinfectant.pre .gc > g,html.motion #microbiology #fig-disinfectant.pre .gm > g,html.motion #microbiology #fig-disinfectant.pre .after{opacity:0}
+
+/* print: the counted state, whatever was pressed, from CSS alone (no beforeprint listener, SYSTEM-C §6.2). Every string
+   JS writes (.lv tallies, the first .val, .clk, the caption's first .state) has an authored final copy (.pf), hidden on
+   screen; print swaps them, and shows the counted status. */
+#microbiology #fig-disinfectant .pf{display:none}
+@media print{
+  #microbiology #fig-disinfectant .gc > g,#microbiology #fig-disinfectant .gm > g,#microbiology #fig-disinfectant .after,#microbiology #fig-disinfectant .status.of{opacity:1!important}
+  #microbiology #fig-disinfectant .lv,#microbiology #fig-disinfectant .clk,#microbiology #fig-disinfectant .val:not(.pf),#microbiology #fig-disinfectant .state:not(.pf),
+  #microbiology #fig-disinfectant .status > .sp,#microbiology #fig-disinfectant .status > .si{display:none!important}
+  #microbiology #fig-disinfectant .pf{display:inline}
+  #microbiology #fig-disinfectant .status > .sc{display:inline-flex!important}
+}

@@ -1,0 +1,16 @@
+{
+ "slug": "engineering",
+ "code": "eng",
+ "no": "01",
+ "nav": "Engineering",
+ "years": "2026–",
+ "contents": "Collins Aerospace",
+ "figures": [
+  { "id": "field", "kind": "gl", "states": ["polished", "etched"], "initial": "polished", "final": "etched",
+    "sizes": "(min-width:1024px) 560px, 358px" },
+  { "id": "indent", "kind": "gl", "states": ["etched", "indented", "measured"], "initial": "etched", "final": "measured", "reduced": "tri",
+    "sizes": "(min-width:1024px) 600px, calc(100vw - 32px)" }
+ ],
+ "facts": ["eng.field", "eng.hv"],
+ "generators": []
+}

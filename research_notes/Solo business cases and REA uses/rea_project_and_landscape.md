@@ -490,3 +490,186 @@ Source: [docs/mcp-contracts.md "Untrusted target content"](https://github.com/mo
 - Success rates of RE-agent prompt-injection attacks against frontier models (as opposed to Qwen3-8B), and against REA specifically, were not found.
 - The Check Point and SentinelLABS primary reports were not read.
 - No REA-specific CVEs or security advisories were found. The GitHub Security tab could not be queried.
+
+---
+
+## 8. Ghidra as the core engine under REA: license, REA's provider, productizable features, ecosystem and cadence
+
+(Added at the coordinator's request.) Ghidra facts below come from:
+- the Ghidra repository at tag `Ghidra_12.1.4_build`, read via a blobless git fetch on 12 Oct 2026 (`WhatsNew.md`, `ChangeHistory.md`, module READMEs and help pages);
+- tag commit dates via git;
+- the GitHub search API.
+
+REA facts come from the local clone.
+
+### Takeaway
+Ghidra is the only deep native provider under REA that is free *and* licensed permissively enough for a paid service or SaaS:
+- Apache-2.0, with a NOTICE file;
+- US-government portions are public domain in the US;
+- a few GPL-licensed modules are isolated under `GPL/`.
+
+**REA + Ghidra on Linux x64 is a fully free stack.** It provides 25 read-only native operations plus session-only renaming, and covers ELF, PE, Mach-O, DOS/COM, raw ARM/x86 blobs, MIPS, RISC-V and PSP. The same machine can also run REA's non-provider workflows (JS/Electron, web, .NET, Android via JADX, firmware extraction via Binwalk/Unblob).
+
+REA uses only a thin slice of Ghidra: an ephemeral, single-target `analyzeHeadless` import. It does **not** use Ghidra's most productizable features:
+- BSim function-similarity databases;
+- Version Tracking / patch diffing;
+- PyGhidra;
+- Ghidra Server;
+- the official Docker image.
+
+These are open ground for a business. Ghidra is actively maintained, with about 2 feature releases a year and patch releases every 1–2 months through 2025–2026. As of 12.1.4 it has no built-in MCP or LLM features; the AI layer is entirely third-party (GhidraMCP 11.1k stars, bethington/ghidra-mcp 5.5k, ReVa, GhidrAssistMCP, REA).
+
+### Cited Findings
+**(1) License: Ghidra vs. the commercial disassemblers**
+- Ghidra's LICENSE is the Apache License 2.0. It grants "a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of…", plus a patent license. Section 6 does **not** grant trademark rights beyond "reasonable and customary use in describing the origin of the Work." — [Ghidra 12.1.4 LICENSE (copy retained in REA)](https://github.com/morluto/rea/blob/main/licenses/ghidra-12.1.4-LICENSE.txt); [upstream LICENSE](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/LICENSE)
+- NOTICE: "Portions of this product were created by the U.S. Government and not subject to U.S. copyright protections"; such portions are "generally understood to mean… placed in the public domain" in the US and released under the License elsewhere. — [Ghidra NOTICE](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/NOTICE)
+- REA notes that standalone programs under `GPL/` have GPLv3 terms. In 12.1.4, `GPL/` contains `DemanglerGnu`, `GnuDisassembler` and `DMG`. — [REA THIRD_PARTY_NOTICES](https://github.com/morluto/rea/blob/main/THIRD_PARTY_NOTICES.md); Ghidra repo tree at tag `Ghidra_12.1.4_build` ([GPL/](https://github.com/NationalSecurityAgency/ghidra/tree/Ghidra_12.1.4_build/GPL))
+- Commercial alternatives, for contrast (details and sources in §1):
+  - **IDA Pro:** EULA "limited, non-exclusive, non-transferable, non-sub-licensable, revocable". REA: "Availability of an API or a bridge does not grant hosting, service, or additional-user rights." No official 2026 price found; a third-party listing says "from $365/user/year", which is unreliable and likely a lower tier. — [Hex-Rays EULA](https://hex-rays.com/eula); [REA THIRD_PARTY_NOTICES](https://github.com/morluto/rea/blob/main/THIRD_PARTY_NOTICES.md); [Capterra](https://www.capterra.com/p/232957/IDA-PRO/)
+  - **Hopper:** $99 Personal License (tied to one person, any of their machines) or $129 Computer License (tied to one machine, any user). Perpetual, one year of updates. REA's Linux automation uses Hopper's *demo mode*. — [Hopper store](https://hopperapp.com/webstore); [Hopper license](https://www.hopperapp.com/license_agreement.html); [REA installation.md](https://github.com/morluto/rea/blob/main/docs/installation.md)
+  - **JEB Pro:** $2,000 per user per year (floating seat $4,000). Its EULA restricts third-party disclosure of decompiled code and analysis reports unless the license type permits it. — [JEB buy](https://pnfsoftware.com/jeb/buy); [REA THIRD_PARTY_NOTICES](https://github.com/morluto/rea/blob/main/THIRD_PARTY_NOTICES.md)
+  - **Binary Ninja** (not an REA provider): Personal $199, Commercial $1,799; Sidekick AI $30–$300 per month. — [Binary Ninja purchase](https://binary.ninja/purchase/); [Sidekick pricing](https://sidekick.binary.ninja/pricing/)
+
+**(2) REA's Ghidra provider: what works with Ghidra alone**
+
+*How REA drives Ghidra*
+- "REA imports one target into an ephemeral Ghidra database." "One `analyzeHeadless` import produces exactly one Program." REA does not open or modify user-owned Ghidra projects and deletes the temporary project on close. Executable bytes are never changed. — [docs/ghidra-provider.md](https://github.com/morluto/rea/blob/main/docs/ghidra-provider.md); [SECURITY.md](https://github.com/morluto/rea/blob/main/SECURITY.md)
+- The adapter uses a packaged Java `HeadlessScript`. "Python and PyGhidra are not prerequisites." — [docs/windows-ghidra-p0.md](https://github.com/morluto/rea/blob/main/docs/windows-ghidra-p0.md)
+
+*Host requirements*
+- Hosts: Linux x64/arm64, macOS x64/arm64, experimental Windows x64 ("P0").
+- It accepts Ghidra 12.1.x with a full JDK 21+ and is "verified with Ghidra 12.1.4 and JDK 21". Linux ARM64 may require building the native decompiler yourself.
+- "REA does not download, install, upgrade, or modify Ghidra or Java." Ghidra is bring-your-own.
+
+Source: [docs/installation.md#ghidra](https://github.com/morluto/rea/blob/main/docs/installation.md); [SECURITY.md](https://github.com/morluto/rea/blob/main/SECURITY.md)
+
+*Operations*
+- There are **25 read-only operations**: thirteen inventory/name/search operations and twelve function-analysis operations. They cover:
+  - metadata, decompilation, assembly;
+  - resolved calls, typed references, xrefs;
+  - function dossiers (CFG plus bounded p-code value flow: up to 3,000 ops and 12,000 def-use edges);
+  - instructions, recovered data types, load mappings, memory bytes and file offsets.
+- On Linux and macOS, `annotate_native_function`, `set_address_name` and `set_addresses_names` add session-only renames and comments; these are discarded on close.
+- "GUI controls require Hopper." Windows P0 is read-only.
+
+Source: [docs/installation.md#ghidra](https://github.com/morluto/rea/blob/main/docs/installation.md); [docs/ghidra-provider.md](https://github.com/morluto/rea/blob/main/docs/ghidra-provider.md)
+
+*Formats verified with Ghidra*
+- Host-native x86-64/AArch64 ELF on Linux, or Mach-O on macOS.
+- A cross-format lane adds AArch64 ELF, x86-64 PE and x86-64 Mach-O.
+- Windows lanes cover x86 and x86-64 PE applications and DLLs.
+
+Source: [docs/ghidra-provider.md](https://github.com/morluto/rea/blob/main/docs/ghidra-provider.md)
+
+*Extra Ghidra-only lanes*
+- 16-bit DOS MZ and COM. — [docs/ghidra-dos.md](https://github.com/morluto/rea/blob/main/docs/ghidra-dos.md)
+- Headless raw binaries with caller-supplied architecture `x86`, `x86_64`, `arm` or `arm64` and entry point (example: `ecu.bin` at `0x8000000`). — [docs/raw-binary.md](https://github.com/morluto/rea/blob/main/docs/raw-binary.md)
+- MIPS ELF ("does not execute MIPS code or rehost firmware"). — [docs/ghidra-mips.md](https://github.com/morluto/rea/blob/main/docs/ghidra-mips.md)
+- RISC-V ELF. — [docs/ghidra-riscv.md](https://github.com/morluto/rea/blob/main/docs/ghidra-riscv.md)
+- PSP/Allegrex, on Linux x64 with the third-party ghidra-allegrex extension. — [docs/ghidra-psp.md](https://github.com/morluto/rea/blob/main/docs/ghidra-psp.md)
+- .NET NativeAOT metadata. — [docs/ghidra-nativeaot.md](https://github.com/morluto/rea/blob/main/docs/ghidra-nativeaot.md)
+
+*Firmware handoff*
+- Binwalk or Unblob extracts the image on Linux. "Arbitrary firmware bytes do not pass native executable admission; select a returned ELF separately for supported Ghidra analysis." The workflow is then `provider_id: "ghidra"`. — [docs/firmware-analysis.md](https://github.com/morluto/rea/blob/main/docs/firmware-analysis.md)
+
+*Known Ghidra-specific limitations REA declares*
+- String search covers only Ghidra-defined string `Data`. "Packed or undefined literals, including Rust strings, may be absent."
+- Callers and callees contain only resolved functions; targetless computed flow remains unknown.
+- Inferred no-return calls can truncate function bodies.
+
+Source: [docs/ghidra-provider.md](https://github.com/morluto/rea/blob/main/docs/ghidra-provider.md)
+
+*Provider fallback and Ghidra feature usage*
+- "One deep provider stays bound to the target; runtime failure never selects another provider automatically." — [docs/ghidra-provider.md](https://github.com/morluto/rea/blob/main/docs/ghidra-provider.md)
+- A grep of REA's docs, README and CHANGELOG for "BSim", "Version Tracking", "Ghidra Server" and "PyGhidra" finds **no use of any of them**. The only hit is the statement that PyGhidra is not a prerequisite. — [local clone, docs/windows-ghidra-p0.md](https://github.com/morluto/rea/blob/main/docs/windows-ghidra-p0.md)
+
+**(3) Ghidra features relevant to productized services (all present in the 12.1.4 source tree)**
+- **Headless analysis:** "The Headless Analyzer is a command-line-based (non-GUI) version of Ghidra that allows users to: create and populate projects; perform analysis on imported or existing binaries; run non-GUI scripts in a project." It supports pre- and post-scripts, analysis timeouts and wildcards for batch import. — [analyzeHeadlessREADME.md](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/RuntimeScripts/Common/support/analyzeHeadlessREADME.md)
+- **BSim (Behavioral Similarity):**
+  - BSim lets analysts "ingest metadata about previously analyzed binary executables to a central server or local database, which can then be queried… to quickly discover previously seen functions and libraries."
+  - Features come from decompiler p-code data-flow graphs and are normalized against "equivalent machine instructions, storage location, instruction order, many forms of compiler transformation, even some forms of deliberate obfuscation."
+  - It supports nearest-neighbor queries, so "there can be some amount of true change in the underlying source code, and the query may still be able to find a match."
+  - Vendor claim: single-function queries return "in microseconds, even for a database containing millions of functions."
+  - Backends: PostgreSQL, local H2 or Elasticsearch, plus a `bsim` command-line utility.
+  - Recent maintenance: 12.0 added a `getmetadata` subcommand and Elasticsearch 8.19.7 support; 12.1.4 upgraded BSim's PostgreSQL to 15.18.
+
+  Source: [BSimOverview help page](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Features/BSim/src/main/help/help/topics/BSim/BSimOverview.html); [ChangeHistory.md](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/ChangeHistory.md)
+- **Version Tracking:** "the process used by reverse engineers to identify matching code or data between different software binaries". Two common uses are porting annotations to a newer version, and checking "for the presence of existing code within a given binary… from some library of routines or code representing known malware." Ghidra also ships `VersionTrackingBSim`, `ProgramDiff`, `CodeCompare` and `FunctionID` modules. 12.0 added side-by-side Function Graph views in Function Comparison, e.g. "when viewing BSim functions". — [Version_Tracking_Intro help page](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Features/VersionTracking/src/main/help/help/topics/VersionTrackingPlugin/Version_Tracking_Intro.html); [ChangeHistory.md](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/ChangeHistory.md)
+- **PyGhidra:**
+  - Originally "Pyhidra", developed by the DoD Cyber Crime Center (DC3). It "provides direct access to the Ghidra API within a native CPython 3 interpreter using JPype", runs headless or GUI scripts in CPython 3, and can be used "as a standalone Python library… where Ghidra may be one of many components."
+  - Install with `pip install pyghidra` (Ghidra 12.0+).
+  - In 12.1, Jython moved to an optional extension, and Ghidra tells users to convert scripts to PyGhidra or Java.
+
+  Source: [PyGhidra README](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Features/PyGhidra/src/main/py/README.md); [WhatsNew 12.1](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/WhatsNew.md)
+- **Ghidra Server:** multi-user shared repositories with user authentication (including SSH and PKI), backups and Windows/Linux/macOS service installs. 12.1 fixed a **PKI-authentication bypass**: "an attacker [could] authenticate as a different user without having access to their private key." 12.1 also tightened RMI serialization filters. Ghidra "highly recommend[s]" upgrading older servers. — [svrREADME.md](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/RuntimeScripts/Common/server/svrREADME.md); [WhatsNew 12.1](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/WhatsNew.md)
+- **Official Docker image:** added in 11.4 (June 2025), with modes `gui`, `headless`, `ghidra-server`, `bsim`, `bsim-server` and `pyghidra`. It runs as the unprivileged user `ghidra` (uid 1001). — [docker/README.md](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/docker/README.md); [ChangeHistory 11.4](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/ChangeHistory.md)
+- **Processor and architecture coverage:**
+  - The 12.1.4 tree has 40 processor modules: 6502, 68000, 8048, 8051, 8085, AARCH64, ARM, Atmel, BPF, CP1600, CR16, Dalvik, HCS08, HCS12, Hexagon, JVM, Loongarch, M16C, M8C, MC6800, MCS96, MIPS, NDS32, PA-RISC, PIC, PowerPC, RISCV, Sparc, SuperH, SuperH4, TI_MSP430, Toy, V850, Xtensa, Z80, eBPF, tricore and x86 (plus DATA).
+  - Hexagon was added in 12.1 and NDS32 in 12.0. Many missing ARM, AARCH64 and x86 instructions were added in 12.1.
+  - **REA admits only a subset:** x86/x86-64, ARM/ARM64, MIPS, RISC-V, PSP, and DOS 16-bit.
+
+  Source: Ghidra tree at tag `Ghidra_12.1.4_build` ([Ghidra/Processors](https://github.com/NationalSecurityAgency/ghidra/tree/Ghidra_12.1.4_build/Ghidra/Processors)); [WhatsNew 12.1](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/WhatsNew.md); [REA docs/raw-binary.md](https://github.com/morluto/rea/blob/main/docs/raw-binary.md)
+- **Other recent analysis features:**
+  - 12.0 (Dec 2025): low-p-code abstract interpretation via the LiSA library; an experimental Z3 symbolic emulator extension; Go 1.24/1.25 support; an Apple ARM64 compiler spec.
+  - 12.1 (May 2026): x64dbg–Ghidra debugger synchronization; `debuginfod` queries; Decompiler bitfield recovery; Objective-C improvements.
+
+  Source: [ChangeHistory.md](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/ChangeHistory.md); [WhatsNew 12.1](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/WhatsNew.md)
+
+**(4) Ghidra-based MCP/AI projects, and Ghidra maintenance**
+- Ghidra repo (GitHub API, 12 Oct 2026): 85,150 stars, 9,446 forks, 2,080 open issues. Created 1 Mar 2019. — [NationalSecurityAgency/ghidra](https://github.com/NationalSecurityAgency/ghidra)
+- **No built-in MCP or LLM:** searching ChangeHistory.md through 12.1.4 for "MCP", "LLM" and "AI" found no built-in MCP/LLM feature. A feature request for an official MCP server exists; its status is unverified. — [ChangeHistory.md](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/ChangeHistory.md); [Ghidra issue #9352](https://github.com/NationalSecurityAgency/ghidra/issues/9352)
+- **Third-party Ghidra AI/MCP projects** (GitHub API, 12 Oct 2026):
+
+  | Project | Stars | Notes |
+  | --- | --- | --- |
+  | [LaurieWired/GhidraMCP](https://github.com/LaurieWired/GhidraMCP) | 11,133 | Created Mar 2025. GUI plugin (CodeBrowser) + Python MCP bridge; decompile, rename, list. |
+  | [bethington/ghidra-mcp](https://github.com/bethington/ghidra-mcp) | 5,528 | "200+ MCP tools", GUI plugin + headless server, Ghidra Server integration, Docker. The search summary says not all endpoints work headless. |
+  | [cyberkaida/reverse-engineering-assistant](https://github.com/cyberkaida/reverse-engineering-assistant) (ReVa) | 871 | Created Aug 2023. Also used in a Claude CTF skill ([mcpmarket](https://mcpmarket.com/tools/skills/ctf-reverse-engineering-assistant)). |
+  | [symgraph/GhidrAssistMCP](https://github.com/symgraph/GhidrAssistMCP) | 770 | — |
+  | [LING71671/open-reverselab](https://github.com/LING71671/open-reverselab) | 1,253 | Ghidra + Frida + x64dbg + Rizin |
+
+  Additional headless Ghidra MCP servers exist (e.g., [Bamimore-Tomi/ghidra_mcp](https://mcpservers.org/servers/Bamimore-Tomi/ghidra_mcp)).
+- **Prompt-injection research** on RE agents used GhidraMCP as its testbed (see §7). — [arXiv 2605.30667](https://arxiv.org/pdf/2605.30667)
+- **Release cadence** (git commit dates of release tags; ChangeHistory months agree):
+
+  | Line | Feature release | Patch releases |
+  | --- | --- | --- |
+  | 11.3 | 5 Feb 2025 | 11.3.1 (18 Feb), 11.3.2 (15 Apr) |
+  | 11.4 | 18 Jun 2025 | 11.4.1 (31 Jul), 11.4.2 (26 Aug), 11.4.3 (2 Dec) |
+  | 12.0 | 5 Dec 2025 | 12.0.1 (14 Jan 2026), 12.0.2 (29 Jan), 12.0.3 (10 Feb), 12.0.4 (3 Mar) |
+  | 12.1 | 12 May 2026 | 12.1.1 (27 May), 12.1.2 (2 Jun), 12.1.3 (14 Aug), 12.1.4 (11 Sep 2026; "September 2026" in ChangeHistory) |
+
+  That is roughly two feature releases a year, with a patch every 1–2 months. `Ghidra_12.1.4_build` is the latest tag. — [Ghidra tags](https://github.com/NationalSecurityAgency/ghidra/tags); [ChangeHistory.md](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/ChangeHistory.md)
+- **Compatibility:** "programs and data type archives which are created or modified in 12.1 will not be usable by an earlier Ghidra version." 12.1 clients need Ghidra Server 12.1/12.0.5 or newer. 12.1 requires JDK 21 minimum, and Python 3.9–3.14 for the Debugger. — [WhatsNew 12.1](https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.4_build/Ghidra/Configurations/Public_Release/src/global/docs/WhatsNew.md)
+
+### Inferences
+**Licensing**
+- Apache-2.0 allows Ghidra to run inside a paid service or SaaS with no license fee and no per-seat or automation restrictions. That contrasts directly with IDA, Hopper and JEB, whose EULAs govern seats, automation, hosting and/or output sharing.
+- Obligations arise mainly on *redistribution*: keep the LICENSE and NOTICE, mark modifications, and meet GPL obligations if you ship the `GPL/` modules (e.g., an on-prem appliance or a Docker image given to customers).
+- Do not brand a product in a way that implies NSA endorsement (Apache §6; REA's DISCLAIMER also disclaims NSA affiliation).
+
+**REA + Ghidra as a zero-license-cost core**
+- A solo business could run REA + Ghidra + JDK 21 + Binwalk/Unblob + JADX on Linux x64 with zero tool-license cost.
+- The cost is analysis quality and coverage. Ghidra pseudocode is generally regarded as below Hex-Rays for some targets; I did not find a 2026 benchmark to quantify this.
+- REA's own stated Ghidra gaps (resolved-only call graphs, string coverage, no GUI) still apply.
+
+**The biggest Ghidra-based opening is BSim**
+- REA discards each project on close and has no persistent knowledge base. A service that maintains a curated BSim database could offer:
+  - known open-source library functions, OpenSSL/BusyBox/U-Boot versions, and known-vulnerable functions;
+  - matching against stripped customer firmware;
+  - Version Tracking / ProgramDiff to diff vendor patches;
+  - REA or a Ghidra MCP server so an agent explains the hits.
+- That would be differentiated from both REA (stateless) and the generic MCP bridges. It runs on the official Docker `bsim-server` and `headless` modes.
+- This is an inference; BSim's accuracy at that task in practice was not verified, and the "microseconds over millions of functions" figure is Ghidra's own claim.
+
+**Operations for a Ghidra-backed service**
+- Ghidra's breaking project-format changes between releases and its regular security fixes (e.g., the 12.1 Ghidra Server PKI bypass) mean a service should pin Ghidra versions per customer engagement and patch Ghidra Server promptly.
+- REA verifies only Ghidra 12.1.x, so a Ghidra 12.2 or 13.0 release will need REA to re-verify.
+
+### Gaps
+- No independent 2026 benchmark comparing Ghidra and Hex-Rays decompiler accuracy was found.
+- No published real-world precision/recall for BSim on stripped firmware was found.
+- I could not confirm whether any Ghidra MCP project exposes BSim or Version Tracking to agents. pyghidra-mcp was not located in search.
+- The status of Ghidra issue #9352 (official MCP) was not checked; GitHub API access to that repo was blocked in this session.
+- Tag dates are commit dates of the tagged commits (lightweight tags), which approximate but may not equal GitHub release publication dates.
+- I could not retrieve Ghidra's own list of officially supported loaders and formats for embedded firmware beyond the processor modules.

@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Why a two-endpoint titration cannot measure HF in an activation bath</title>
+<style>
+:root{
+  --bg:#ffffff; --surface:#f3f5f8; --text:#12161c; --muted:#47515f; --line:#c9d0da; --grid:#e3e7ee;
+  --accent:#0b5cad; --curve:#1f4fb8; --sulf:#0b5cad; --on-sulf:#ffffff; --hf:#e07a1f; --hf-ink:#9a4a00; --on-hf:#12161c; --on-nickel:#12161c; --on-steel:#12161c;
+  --win:#a3197a; --on-win:#ffffff; --band:#f1d9ec; --record:#00775f; --bath:#c4350a; --ok:#1b7a3a;
+  --steel:#9aa3af; --steel-dk:#6f7986; --grain:#5d6673; --nickel:#d5dde8; --nickel-ln:#56657a;
+  --oxide:#8a4a1f; --smut:#15181d; --rust:#b8420f; --hyd:#0b66c3; --atom-n:#5b6b82; --atom-h:#e8ecf2; --pore-bg:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1318; --surface:#181e26; --text:#eef1f5; --muted:#b0b9c6; --line:#3b4452; --grid:#262e39;
+    --accent:#6fb1f2; --curve:#8db6ff; --sulf:#6fb1f2; --on-sulf:#0b1220; --hf:#ffa04d; --hf-ink:#ffa04d; --on-hf:#12161c; --on-nickel:#12161c; --on-steel:#f4f6f9;
+    --win:#f28cc8; --on-win:#1a0c14; --band:#3a2036; --record:#3fd3b1; --bath:#ff7a4d; --ok:#5fd18a;
+    --steel:#5f6978; --steel-dk:#3f4753; --grain:#232a33; --nickel:#c3d2e4; --nickel-ln:#e4ecf6;
+    --oxide:#c07a45; --smut:#e8ecf2; --rust:#ee6a30; --hyd:#6fb1f2; --atom-n:#8ea2bf; --atom-h:#2a323e; --pore-bg:#181e26;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1318; --surface:#181e26; --text:#eef1f5; --muted:#b0b9c6; --line:#3b4452; --grid:#262e39;
+  --accent:#6fb1f2; --curve:#8db6ff; --sulf:#6fb1f2; --on-sulf:#0b1220; --hf:#ffa04d; --hf-ink:#ffa04d; --on-hf:#12161c; --on-nickel:#12161c; --on-steel:#f4f6f9;
+  --win:#f28cc8; --on-win:#1a0c14; --band:#3a2036; --record:#3fd3b1; --bath:#ff7a4d; --ok:#5fd18a;
+  --steel:#5f6978; --steel-dk:#3f4753; --grain:#232a33; --nickel:#c3d2e4; --nickel-ln:#e4ecf6;
+  --oxide:#c07a45; --smut:#e8ecf2; --rust:#ee6a30; --hyd:#6fb1f2; --atom-n:#8ea2bf; --atom-h:#2a323e; --pore-bg:#181e26;
+}
+
+*{box-sizing:border-box}
+html{font-size:clamp(16px, 0.55vw + 11px, 24px); -webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; line-height:1.45}
+.wrap{max-width:74rem; margin:0 auto; padding:1.2rem 1rem 2.4rem}
+header.top{display:flex; gap:1rem; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--text); padding-bottom:.8rem}
+h1{font-size:1.75rem; line-height:1.15; margin:0 0 .45rem; font-weight:700}
+.lede{margin:0; max-width:56rem; color:var(--muted); font-size:1.02rem}
+button,.btn{font:inherit; font-size:.85rem; color:var(--text); background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:.35rem .7rem; cursor:pointer}
+button:hover{border-color:var(--text)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.setup{margin:.9rem 0 0; padding:.7rem .9rem; background:var(--surface); border:1px solid var(--line); font-size:.9rem}
+.setup b{font-weight:650}
+.setup p{margin:.15rem 0}
+
+.panel{margin-top:1.6rem; padding-top:1rem; border-top:1px solid var(--line)}
+.panel-head{display:flex; align-items:baseline; gap:.7rem; margin-bottom:.3rem}
+.pn{flex:none; display:inline-block; min-width:1.9rem; text-align:center; padding:.05rem .35rem; background:var(--text); color:var(--bg); font-weight:700; font-size:.95rem}
+h2{font-size:1.32rem; margin:0; line-height:1.2; font-weight:700}
+.lead{margin:.2rem 0 .7rem; max-width:58rem; font-size:1rem}
+figure{margin:0}
+.fig{background:var(--bg); border:1px solid var(--line); padding:.4rem}
+svg{display:block; width:100%; height:auto}
+.tx{fill:var(--text); font-family:inherit}
+.tm{fill:var(--muted)}
+.b{font-weight:650}
+figcaption,.cap{margin:.55rem 0 0; font-size:.88rem; color:var(--muted); max-width:62rem}
+.cap b{color:var(--text)}
+.takeaway{margin:.9rem 0 0; padding:.55rem .8rem; border-left:5px solid var(--accent); background:var(--surface); font-size:1.08rem; font-weight:650}
+.tk{font-size:.74rem; text-transform:none; letter-spacing:.02em; color:var(--muted); font-weight:650; margin-right:.55rem}
+
+.cards{display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:.7rem}
+.card{border:1px solid var(--line); padding:.6rem .8rem; background:var(--bg)}
+.card h3{margin:0 0 .3rem; font-size:1rem}
+.row{display:grid; grid-template-columns:5.2rem 1fr 7.6rem; align-items:center; gap:.5rem; margin:.2rem 0; font-size:.88rem}
+.row .nm{color:var(--muted)}
+.track{height:1.05rem; background:var(--grid); position:relative}
+.fill{position:absolute; left:0; top:0; bottom:0}
+.val{text-align:right; font-weight:650; font-variant-numeric:tabular-nums}
+.note{margin:.35rem 0 0; font-size:.85rem; color:var(--muted)}
+
+.ctl{display:grid; grid-template-columns:minmax(12rem,20rem) 1fr; gap:.8rem 1.2rem; align-items:center; margin:.7rem 0; padding:.6rem .8rem; background:var(--surface); border:1px solid var(--line)}
+.ctl label{font-weight:650; font-size:.95rem}
+.ctl .slidebox{display:flex; align-items:center; gap:.8rem}
+.ctl input[type=range]{flex:1; accent-color:var(--accent); height:1.6rem; min-width:8rem}
+.ctl output{font-weight:700; font-variant-numeric:tabular-nums; min-width:5.2rem; text-align:right; font-size:1.05rem}
+.reads{display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; margin:.5rem 0}
+.read{border:1px solid var(--line); padding:.45rem .6rem; background:var(--bg)}
+.read .k{font-size:.78rem; color:var(--muted)}
+.read .v{font-size:1.35rem; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.2}
+.read .d{font-size:.8rem; color:var(--muted); font-variant-numeric:tabular-nums}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:.8rem}
+.sens{margin:.3rem 0 0; font-size:.92rem}
+.sens b{font-variant-numeric:tabular-nums}
+
+.three{display:grid; grid-template-columns:repeat(3,1fr); gap:.8rem}
+.xs h3{margin:.1rem 0 .1rem; font-size:1.02rem}
+.xs .sub{margin:0 0 .3rem; font-size:.84rem; color:var(--muted); min-height:2.7em}
+.outcome{margin:.4rem 0 0; padding:.4rem .55rem; border:1px solid var(--line); font-size:.9rem; display:flex; gap:.5rem; align-items:flex-start}
+.sw{flex:none; width:.85rem; height:.85rem; margin-top:.22rem}
+.sw.rust{background:var(--rust)}
+.sw.ok{background:var(--ok)}
+.chip{font-size:.92rem}
+
+.loop{display:grid; grid-template-columns:1fr 1fr; gap:.8rem}
+.loopfig h3{margin:0 0 .2rem; font-size:.95rem}
+.ss-pending .ss-lines{visibility:hidden}
+.status{margin:.5rem 0 0; min-height:2.6em; font-size:.95rem; font-weight:600}
+.verdict{margin:.4rem 0 0; font-size:.95rem}
+
+.close ol{list-style:none; margin:.5rem 0 0; padding:0; display:grid; gap:.55rem}
+.close li{display:grid; grid-template-columns:2.2rem 1fr; gap:.7rem; padding:.55rem .8rem; border:1px solid var(--line); background:var(--bg)}
+.close .n{font-weight:700; font-size:1.3rem; color:var(--accent)}
+.close .big{font-size:1.28rem; font-weight:700; line-height:1.25}
+.close .why{margin:.1rem 0 0; color:var(--muted); font-size:.92rem}
+footer{margin-top:1.8rem; padding-top:.7rem; border-top:2px solid var(--text); font-size:.85rem; color:var(--muted)}
+
+@media screen and (max-width:900px){
+  .cards,.two,.three,.loop{grid-template-columns:1fr}
+  .reads{grid-template-columns:1fr 1fr}
+  .ctl{grid-template-columns:1fr}
+  header.top{flex-direction:column}
+}
+
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"],:root:not([data-theme="light"]){
+    --bg:#ffffff !important; --surface:#f3f5f8 !important; --text:#12161c !important; --muted:#47515f !important; --line:#b9c1cd !important; --grid:#e3e7ee !important;
+    --accent:#0b5cad !important; --curve:#1f4fb8 !important; --sulf:#0b5cad !important; --on-sulf:#ffffff !important; --hf:#e07a1f !important; --hf-ink:#9a4a00 !important; --on-hf:#12161c !important; --on-nickel:#12161c !important; --on-steel:#12161c !important;
+    --win:#a3197a !important; --on-win:#ffffff !important; --band:#f1d9ec !important; --record:#00775f !important; --bath:#c4350a !important; --ok:#1b7a3a !important;
+    --steel:#9aa3af !important; --steel-dk:#6f7986 !important; --grain:#5d6673 !important; --nickel:#d5dde8 !important; --nickel-ln:#56657a !important;
+    --oxide:#8a4a1f !important; --smut:#15181d !important; --rust:#b8420f !important; --hyd:#0b66c3 !important; --atom-n:#5b6b82 !important; --atom-h:#e8ecf2 !important; --pore-bg:#ffffff !important;
+  }
+  @page{size:letter; margin:.35in}
+  html{font-size:8pt}
+  body{line-height:1.32}
+  *{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+  .noprint{display:none !important}
+  .wrap{max-width:none; padding:0}
+  header.top{padding-bottom:.3rem; border-bottom-width:1.5px}
+  h1{font-size:1.5rem; margin:0 0 .15rem}
+  .lede{font-size:.92rem; max-width:none}
+  .setup{margin:.35rem 0 0; padding:.3rem .5rem; font-size:.86rem}
+  .setup p{margin:.05rem 0}
+  h2{font-size:1.12rem}
+  .pn{font-size:.85rem; padding:0 .3rem; min-width:1.5rem}
+  .panel{margin-top:.4rem; padding-top:.3rem; break-inside:avoid; page-break-inside:avoid;
+    display:grid; grid-template-columns:minmax(0,1.9fr) minmax(0,1fr); column-gap:.65rem; row-gap:.22rem; align-items:start}
+  .panel>*{margin:0}
+  .panel-head{grid-column:1/-1}
+  #p1 figure,#p2 figure,#p3 figure,#p4 figure,#p5>figure{display:contents}
+  #p5 .loopfig{display:block}
+  .lead{font-size:.9rem; max-width:none}
+  .fig{padding:.15rem}
+  figcaption,.cap{font-size:.8rem; margin:0; max-width:none}
+  .takeaway{grid-column:1/-1; margin:.1rem 0 0; padding:.28rem .5rem; font-size:.98rem; border-left-width:4px}
+  .tk{font-size:.7rem}
+  .card{padding:.25rem .4rem}
+  .card h3{font-size:.9rem; margin-bottom:.1rem}
+  .row{grid-template-columns:3.1rem 1fr 4.6rem; font-size:.8rem; margin:.1rem 0}
+  .track{height:.8rem}
+  .note{font-size:.78rem; margin-top:.15rem}
+  .cards{margin:0; gap:.35rem; grid-template-columns:1fr 1fr}
+  .reads{margin:0; gap:.3rem}
+  .read{padding:.2rem .35rem}
+  .read .k{font-size:.7rem}
+  .read .v{font-size:1rem}
+  .read .d{font-size:.68rem}
+  .ctl{margin:0; padding:.25rem .45rem; grid-template-columns:1fr; gap:.1rem}
+  .ctl label{font-size:.82rem}
+  .ctl input[type=range]{height:1rem}
+  .ctl output{font-size:.9rem}
+  .status{display:none}
+  .verdict{font-size:.82rem; margin:0}
+  .ss-pending .ss-lines{visibility:visible}
+  .sens{font-size:.8rem}
+  /* panel layouts */
+  #p1 .lead{grid-column:2; grid-row:2}
+  #p1 .fig{grid-column:1; grid-row:2 / span 2}
+  #p1 figcaption{grid-column:2; grid-row:3}
+  #p1 .takeaway{grid-row:4}
+
+  #p2 .lead{grid-column:2; grid-row:2}
+  #p2 .fig{grid-column:1; grid-row:2}
+  #p2 figcaption{grid-column:2; grid-row:3}
+  #p2 .cards{grid-column:1; grid-row:3}
+  #p2 .takeaway{grid-row:4}
+
+  #p3 .lead{grid-column:2; grid-row:2}
+  #p3 .ctl{grid-column:2; grid-row:3}
+  #p3 .reads{grid-column:1; grid-row:2 / span 2; grid-template-columns:1fr 1fr 1fr 1fr}
+  #p3 .two{grid-column:1; grid-row:4; gap:.3rem}
+  #p3 figcaption{grid-column:2; grid-row:4}
+  #p3 .takeaway{grid-row:5}
+  #fig3a text,#fig3b text{font-size:15px}
+
+  #p4{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+  #p4 .lead{grid-column:2; grid-row:2}
+  #p4 .fig:first-of-type{grid-column:1; grid-row:2}
+  #p4 .fig:last-of-type{grid-column:1; grid-row:3; margin-top:0 !important}
+  #p4 figcaption{grid-column:2; grid-row:3}
+  #p4 .takeaway{grid-row:4}
+
+  #p5{grid-template-columns:minmax(0,2.5fr) minmax(0,1fr)}
+  #p5 .lead{grid-column:2; grid-row:2}
+  #p5 .ctl{grid-column:2; grid-row:3}
+  #p5 .loop{grid-column:1; grid-row:2 / span 3; gap:.3rem}
+  #p5 .loopfig h3{font-size:.8rem; margin:0}
+  #p5 .verdict{grid-column:2; grid-row:4}
+  #p5 .reads{grid-column:1/-1; grid-row:6; grid-template-columns:repeat(3,1fr) !important}
+  #p5 .cap:not(.noprint){grid-column:1/-1; grid-row:7}
+  #p5 .takeaway{grid-row:8}
+  #fig5a text,#fig5b text{font-size:17px}
+
+  #p6,#p7{display:block}
+  .three{gap:.4rem}
+  .xs h3{font-size:.9rem; margin:0}
+  .xs .sub{font-size:.76rem; min-height:0; margin-bottom:.15rem}
+  .outcome{margin-top:.15rem; padding:.2rem .4rem; font-size:.82rem}
+  .three svg{max-height:1.42in}
+  #p6 .cap{margin-top:.2rem}
+  .close ol{grid-template-columns:1fr 1fr; gap:.3rem; margin-top:.2rem}
+  .close li{padding:.25rem .45rem; gap:.4rem; grid-template-columns:1.2rem 1fr}
+  .close .n{font-size:1rem}
+  .close .big{font-size:.98rem}
+  .close .why{font-size:.78rem}
+  #p4{break-before:page; page-break-before:always; margin-top:0; border-top:0; padding-top:0}
+  footer{margin-top:.5rem; padding-top:.3rem; font-size:.8rem; border-top-width:1.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>Why a two-endpoint titration cannot measure HF in an activation bath</h1>
+    <p class="lede">An activation bath is an acid mix that strips oxide off steel just before nickel plating. The control software sets its HF level from a titration with two endpoints. This page shows what that method can and cannot see, how a counting error in the add calculation (a stoichiometry error) compounds it, and what the steel pays for the result.</p>
+  </div>
+  <button type="button" id="themeBtn" class="noprint" aria-label="Change color theme">Theme: auto</button>
+</header>
+
+<div class="setup" aria-label="Example bath and method">
+  <p><b>Example bath.</b> Sulfuric acid <span data-b="sulf_oz">60</span> oz/gal (4.58 M) plus HF <span data-b="hf_oz">4.2</span> oz/gal (1.57 M), with the fluoride supplied as ammonium bifluoride (NH4HF2).</p>
+  <p><b>The method.</b> A 2 mL sample is diluted to 50 mL and titrated with 1.0 N sodium hydroxide while a glass pH electrode follows the pH. Sulfuric acid is the mL used to reach pH 4.0, times 3.27 oz/gal per mL. Fluoride is the mL used from pH 4.0 to pH 7.0, times 1.34 oz/gal per mL.</p>
+</div>
+
+<noscript><p class="setup">This page draws its charts with JavaScript. Enable it to see the figures.</p></noscript>
+
+<!-- PANEL 1 -->
+<section class="panel" id="p1" aria-labelledby="h1p">
+  <div class="panel-head"><span class="pn">1</span><h2 id="h1p">The titration curve and the pH 4 to 7 window</h2></div>
+  <p class="lead">Sodium hydroxide is added to a small sample of the bath. The blue line is the pH the electrode reads. The orange line is the share of the HF not yet neutralized. The method measures fluoride only inside the shaded pH 4 to 7 window.</p>
+  <figure class="p1fig">
+    <div class="fig"><svg id="fig1" viewBox="0 0 820 400" role="img" aria-labelledby="fig1t fig1d"><title id="fig1t">Titration curve with the pH 4 to 7 window</title><desc id="fig1d">The pH rises slowly, then jumps from about pH 4 to pH 7 over half a milliliter near 21 milliliters. The share of HF remaining has already fallen to 13 percent when the window opens at pH 4.</desc></svg></div>
+    <figcaption><b>How to read it.</b> Blue is pH (left axis). Orange is the HF remaining (right axis). The horizontal band is pH 4 to 7. The vertical strip shows how much sodium hydroxide that window spans: <span data-b="win_ml">0.50</span> mL, from <span data-b="v4">20.98</span> mL to <span data-b="v7">21.48</span> mL. At pH 4.0, <span data-b="hf_left_pct">13</span>% of the HF is still left. The shoulder near pH 9 is the ammonium that comes with the bifluoride, well after the window.</figcaption>
+  </figure>
+  <p class="takeaway"><span class="tk">Takeaway</span>The window opens after about <span data-b="hf_neut_pct">87</span>% of the HF is already gone.</p>
+</section>
+
+<!-- PANEL 2 -->
+<section class="panel" id="p2" aria-labelledby="h2p">
+  <div class="panel-head"><span class="pn">2</span><h2 id="h2p">Where the method splits the burette reading</h2></div>
+  <p class="lead">The method sorts every mL of sodium hydroxide into one of two bins with one rule: up to pH 4.0 counts as sulfuric acid, and pH 4.0 to 7.0 counts as fluoride. The bar is the whole titration drawn to scale.</p>
+  <figure>
+    <div class="fig"><svg id="fig2" viewBox="0 0 820 250" role="img" aria-labelledby="fig2t fig2d"><title id="fig2t">The burette reading split at pH 4.0</title><desc id="fig2d">A bar of 21.48 milliliters. Sulfuric acid takes 18.24 mL and HF neutralized before pH 4.0 takes 2.74 mL. Only 0.41 mL of HF and 0.09 mL of sulfuric acid fall after the pH 4.0 line.</desc></svg></div>
+    <figcaption><b>The arithmetic.</b> Counted as sulfuric acid: <span data-b="v4">20.98</span> mL × 3.27 oz/gal per mL = <span data-b="sulf_rep">68.6</span> oz/gal. Counted as fluoride: <span data-b="win_ml">0.50</span> mL × 1.34 oz/gal per mL = <span data-b="f_rep">0.67</span> oz/gal. The bath holds <span data-b="sulf_oz">60</span> oz/gal of sulfuric acid in all (<span data-b="sulf_total_ml">18.33</span> mL of titrant) and <span data-b="hf_oz">4.2</span> oz/gal of HF (<span data-b="hf_total_ml">3.14</span> mL of titrant).</figcaption>
+  </figure>
+  <div class="cards" id="cards2">
+    <div class="card"><h3>Sulfuric acid, oz/gal</h3>
+      <div class="row"><span class="nm">Reported</span><div class="track"><div class="fill" id="b2sr" style="background:var(--sulf)"></div></div><span class="val"><span data-b="sulf_rep">68.6</span> oz/gal</span></div>
+      <div class="row"><span class="nm">True</span><div class="track"><div class="fill" id="b2st" style="background:var(--muted)"></div></div><span class="val"><span data-b="sulf_oz">60</span> oz/gal</span></div>
+      <p class="note">Reads <span data-b="sulf_over_pct">14</span>% high, because <span data-b="hf_before_ml">2.74</span> mL of HF is counted as sulfuric acid.</p></div>
+    <div class="card"><h3>Fluoride, as HF, oz/gal</h3>
+      <div class="row"><span class="nm">Reported</span><div class="track"><div class="fill" id="b2fr" style="background:var(--win)"></div></div><span class="val"><span data-b="f_rep">0.67</span> oz/gal</span></div>
+      <div class="row"><span class="nm">True</span><div class="track"><div class="fill" id="b2ft" style="background:var(--muted)"></div></div><span class="val"><span data-b="hf_oz">4.2</span> oz/gal</span></div>
+      <p class="note">Reads <span data-b="f_rep_pct">16</span>% of the true value. Of the <span data-b="f_rep">0.67</span> oz/gal, <span data-b="f_hf_part">0.54</span> oz/gal is HF and the rest is sulfuric acid not yet finished.</p></div>
+  </div>
+  <p class="takeaway"><span class="tk">Takeaway</span>The method reports a sliver of the HF as fluoride and counts most of the rest as sulfuric acid.</p>
+</section>
+
+<!-- PANEL 3 -->
+<section class="panel" id="p3" aria-labelledby="h3p">
+  <div class="panel-head"><span class="pn">3</span><h2 id="h3p">Where the analyst stops for pH 4.0</h2></div>
+  <p class="lead">The pH 4.0 endpoint sits on a sloping curve, so it moves with the electrode, its calibration and the operator. Drag the slider to see what the method would report if the stop point shifts.</p>
+  <div class="ctl">
+    <label for="s3">Where the analyst stops for pH 4.0</label>
+    <div class="slidebox"><input type="range" id="s3" min="3" max="5" step="0.05" value="4"><output id="o3" for="s3">pH 4.00</output></div>
+  </div>
+  <div class="reads" aria-live="polite">
+    <div class="read"><div class="k">Reported sulfuric acid</div><div class="v"><span id="r3s">68.6</span> oz/gal</div><div class="d">true <span data-b="sulf_oz">60</span> oz/gal; <span id="d3s">+0.0</span> oz/gal vs pH 4.0</div></div>
+    <div class="read"><div class="k">Reported fluoride</div><div class="v"><span id="r3f">0.67</span> oz/gal</div><div class="d">true <span data-b="hf_oz">4.2</span> oz/gal; <span id="d3f">+0.00</span> oz/gal vs pH 4.0</div></div>
+    <div class="read"><div class="k">HF neutralized at this stop</div><div class="v"><span id="r3h">87</span>%</div><div class="d">pKa 3.17</div></div>
+    <div class="read"><div class="k">Sulfuric acid, second proton</div><div class="v"><span id="r3b">99</span>%</div><div class="d">pKa 1.99</div></div>
+  </div>
+  <figure>
+    <div class="two p3charts">
+      <div class="fig"><svg id="fig3a" viewBox="0 0 400 270" role="img" aria-label="Reported fluoride against the pH where the analyst stops"></svg></div>
+      <div class="fig"><svg id="fig3b" viewBox="0 0 400 270" role="img" aria-label="Reported sulfuric acid against the pH where the analyst stops"></svg></div>
+    </div>
+    <figcaption>Reported values are recomputed from the fraction of each acid neutralized at the stop pH, using pKa 3.17 for HF and pKa 1.99 for the second proton of sulfuric acid. Dashed lines mark what the bath really holds. <span class="sens" id="sens3"></span></figcaption>
+  </figure>
+  <p class="takeaway"><span class="tk">Takeaway</span>The number tracks the electrode and the operator, not the bath.</p>
+</section>
+
+<!-- PANEL 4 -->
+<section class="panel" id="p4" aria-labelledby="h4p">
+  <div class="panel-head"><span class="pn">4</span><h2 id="h4p">The add calculation counts one fluoride where there are two</h2></div>
+  <p class="lead">Ammonium bifluoride (NH4HF2) is the fluoride source. Each unit carries two fluorides. A control setup that assumes one fluoride treats the compound as <span data-b="one_f_pct">33.3</span>% fluoride when it is <span data-b="two_f_pct">66.6</span>%.</p>
+  <figure>
+    <div class="fig"><svg id="fig4a" viewBox="0 0 820 244" role="img" aria-labelledby="fig4at fig4ad"><title id="fig4at">One fluoride assumed against two present</title><desc id="fig4ad">NH4HF2 drawn as N, H4, H, F, F. The control setup counts one fluoride, 19.00 of 57.04 g/mol, or 33.3 percent. The compound carries two, 38.00 of 57.04 g/mol, or 66.6 percent.</desc></svg></div>
+    <div class="fig" style="margin-top:.6rem"><svg id="fig4b" viewBox="0 0 820 186" role="img" aria-labelledby="fig4bt fig4bd"><title id="fig4bt">Ordered against needed</title><desc id="fig4bd">Ordered 7.5 lb of NH4HF2 where 3.56 lb is needed, and a bath rise of 0.84 oz/gal where 0.4 oz/gal was wanted.</desc></svg></div>
+    <figcaption><b>Worked example, 100 gal of bath, 0.4 oz/gal wanted.</b> 0.4 oz/gal × 100 gal = 40 oz = 2.5 lb of HF. NH4HF2 is <span data-b="hf_basis_pct">70.1</span>% HF by weight, so the right order is 2.5 lb ÷ 0.701 = <span data-b="need_lb">3.56</span> lb. With one fluoride assumed (<span data-b="one_f_pct">33.3</span>%) the order is 2.5 lb ÷ 0.333 = <span data-b="ord_lb">7.5</span> lb, which delivers <span data-b="ord_lb">7.5</span> lb × 0.701 = <span data-b="deliv_lb">5.26</span> lb of HF in 100 gal, a rise of <span data-b="deliv_ozgal">0.84</span> oz/gal. That is <span data-b="ratio">2.1</span> times the 3.56 lb needed and <span data-b="ratio">2.1</span> times the 0.4 oz/gal wanted.</figcaption>
+  </figure>
+  <p class="takeaway"><span class="tk">Takeaway</span>Every add is about twice what the bath needs.</p>
+</section>
+
+<!-- PANEL 5 -->
+<section class="panel" id="p5" aria-labelledby="h5p">
+  <div class="panel-head"><span class="pn">5</span><h2 id="h5p">The control loop: how the two errors hide each other</h2></div>
+  <p class="lead">Watch three add cycles. The bath uses up HF at a steady rate. When the record falls below the lower control point, the control software orders an add sized for a 0.4 oz/gal rise. The bath gains <span data-b="deliv_ozgal">0.84</span> oz/gal, and the method reports only the fraction you set below.</p>
+  <div class="ctl">
+    <label for="s5">Fraction of the HF the method reports</label>
+    <div class="slidebox"><input type="range" id="s5" min="10" max="100" step="1" value="50"><output id="o5" for="s5">50%</output></div>
+  </div>
+  <div class="loop">
+    <figure class="loopfig">
+      <h3>First three add cycles</h3>
+      <div class="fig"><svg id="fig5a" viewBox="0 0 520 300" role="img" aria-label="Record and bath over three add cycles"></svg></div>
+    </figure>
+    <figure class="loopfig">
+      <h3>Steady state after many cycles</h3>
+      <div class="fig" id="ssbox" ><svg id="fig5b" viewBox="0 0 520 300" role="img" aria-label="Record and bath in steady state"></svg></div>
+    </figure>
+  </div>
+  <p class="status" id="status5" aria-live="off"></p>
+  <div class="reads" style="grid-template-columns:repeat(3,1fr)">
+    <div class="read"><div class="k">Software expects the record to rise</div><div class="v">+<span data-b="intended">0.40</span> oz/gal</div><div class="d">per add</div></div>
+    <div class="read"><div class="k">The record actually rises</div><div class="v" style="color:var(--record)"><span id="r5r">+0.42</span> oz/gal</div><div class="d">per add, at <span id="r5f">50</span>% reported</div></div>
+    <div class="read"><div class="k">The bath actually rises</div><div class="v" style="color:var(--bath)">+<span data-b="deliv_ozgal">0.84</span> oz/gal</div><div class="d">per add, whatever the method reports</div></div>
+  </div>
+  <p class="verdict" id="verdict5"></p>
+  <p class="cap noprint" style="margin-top:.5rem"><button type="button" id="replay5">Replay the three cycles</button></p>
+  <p class="cap"><b>How the simulation works.</b> The bath loses HF at a steady rate, one <span data-b="deliv_ozgal">0.84</span> oz/gal drop per cycle. An add is ordered the moment the record reaches the lower control point, which was set when the bath was made up at <span data-b="hf_oz">4.2</span> oz/gal. The record is the chosen fraction of the bath HF. The example method in panels 1 and 2 reports <span data-b="f_rep_pct">16</span>%.</p>
+  <p class="takeaway"><span class="tk">Takeaway</span>On paper the errors cancel, but in the bath they stack.</p>
+</section>
+
+<!-- PANEL 6 -->
+<section class="panel" id="p6" aria-labelledby="h6p">
+  <div class="panel-head"><span class="pn">6</span><h2 id="h6p">What over- and under-activation do to steel before nickel plating</h2></div>
+  <p class="lead">Activation strips oxide so nickel can bond to bare steel. Too much HF and too little HF both leave a damaged surface. The drawings are schematic cross sections, not to scale.</p>
+  <div class="three">
+    <figure class="xs">
+      <h3>a. Correct activation</h3><p class="sub">Clean steel, continuous nickel.</p>
+      <div class="fig"><svg id="fig6a" viewBox="0 0 320 268" role="img" aria-label="Cross section of correctly activated steel with a continuous nickel layer"></svg></div>
+      <p class="outcome"><span class="sw ok"></span><span><b>Salt spray:</b> no red rust.</span></p>
+    </figure>
+    <figure class="xs">
+      <h3>b. Over-activated</h3><p class="sub">Etched boundaries, smut (loose dark residue), hydrogen in.</p>
+      <div class="fig"><svg id="fig6b" viewBox="0 0 320 268" role="img" aria-label="Cross section of over-activated steel with etched grain boundaries, smut, through-pores and hydrogen entering the steel"></svg></div>
+      <p class="outcome"><span class="sw rust"></span><span><b>Salt spray:</b> red rust grows from a pore.</span></p>
+    </figure>
+    <figure class="xs">
+      <h3>c. Under-activated</h3><p class="sub">Oxide patches left on the steel; nickel bridges over them.</p>
+      <div class="fig"><svg id="fig6c" viewBox="0 0 320 268" role="img" aria-label="Cross section of under-activated steel with oxide patches, nickel bridging over them and through-pores"></svg></div>
+      <p class="outcome"><span class="sw rust"></span><span><b>Salt spray:</b> red rust grows from a pore.</span></p>
+    </figure>
+  </div>
+  <p class="cap" style="font-size:.98rem"><b>Adhesion can pass on all three; the pore is the failure.</b></p>
+  <p class="takeaway"><span class="tk">Takeaway</span>Too much and too little activation both leave a path to the steel, and a path is all salt spray needs.</p>
+</section>
+
+<!-- PANEL 7 -->
+<section class="panel close" id="p7" aria-labelledby="h7p">
+  <div class="panel-head"><span class="pn">7</span><h2 id="h7p">The four things to remember</h2></div>
+  <ol>
+    <li><span class="n">1</span><div><div class="big">The add is 2x.</div><p class="why"><span data-b="ord_lb">7.5</span> lb of NH4HF2 is ordered where <span data-b="need_lb">3.56</span> lb is needed (<span data-b="ratio">2.1</span> times), so the bath gains <span data-b="deliv_ozgal">0.84</span> oz/gal instead of 0.4 oz/gal.</p></div></li>
+    <li><span class="n">2</span><div><div class="big">The method sees about 10% of the HF.</div><p class="why"><span data-b="hf_left_pct">13</span>% in the example (<span data-b="hf_win_ml">0.41</span> mL of the <span data-b="hf_total_ml">3.14</span> mL of HF falls in the window), and 8 to 14% across plausible pKa values.</p></div></li>
+    <li><span class="n">3</span><div><div class="big">The record stays in band.</div><p class="why">An add that is <span data-b="ratio">2.1</span> times too big, read by a method that reports 50%, shows up as the 0.4 oz/gal rise the software expects.</p></div></li>
+    <li><span class="n">4</span><div><div class="big">The steel takes the difference.</div><p class="why">Over-activated or under-activated steel leaves pores under the nickel, and a pore is where red rust starts in salt spray.</p></div></li>
+  </ol>
+  <p class="takeaway"><span class="tk">Takeaway</span>A calm record does not mean a calm bath.</p>
+</section>
+
+<footer>pKa values from standard stability constant tables; example bath and method are generic.</footer>
+</div>
+
+<script id="model">
+/* One chemistry model drives every number and chart on the page. */
+var MODEL = (function () {
+  var OZ = 28.3495, GAL = 3.78541;                 // g per oz, L per gal
+  var SULF_OZ = 60, HF_OZ = 4.2;                   // example bath, oz/gal
+  var PKF = 3.17, PK2 = 1.99, PKN = 9.25;          // HF, bisulfate, ammonium
+  var FS = 3.27, FF = 1.34;                        // oz/gal per mL
+  var mS = SULF_OZ * OZ / GAL / 98.079;            // mol/L sulfuric acid
+  var mF = HF_OZ * OZ / GAL / 20.006;              // mol/L HF
+  var Ts = 2 * mS, Tf = 2 * mF, Tn = Tf / 2;       // mmol in the 2 mL sample (ammonium from NH4HF2)
+  function frac(pk, p) { return 1 / (1 + Math.pow(10, pk - p)); }   // fraction neutralized
+  function aF(p, pk) { return frac(pk === undefined ? PKF : pk, p); }
+  function a2(p) { return frac(PK2, p); }
+  function aN(p) { return frac(PKN, p); }
+  function V(p, pk) { return Ts * (1 + a2(p)) + Tf * aF(p, pk) + Tn * aN(p); }   // mL of 1.0 N titrant to reach pH p
+  function Vx(p) {                                                           // same, with free hydrogen and hydroxide ions and the 50 mL dilution (for the curve)
+    var h = Math.pow(10, -p), oh = Math.pow(10, p - 14);
+    return (V(p) - 50 * (h - oh)) / (1 + h - oh);
+  }
+  function pHat(v) { var lo = 0, hi = 14, m, i; for (i = 0; i < 60; i++) { m = (lo + hi) / 2; if (Vx(m) < v) lo = m; else hi = m; } return (lo + hi) / 2; }
+  var v4 = V(4), v7 = V(7);
+  var tail = Ts * (1 - a2(4));
+  var hfBefore = Tf * aF(4), hfWin = Tf * (1 - aF(4));
+  var sulfBefore = 2 * Ts - tail;
+  function repS(p) { return V(p) * FS; }
+  function repF(p) { return (v7 - V(p)) * FF; }
+  // add stoichiometry
+  var MW = 57.04, FW = 19.00, HFW = 20.006;
+  var oneF = FW / MW, twoF = 2 * FW / MW, hfBasis = 2 * HFW / MW;
+  var needHFlb = 0.4 * 100 / 16;
+  var needLb = needHFlb / hfBasis, ordLb = needHFlb / oneF;
+  var delivLb = ordLb * hfBasis, delivOz = delivLb * 16 / 100;
+  // control loop
+  function simulate(f, tEnd) {
+    var T0 = HF_OZ, dt = 0.005, add = delivOz, ramp = 0.06;
+    var T = T0 + 0.3, t = 0, left = 0, pts = [], adds = [];
+    while (t <= tEnd + 1e-9) {
+      pts.push({ t: t, bath: T, rec: f * T });
+      if (left > 1e-9) { var inc = Math.min(left, add * dt / ramp); T += inc; left -= inc; }
+      else { T -= add * dt; if (T <= T0) { adds.push(t); left = add; } }
+      t += dt;
+    }
+    return { pts: pts, adds: adds };
+  }
+  return {
+    SULF_OZ: SULF_OZ, HF_OZ: HF_OZ, PKF: PKF, PK2: PK2, FS: FS, FF: FF, Ts: Ts, Tf: Tf,
+    aF: aF, a2: a2, V: V, Vx: Vx, pHat: pHat, v4: v4, v7: v7, tail: tail, hfBefore: hfBefore, hfWin: hfWin, sulfBefore: sulfBefore,
+    repS: repS, repF: repF, oneF: oneF, twoF: twoF, hfBasis: hfBasis, needLb: needLb, ordLb: ordLb, delivLb: delivLb, delivOz: delivOz,
+    simulate: simulate, T0: HF_OZ, MW: MW, FW: FW
+  };
+})();
+</script>
+
+<script>
+(function () {
+'use strict';
+var M = MODEL;
+function fx(x, d) { return x.toFixed(d); }
+function sg(x, d) { var s = x.toFixed(d); return (x < -0.5 * Math.pow(10, -d) ? '−' : '+') + s.replace('-', ''); }
+
+/* ---------- bound text: every number in prose comes from the model ---------- */
+var winMl = M.v7 - M.v4;
+var BIND = {
+  sulf_oz: fx(M.SULF_OZ, 0), hf_oz: fx(M.HF_OZ, 1),
+  v4: fx(M.v4, 2), v7: fx(M.v7, 2), win_ml: fx(winMl, 2),
+  sulf_total_ml: fx(2 * M.Ts, 2), hf_total_ml: fx(M.Tf, 2),
+  hf_before_ml: fx(M.hfBefore, 2), hf_win_ml: fx(M.hfWin, 2),
+  sulf_rep: fx(M.repS(4), 1), f_rep: fx(M.repF(4), 2), f_hf_part: fx(M.hfWin * M.FF, 2),
+  sulf_over_pct: fx((M.repS(4) / M.SULF_OZ - 1) * 100, 0), f_rep_pct: fx(M.repF(4) / M.HF_OZ * 100, 0),
+  hf_left_pct: fx((1 - M.aF(4)) * 100, 0), hf_neut_pct: fx(M.aF(4) * 100, 0),
+  one_f_pct: fx(M.oneF * 100, 1), two_f_pct: fx(M.twoF * 100, 1), hf_basis_pct: fx(M.hfBasis * 100, 1),
+  need_lb: fx(M.needLb, 2), ord_lb: fx(M.ordLb, 1), deliv_lb: fx(M.delivLb, 2), deliv_ozgal: fx(M.delivOz, 2),
+  ratio: fx(M.ordLb / M.needLb, 1), intended: '0.40'
+};
+Array.prototype.forEach.call(document.querySelectorAll('[data-b]'), function (e) {
+  var k = e.getAttribute('data-b'); if (BIND[k] !== undefined) e.textContent = BIND[k];
+});
+
+/* ---------- svg helpers ---------- */
+var NS = 'http://www.w3.org/2000/svg';
+function mk(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function tx(parent, x, y, s, o) {
+  o = o || {};
+  var t = mk('text', { x: x, y: y, 'font-size': o.size || 14, 'text-anchor': o.anchor || 'start', 'class': 'tx ' + (o.cls || ''), transform: o.rot ? 'rotate(' + o.rot + ' ' + x + ' ' + y + ')' : null, style: o.fill ? 'fill:' + o.fill : null, 'font-weight': o.bold ? 700 : null }, parent);
+  t.textContent = s; return t;
+}
+function ln(parent, x1, y1, x2, y2, stroke, w, dash) {
+  return mk('line', { x1: x1, y1: y1, x2: x2, y2: y2, stroke: stroke, 'stroke-width': w || 1, 'stroke-dasharray': dash || null }, parent);
+}
+function reset(svg) {
+  var keep = []; Array.prototype.forEach.call(svg.childNodes, function (n) { if (n.nodeName === 'title' || n.nodeName === 'desc') keep.push(n); });
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  keep.forEach(function (n) { svg.appendChild(n); });
+}
+
+/* ---------- panel 1: titration curve ---------- */
+function panel1() {
+  var svg = document.getElementById('fig1'); reset(svg);
+  var W = 820, H = 400, L = 62, R = 66, Tp = 46, B = 58, pw = W - L - R, ph = H - Tp - B;
+  var X = function (v) { return L + v / 25 * pw; };
+  var YP = function (p) { return Tp + (1 - p / 13) * ph; };
+  var YF = function (f) { return Tp + (1 - f) * ph; };
+  var g = mk('g', {}, svg), p, i;
+  // window band (horizontal) and strip (vertical)
+  mk('rect', { x: L, y: YP(7), width: pw, height: YP(4) - YP(7), fill: 'var(--band)' }, g);
+  // grid
+  for (p = 0; p <= 12; p += 2) ln(g, L, YP(p), L + pw, YP(p), 'var(--grid)', 1);
+  mk('rect', { x: X(M.v4), y: Tp, width: X(M.v7) - X(M.v4), height: ph, fill: 'var(--win)', 'fill-opacity': 0.35 }, g);
+  // axes
+  ln(g, L, Tp, L, Tp + ph, 'var(--muted)', 1.2); ln(g, L, Tp + ph, L + pw, Tp + ph, 'var(--muted)', 1.2); ln(g, L + pw, Tp, L + pw, Tp + ph, 'var(--muted)', 1.2);
+  for (i = 0; i <= 25; i += 5) { ln(g, X(i), Tp + ph, X(i), Tp + ph + 5, 'var(--muted)', 1.2); tx(g, X(i), Tp + ph + 22, String(i), { anchor: 'middle', size: 14, cls: 'tm' }); }
+  for (p = 0; p <= 12; p += 2) tx(g, L - 8, YP(p) + 5, String(p), { anchor: 'end', size: 14, cls: 'tm' });
+  for (i = 0; i <= 100; i += 25) tx(g, L + pw + 8, YF(i / 100) + 5, i + '%', { size: 14, cls: 'tm' });
+  tx(g, L + pw / 2, H - 10, 'Sodium hydroxide added, mL (1.0 N)', { anchor: 'middle', size: 14 });
+  tx(g, 16, Tp + ph / 2, 'pH', { anchor: 'middle', size: 14, rot: -90, fill: 'var(--curve)', bold: true });
+  tx(g, W - 12, Tp + ph / 2, 'HF remaining, %', { anchor: 'middle', size: 14, rot: -90, fill: 'var(--hf-ink)', bold: true });
+  // curves
+  var dPH = '', dHF = '', first = true, v;
+  var pStart = M.pHat(0);
+  dPH = 'M' + X(0) + ' ' + YP(pStart); dHF = 'M' + X(0) + ' ' + YF(1 - M.aF(pStart));
+  for (p = Math.ceil(pStart * 50) / 50; p <= 12.95; p += 0.02) {
+    v = M.Vx(p); if (v > 25) break;
+    dPH += 'L' + X(v).toFixed(1) + ' ' + YP(p).toFixed(1);
+    dHF += 'L' + X(v).toFixed(1) + ' ' + YF(1 - M.aF(p)).toFixed(1);
+  }
+  mk('path', { d: dHF, fill: 'none', stroke: 'var(--hf)', 'stroke-width': 3, 'stroke-dasharray': '9 5' }, g);
+  mk('path', { d: dPH, fill: 'none', stroke: 'var(--curve)', 'stroke-width': 3.2 }, g);
+  // markers
+  var hfl = 1 - M.aF(4);
+  mk('circle', { cx: X(M.v4), cy: YP(4), r: 5.5, fill: 'var(--curve)', stroke: 'var(--bg)', 'stroke-width': 1.5 }, g);
+  mk('circle', { cx: X(M.v7), cy: YP(7), r: 5.5, fill: 'var(--curve)', stroke: 'var(--bg)', 'stroke-width': 1.5 }, g);
+  mk('circle', { cx: X(M.v4), cy: YF(hfl), r: 6, fill: 'var(--hf)', stroke: 'var(--bg)', 'stroke-width': 1.5 }, g);
+  // labels
+  tx(g, L + 8, YP(7) - 6, 'pH 7.0', { size: 14, cls: 'b' });
+  tx(g, L + 8, YP(5.5) + 5, 'window: pH 4 to 7', { size: 14, cls: 'b', fill: 'var(--win)' });
+  tx(g, L + 8, YP(4) + 19, 'pH 4.0', { size: 14, cls: 'b' });
+  tx(g, X(M.v4) - 12, YF(hfl) + 26, fx(hfl * 100, 0) + '% of the HF is left at pH 4.0', { anchor: 'end', size: 14, cls: 'b', fill: 'var(--hf-ink)' });
+  tx(g, (X(M.v4) + X(M.v7)) / 2 + 4, Tp - 8, 'window spans ' + fx(winMl, 2) + ' mL', { anchor: 'middle', size: 14, cls: 'b', fill: 'var(--win)' });
+  // legend
+  ln(g, L + 4, 20, L + 40, 20, 'var(--curve)', 3.2); tx(g, L + 48, 25, 'pH (left axis)', { size: 14 });
+  ln(g, L + 190, 20, L + 226, 20, 'var(--hf)', 3, '9 5'); tx(g, L + 234, 25, 'HF remaining (right axis)', { size: 14 });
+}
+
+/* ---------- panel 2: burette bar ---------- */
+function panel2() {
+  var svg = document.getElementById('fig2'); reset(svg);
+  var W = 820, x0 = 20, bw = 780, by = 82, bh = 46, tot = M.v7, k = bw / tot;
+  var g = mk('g', {}, svg);
+  var xa = x0, xb = x0 + M.sulfBefore * k, xc = x0 + M.v4 * k, xd = xc + M.hfWin * k, xe = x0 + tot * k;
+  mk('rect', { x: xa, y: by, width: xb - xa, height: bh, fill: 'var(--sulf)' }, g);
+  mk('rect', { x: xb, y: by, width: xc - xb, height: bh, fill: 'var(--hf)' }, g);
+  mk('rect', { x: xc, y: by, width: xd - xc, height: bh, fill: 'var(--win)' }, g);
+  mk('rect', { x: xd, y: by, width: xe - xd, height: bh, fill: 'var(--sulf)' }, g);
+  tx(g, (xa + xb) / 2, by + 29, 'Sulfuric acid ' + fx(M.sulfBefore, 2) + ' mL', { anchor: 'middle', size: 17, bold: true, fill: 'var(--on-sulf)' });
+  tx(g, (xb + xc) / 2, by + 20, 'HF', { anchor: 'middle', size: 15, bold: true, fill: 'var(--on-hf)' });
+  tx(g, (xb + xc) / 2, by + 38, fx(M.hfBefore, 2) + ' mL', { anchor: 'middle', size: 15, bold: true, fill: 'var(--on-hf)' });
+  // split line
+  ln(g, xc, by - 36, xc, by + bh + 12, 'var(--text)', 2.5);
+  tx(g, xc - 8, by - 42, 'pH 4.0, where the method splits', { anchor: 'end', size: 16, bold: true });
+  // axis
+  var ay = by + bh + 12, i;
+  ln(g, x0, ay, x0 + bw, ay, 'var(--muted)', 1.2);
+  for (i = 0; i <= 20; i += 5) { ln(g, x0 + i * k, ay, x0 + i * k, ay + 5, 'var(--muted)', 1.2); tx(g, x0 + i * k, ay + 22, String(i), { anchor: 'middle', size: 14, cls: 'tm' }); }
+  tx(g, x0 + 0, ay + 42, 'mL of 1.0 N sodium hydroxide', { size: 14, cls: 'tm' });
+  // bracket: counted as sulfuric
+  var by2 = ay + 56;
+  ln(g, xa, by2, xc, by2, 'var(--sulf)', 3); ln(g, xa, by2 - 6, xa, by2 + 6, 'var(--sulf)', 3); ln(g, xc, by2 - 6, xc, by2 + 6, 'var(--sulf)', 3);
+  tx(g, x0, by2 + 26, 'The method counts all of this as sulfuric acid: ' + fx(M.v4, 2) + ' mL', { anchor: 'start', size: 16, bold: true, fill: 'var(--sulf)' });
+  // callouts for the window
+  var cx = (xc + xe) / 2;
+  ln(g, cx, by + bh, cx, by + bh + 3, 'var(--win)', 2);
+  var wy = by2 - 6;
+  ln(g, cx, ay + 6, cx, by2 - 4, 'var(--win)', 2);
+  mk('rect', { x: xc, y: by2 - 4, width: xe - xc, height: 8, fill: 'var(--win)' }, g);
+  tx(g, W - 12, by2 + 26, 'Counted as fluoride: ' + fx(winMl, 2) + ' mL', { anchor: 'end', size: 16, bold: true, fill: 'var(--win)' });
+  tx(g, W - 12, by2 + 46, 'HF ' + fx(M.hfWin, 2) + ' mL + sulfuric acid ' + fx(M.tail, 2) + ' mL', { anchor: 'end', size: 14, cls: 'tm' });
+  tx(g, x0, 16, 'Whole titration to pH 7.0: ' + fx(tot, 2) + ' mL', { size: 15, cls: 'b' });
+  // result bars
+  var s = function (id, pct) { document.getElementById(id).style.width = pct + '%'; };
+  s('b2sr', M.repS(4) / 70 * 100); s('b2st', M.SULF_OZ / 70 * 100);
+  s('b2fr', M.repF(4) / M.HF_OZ * 100); s('b2ft', 100);
+}
+
+/* ---------- panel 3: stop-pH slider ---------- */
+function panel3() {
+  var sl = document.getElementById('s3'), out = document.getElementById('o3');
+  var A = document.getElementById('fig3a'), Bs = document.getElementById('fig3b');
+  var dyn = {};
+  function frame(svg, o) {
+    reset(svg);
+    var W = 400, H = 270, L = 52, R = 16, Tp = 30, Bm = 52, pw = W - L - R, ph = H - Tp - Bm, g = mk('g', {}, svg), i;
+    var X = function (p) { return L + (p - 3) / 2 * pw; };
+    var Y = function (v) { return Tp + (1 - (v - o.y0) / (o.y1 - o.y0)) * ph; };
+    for (i = 0; i < o.ticks.length; i++) { ln(g, L, Y(o.ticks[i]), L + pw, Y(o.ticks[i]), 'var(--grid)', 1); tx(g, L - 7, Y(o.ticks[i]) + 5, String(o.ticks[i]), { anchor: 'end', size: 13, cls: 'tm' }); }
+    ln(g, L, Tp, L, Tp + ph, 'var(--muted)', 1.2); ln(g, L, Tp + ph, L + pw, Tp + ph, 'var(--muted)', 1.2);
+    for (i = 3; i <= 5; i += 0.5) { ln(g, X(i), Tp + ph, X(i), Tp + ph + 5, 'var(--muted)', 1.2); tx(g, X(i), Tp + ph + 20, fx(i, 1), { anchor: 'middle', size: 13, cls: 'tm' }); }
+    tx(g, L + pw / 2, H - 8, 'pH where the analyst stops', { anchor: 'middle', size: 13 });
+    tx(g, L, 16, o.title, { size: 14, cls: 'b' });
+    // true line
+    ln(g, L, Y(o.truth), L + pw, Y(o.truth), 'var(--text)', 1.6, '6 4');
+    tx(g, L + pw - 4, Y(o.truth) - 6, 'bath holds ' + o.truthLabel, { anchor: 'end', size: 13, cls: 'b' });
+    // reference at 4.0
+    ln(g, X(4), Tp, X(4), Tp + ph, 'var(--muted)', 1.2, '2 4');
+    tx(g, X(4) + 4, Tp + ph - 6, 'pH 4.0', { size: 12, cls: 'tm' });
+    var d = '', p; for (p = 3; p <= 5.0001; p += 0.05) d += (d ? 'L' : 'M') + X(p).toFixed(1) + ' ' + Y(o.f(p)).toFixed(1);
+    mk('path', { d: d, fill: 'none', stroke: o.color, 'stroke-width': 3.2 }, g);
+    var vl = ln(g, X(4), Tp, X(4), Tp + ph, o.color, 2); var dot = mk('circle', { r: 7, fill: o.color, stroke: 'var(--bg)', 'stroke-width': 2 }, g);
+    var lab = tx(g, 0, 0, '', { size: 14, cls: 'b', fill: o.color });
+    return { X: X, Y: Y, vl: vl, dot: dot, lab: lab, o: o, L: L, pw: pw, Tp: Tp };
+  }
+  dyn.a = frame(A, { y0: 0, y1: 4.5, ticks: [0, 1, 2, 3, 4], truth: M.HF_OZ, truthLabel: fx(M.HF_OZ, 1) + ' oz/gal', title: 'Reported fluoride, oz/gal', color: 'var(--win)', f: M.repF });
+  dyn.b = frame(Bs, { y0: 55, y1: 75, ticks: [55, 60, 65, 70, 75], truth: M.SULF_OZ, truthLabel: fx(M.SULF_OZ, 0) + ' oz/gal', title: 'Reported sulfuric acid, oz/gal', color: 'var(--sulf)', f: M.repS });
+  function place(d, p, val, d1) {
+    var x = d.X(p), y = d.Y(val);
+    d.vl.setAttribute('x1', x); d.vl.setAttribute('x2', x);
+    d.dot.setAttribute('cx', x); d.dot.setAttribute('cy', y);
+    d.lab.textContent = fx(val, d1);
+    var right = x > d.L + d.pw * 0.62;
+    d.lab.setAttribute('x', right ? x - 12 : x + 12); d.lab.setAttribute('text-anchor', right ? 'end' : 'start');
+    d.lab.setAttribute('y', Math.max(d.Tp + 14, y - 12));
+  }
+  var s4 = M.repS(4), f4 = M.repF(4);
+  function update() {
+    var p = parseFloat(sl.value);
+    out.textContent = 'pH ' + fx(p, 2);
+    var rs = M.repS(p), rf = M.repF(p);
+    document.getElementById('r3s').textContent = fx(rs, 1);
+    document.getElementById('r3f').textContent = fx(rf, 2);
+    document.getElementById('d3s').textContent = sg(rs - s4, 1);
+    document.getElementById('d3f').textContent = sg(rf - f4, 2);
+    document.getElementById('r3h').textContent = fx(M.aF(p) * 100, 0);
+    document.getElementById('r3b').textContent = fx(M.a2(p) * 100, 0);
+    place(dyn.a, p, rf, 2); place(dyn.b, p, rs, 1);
+    sl.setAttribute('aria-valuetext', 'pH ' + fx(p, 2));
+    var lo = M.repF(p - 0.1), hi = M.repF(p + 0.1);
+    document.getElementById('sens3').innerHTML = 'From pH ' + fx(p, 2) + ', stopping 0.1 pH earlier (pH ' + fx(p - 0.1, 2) + ') reports fluoride ' + fx(lo, 2) + ' oz/gal, ' + sg(lo - rf, 2) + ' oz/gal. Stopping 0.1 pH later (pH ' + fx(p + 0.1, 2) + ') reports ' + fx(hi, 2) + ' oz/gal, ' + sg(hi - rf, 2) + ' oz/gal. <b>So 0.1 pH moves fluoride by about ' + fx((lo - hi) / 2, 2) + ' oz/gal, which is ' + fx((lo - hi) / 2 / M.HF_OZ * 100, 0) + '% of the 4.2 oz/gal in the bath.</b>';
+  }
+  sl.addEventListener('input', update); update();
+}
+
+/* ---------- panel 4: stoichiometry ---------- */
+function panel4() {
+  var svg = document.getElementById('fig4a'); reset(svg);
+  var g = mk('g', {}, svg);
+  function atom(cx, cy, label, kind, r) {
+    r = r || 24;
+    var fill = kind === 'F' ? 'var(--hf)' : kind === 'N' ? 'var(--atom-n)' : 'var(--atom-h)';
+    var ink = kind === 'F' ? 'var(--on-hf)' : kind === 'N' ? 'var(--bg)' : 'var(--text)';
+    mk('circle', { cx: cx, cy: cy, r: r, fill: fill, stroke: kind === 'H' ? 'var(--muted)' : 'none', 'stroke-width': 1.5 }, g);
+    tx(g, cx, cy + 6, label, { anchor: 'middle', size: 18, bold: true, fill: ink });
+  }
+  function column(ox, title, counted) {
+    tx(g, ox, 24, title, { size: 16, bold: true });
+    var cy = 80, N = ox + 36, H4 = ox + 98, F1 = ox + 196, Hh = ox + 258, F2 = ox + 320;
+    ln(g, N + 24, cy, H4 - 24, cy, 'var(--muted)', 2.5);
+    ln(g, F1 + 24, cy, Hh - 24, cy, 'var(--muted)', 2.5); ln(g, Hh + 24, cy, F2 - 24, cy, 'var(--muted)', 2.5);
+    atom(N, cy, 'N', 'N'); atom(H4, cy, 'H4', 'H'); atom(F1, cy, 'F', 'F'); atom(Hh, cy, 'H', 'H');
+    if (counted) { atom(F2, cy, 'F', 'F'); }
+    else {
+      mk('circle', { cx: F2, cy: cy, r: 24, fill: 'none', stroke: 'var(--hf)', 'stroke-width': 3, 'stroke-dasharray': '5 4' }, g);
+      tx(g, F2, cy + 6, 'F', { anchor: 'middle', size: 18, bold: true, fill: 'var(--hf-ink)' });
+      ln(g, F2 - 20, cy + 20, F2 + 20, cy - 20, 'var(--text)', 3);
+    }
+    tx(g, (N + H4) / 2, cy + 46, 'ammonium', { anchor: 'middle', size: 13, cls: 'tm' });
+    tx(g, (F1 + F2) / 2, cy + 46, counted ? 'bifluoride: two fluorides' : 'bifluoride: second fluoride not counted', { anchor: 'middle', size: 13, cls: 'tm' });
+    // weight bar
+    var by = 140, bh = 30, bw = 380, k = bw / M.MW, nonF = M.MW - 2 * M.FW;
+    mk('rect', { x: ox, y: by, width: nonF * k, height: bh, fill: 'var(--atom-n)' }, g);
+    mk('rect', { x: ox + nonF * k, y: by, width: M.FW * k, height: bh, fill: 'var(--hf)' }, g);
+    if (counted) mk('rect', { x: ox + (nonF + M.FW) * k, y: by, width: M.FW * k, height: bh, fill: 'var(--hf)', stroke: 'var(--bg)', 'stroke-width': 2 }, g);
+    else mk('rect', { x: ox + (nonF + M.FW) * k, y: by, width: M.FW * k, height: bh, fill: 'none', stroke: 'var(--hf)', 'stroke-width': 2.5, 'stroke-dasharray': '5 4' }, g);
+    mk('rect', { x: ox + nonF * k, y: by, width: M.FW * k, height: bh, fill: 'var(--hf)', stroke: 'var(--bg)', 'stroke-width': 2 }, g);
+    tx(g, ox + nonF * k / 2, by + 20, fx(nonF, 2) + ' g/mol', { anchor: 'middle', size: 13, bold: true, fill: 'var(--bg)' });
+    tx(g, ox + (nonF + M.FW / 2) * k, by + 20, fx(M.FW, 2) + ' g/mol', { anchor: 'middle', size: 14, bold: true, fill: 'var(--on-hf)' });
+    tx(g, ox + (nonF + M.FW * 1.5) * k, by + 20, fx(M.FW, 2) + ' g/mol', { anchor: 'middle', size: 14, bold: true, fill: counted ? 'var(--on-hf)' : 'var(--hf-ink)' });
+    tx(g, ox, by + 52, 'Weight of one NH4HF2 unit: ' + fx(M.MW, 2) + ' g/mol', { size: 13, cls: 'tm' });
+    var pct = counted ? M.twoF : M.oneF;
+    tx(g, ox, by + 78, counted ? 'Fluoride: 38.00 of ' + fx(M.MW, 2) + ' g/mol = ' + fx(pct * 100, 1) + '%' : 'Counted as fluoride: 19.00 of ' + fx(M.MW, 2) + ' g/mol = ' + fx(pct * 100, 1) + '%', { size: 16, bold: true, fill: counted ? 'var(--text)' : 'var(--bath)' });
+    if (counted) tx(g, ox, by + 98, '(' + fx(M.hfBasis * 100, 1) + '% when counted as HF)', { size: 13, cls: 'tm' });
+  }
+  column(10, 'What the control setup assumes: one fluoride', false);
+  column(430, 'What the compound carries: two fluorides', true);
+  ln(g, 410, 12, 410, 236, 'var(--line)', 1.5);
+
+  // bars: ordered vs needed
+  var s2 = document.getElementById('fig4b'); reset(s2);
+  var h = mk('g', {}, s2), X0 = 250, BW = 400;
+  (function () {
+    var y = 18, max = 8.4, kk = BW / max;
+    tx(h, 10, y, 'NH4HF2 for a 0.4 oz/gal rise in 100 gal', { size: 15, bold: true });
+    tx(h, X0 - 10, y + 29, 'Ordered (one fluoride assumed)', { anchor: 'end', size: 14 });
+    mk('rect', { x: X0, y: y + 11, width: M.ordLb * kk, height: 26, fill: 'var(--bath)' }, h);
+    tx(h, X0 + M.ordLb * kk + 8, y + 30, fx(M.ordLb, 1) + ' lb', { size: 15, bold: true });
+    tx(h, X0 - 10, y + 63, 'Needed (two fluorides)', { anchor: 'end', size: 14 });
+    mk('rect', { x: X0, y: y + 45, width: M.needLb * kk, height: 26, fill: 'var(--record)' }, h);
+    tx(h, X0 + M.needLb * kk + 8, y + 64, fx(M.needLb, 2) + ' lb', { size: 15, bold: true });
+    y = 104; max = 1.0; kk = BW / max;
+    tx(h, 10, y, 'Rise in the bath', { size: 15, bold: true });
+    tx(h, X0 - 10, y + 29, 'Delivered by the order', { anchor: 'end', size: 14 });
+    mk('rect', { x: X0, y: y + 11, width: M.delivOz * kk, height: 26, fill: 'var(--bath)' }, h);
+    tx(h, X0 + M.delivOz * kk + 8, y + 30, fx(M.delivOz, 2) + ' oz/gal', { size: 15, bold: true });
+    tx(h, X0 - 10, y + 63, 'Wanted', { anchor: 'end', size: 14 });
+    mk('rect', { x: X0, y: y + 45, width: 0.4 * kk, height: 26, fill: 'var(--record)' }, h);
+    tx(h, X0 + 0.4 * kk + 8, y + 64, '0.40 oz/gal', { size: 15, bold: true });
+    tx(h, 810, 52, fx(M.ordLb / M.needLb, 1) + ' times', { anchor: 'end', size: 20, bold: true, fill: 'var(--bath)' });
+    tx(h, 810, 138, fx(M.delivOz / 0.4, 1) + ' times', { anchor: 'end', size: 20, bold: true, fill: 'var(--bath)' });
+  })();
+}
+
+/* ---------- panel 5: control loop ---------- */
+var loop = { f: 0.5, prog: 0, running: false, raf: 0, t0: 0, dur: 9000, steadyShown: false };
+var A5 = { W: 520, H: 300, L: 52, R: 14, Tp: 56, B: 48 };
+function mkLoopFrame(svg, tEnd, ticksEvery, R) {
+  reset(svg);
+  var o = { W: A5.W, H: A5.H, L: A5.L, R: R || A5.R, Tp: A5.Tp, B: A5.B };
+  var pw = o.W - o.L - o.R, ph = o.H - o.Tp - o.B, g = mk('g', {}, svg), i;
+  var X = function (t) { return o.L + t / tEnd * pw; }, Y = function (v) { return o.Tp + (1 - v / 6) * ph; };
+  for (i = 0; i <= 6; i += 2) { ln(g, o.L, Y(i), o.L + pw, Y(i), 'var(--grid)', 1); tx(g, o.L - 7, Y(i) + 5, String(i), { anchor: 'end', size: 13, cls: 'tm' }); }
+  ln(g, o.L, o.Tp, o.L, o.Tp + ph, 'var(--muted)', 1.2); ln(g, o.L, o.Tp + ph, o.L + pw, o.Tp + ph, 'var(--muted)', 1.2);
+  for (i = 0; i <= tEnd; i += ticksEvery) { ln(g, X(i), o.Tp + ph, X(i), o.Tp + ph + 5, 'var(--muted)', 1.2); tx(g, X(i), o.Tp + ph + 20, String(i), { anchor: 'middle', size: 13, cls: 'tm' }); }
+  tx(g, o.L + pw / 2, o.H - 8, 'Time, add cycles', { anchor: 'middle', size: 13 });
+  tx(g, 14, o.Tp + ph / 2, 'oz/gal', { anchor: 'middle', size: 13, rot: -90 });
+  return { g: g, X: X, Y: Y, pw: pw, ph: ph, o: o };
+}
+function legend5(g, o) {
+  ln(g, o.L + 4, 14, o.L + 34, 14, 'var(--record)', 3.2); tx(g, o.L + 40, 19, 'What the record shows', { size: 13, cls: 'b', fill: 'var(--record)' });
+  ln(g, o.L + 4, 34, o.L + 34, 34, 'var(--bath)', 3.2); tx(g, o.L + 40, 39, 'What the bath holds', { size: 13, cls: 'b', fill: 'var(--bath)' });
+}
+var F5 = {};
+function panel5Init() {
+  F5.a = mkLoopFrame(document.getElementById('fig5a'), 3.5, 1);
+  F5.b = mkLoopFrame(document.getElementById('fig5b'), 10.5, 2, 118);
+  legend5(F5.a.g, A5); legend5(F5.b.g, A5);
+  var gA = F5.a.g, gB = F5.b.g;
+  F5.a.guide = mk('g', {}, gA);
+  F5.a.recP = mk('path', { fill: 'none', stroke: 'var(--record)', 'stroke-width': 3.4, 'stroke-linejoin': 'round' }, gA);
+  F5.a.bathP = mk('path', { fill: 'none', stroke: 'var(--bath)', 'stroke-width': 3.4, 'stroke-linejoin': 'round' }, gA);
+  F5.a.dotR = mk('circle', { r: 5.5, fill: 'var(--record)', stroke: 'var(--bg)', 'stroke-width': 1.5 }, gA);
+  F5.a.dotB = mk('circle', { r: 5.5, fill: 'var(--bath)', stroke: 'var(--bg)', 'stroke-width': 1.5 }, gA);
+  F5.a.marks = mk('g', {}, gA);
+  F5.b.lines = mk('g', { 'class': 'ss-lines' }, gB);
+  document.getElementById('ssbox').classList.add('ss-pending');
+}
+function drawA(prog) {
+  var s = M.simulate(loop.f, 3.5), a = F5.a, pts = s.pts, dR = '', dB = '', i, last = null;
+  for (i = 0; i < pts.length; i++) {
+    if (pts[i].t > prog + 1e-9) break;
+    dR += (i ? 'L' : 'M') + a.X(pts[i].t).toFixed(1) + ' ' + a.Y(pts[i].rec).toFixed(1);
+    dB += (i ? 'L' : 'M') + a.X(pts[i].t).toFixed(1) + ' ' + a.Y(pts[i].bath).toFixed(1);
+    last = pts[i];
+  }
+  a.recP.setAttribute('d', dR); a.bathP.setAttribute('d', dB);
+  if (last) { a.dotR.setAttribute('cx', a.X(last.t)); a.dotR.setAttribute('cy', a.Y(last.rec)); a.dotB.setAttribute('cx', a.X(last.t)); a.dotB.setAttribute('cy', a.Y(last.bath)); }
+  // lower control point (record) and make-up level (bath)
+  while (a.guide.firstChild) a.guide.removeChild(a.guide.firstChild);
+  var yl = a.Y(loop.f * M.T0);
+  ln(a.guide, a.X(0), yl, a.X(3.5), yl, 'var(--record)', 1.6, '6 4');
+  tx(a.guide, a.X(3.5) - 4, yl + 16, 'lower control point', { anchor: 'end', size: 12, fill: 'var(--record)', cls: 'b' });
+  var yb = a.Y(M.T0);
+  ln(a.guide, a.X(0), yb, a.X(3.5), yb, 'var(--bath)', 1.4, '2 4');
+  tx(a.guide, a.X(0) + 6, yb + 16, 'bath at make-up, ' + fx(M.T0, 1) + ' oz/gal', { size: 12, fill: 'var(--bath)', cls: 'b' });
+  // add markers
+  while (a.marks.firstChild) a.marks.removeChild(a.marks.firstChild);
+  s.adds.forEach(function (t, n) {
+    if (t > prog) return;
+    var x = a.X(t), yTop = a.Y(M.T0 + M.delivOz);
+    ln(a.marks, x, a.Y(M.T0) + 2, x, yTop - 6, 'var(--text)', 1.4, '3 3');
+    tx(a.marks, x, yTop - 12, 'add ' + (n + 1), { anchor: 'middle', size: 13, cls: 'b' });
+  });
+  return { s: s, last: last };
+}
+function drawB() {
+  var s = M.simulate(loop.f, 10.5), b = F5.b, pts = s.pts, dR = '', dB = '', i, g = b.lines;
+  while (g.firstChild) g.removeChild(g.firstChild);
+  for (i = 0; i < pts.length; i += 2) {
+    dR += (i ? 'L' : 'M') + b.X(pts[i].t).toFixed(1) + ' ' + b.Y(pts[i].rec).toFixed(1);
+    dB += (i ? 'L' : 'M') + b.X(pts[i].t).toFixed(1) + ' ' + b.Y(pts[i].bath).toFixed(1);
+  }
+  mk('path', { d: dB, fill: 'none', stroke: 'var(--bath)', 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+  mk('path', { d: dR, fill: 'none', stroke: 'var(--record)', 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+  // swing brackets in the right margin
+  var x = b.X(10.5) + 8, hiB = b.Y(M.T0 + M.delivOz), loB = b.Y(M.T0), hiR = b.Y(loop.f * (M.T0 + M.delivOz)), loR = b.Y(loop.f * M.T0);
+  function bracket(y1, y2, col, l1, l2, my) {
+    ln(g, x, y1, x, y2, col, 2); ln(g, x - 5, y1, x, y1, col, 2); ln(g, x - 5, y2, x, y2, col, 2);
+    tx(g, x + 8, my - 2, l1, { size: 12, cls: 'b', fill: col });
+    tx(g, x + 8, my + 14, l2, { size: 12, cls: 'b', fill: col });
+  }
+  var myB = (hiB + loB) / 2, myR = (hiR + loR) / 2;
+  if (Math.abs(myR - myB) < 40) myR = myB + 40;
+  bracket(hiB, loB, 'var(--bath)', 'bath swing', fx(M.delivOz, 2) + ' oz/gal', myB);
+  bracket(hiR, loR, 'var(--record)', 'record swing', fx(loop.f * M.delivOz, 2) + ' oz/gal', myR);
+}
+function status(prog, s) {
+  var el = document.getElementById('status5'), n = 0;
+  s.adds.forEach(function (t) { if (t <= prog) n++; });
+  var txt;
+  var last = s.adds.filter(function (t) { return t <= prog; }).pop();
+  if (prog >= 3.5) txt = 'Three cycles done. The same pattern now repeats, as the steady-state chart shows.';
+  else if (last !== undefined && prog - last < 0.07) txt = 'Add ' + n + ': the software orders an add sized for +0.40 oz/gal. The bath gains +' + fx(M.delivOz, 2) + ' oz/gal; the record gains +' + fx(loop.f * M.delivOz, 2) + ' oz/gal.';
+  else if (n === 0) txt = 'The bath is using up HF. The record is still above the lower control point.';
+  else txt = 'Cycle ' + n + ': the bath keeps using up HF and the record drifts down toward the lower control point.';
+  el.textContent = txt;
+}
+function verdict() {
+  var rise = loop.f * M.delivOz, el = document.getElementById('verdict5');
+  document.getElementById('r5r').textContent = '+' + fx(rise, 2);
+  document.getElementById('r5f').textContent = fx(loop.f * 100, 0);
+  document.getElementById('o5').textContent = fx(loop.f * 100, 0) + '%';
+  var msg;
+  if (rise >= 0.3 && rise <= 0.5) msg = 'At ' + fx(loop.f * 100, 0) + '% the record rises ' + fx(rise, 2) + ' oz/gal per add, within 25% of the 0.40 oz/gal the software expects. Nothing looks wrong on paper, while the bath swings ' + fx(M.delivOz, 2) + ' oz/gal.';
+  else if (rise > 0.5) msg = 'At ' + fx(loop.f * 100, 0) + '% the record rises ' + fx(rise, 2) + ' oz/gal per add, well above the 0.40 oz/gal expected, so the over-add would show in the record.';
+  else msg = 'At ' + fx(loop.f * 100, 0) + '% the record rises only ' + fx(rise, 2) + ' oz/gal per add, far below the 0.40 oz/gal expected, so the record would barely show the adds while the bath swings ' + fx(M.delivOz, 2) + ' oz/gal.';
+  el.textContent = msg;
+}
+function renderLoop() {
+  var r = drawA(loop.prog); status(loop.prog, r.s); verdict();
+  if (loop.steadyShown) drawB();
+}
+function showSteady() {
+  loop.steadyShown = true; drawB(); document.getElementById('ssbox').classList.remove('ss-pending');
+}
+function stepLoop(now) {
+  if (!loop.running) return;
+  loop.prog = Math.min(3.5, (now - loop.t0) / loop.dur * 3.5);
+  renderLoop();
+  if (loop.prog >= 3.5) { loop.running = false; showSteady(); return; }
+  loop.raf = requestAnimationFrame(stepLoop);
+}
+function playLoop() {
+  cancelAnimationFrame(loop.raf);
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  loop.steadyShown = false; document.getElementById('ssbox').classList.add('ss-pending');
+  if (reduce) { loop.prog = 3.5; loop.running = false; renderLoop(); showSteady(); return; }
+  loop.prog = 0; loop.running = true; loop.t0 = performance.now(); loop.raf = requestAnimationFrame(stepLoop);
+}
+function panel5() {
+  panel5Init();
+  var sl = document.getElementById('s5');
+  sl.addEventListener('input', function () { loop.f = parseFloat(sl.value) / 100; renderLoop(); });
+  document.getElementById('replay5').addEventListener('click', playLoop);
+  loop.f = parseFloat(sl.value) / 100;
+  loop.prog = 0; renderLoop();
+  var started = false;
+  function go() { if (started) return; started = true; playLoop(); }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { go(); io.disconnect(); } }); }, { threshold: 0.35 });
+    io.observe(document.getElementById('p5'));
+  } else go();
+  window.addEventListener('beforeprint', function () { cancelAnimationFrame(loop.raf); loop.running = false; loop.prog = 3.5; renderLoop(); showSteady(); });
+}
+
+/* ---------- panel 6: steel cross sections ---------- */
+function panel6() {
+  var W = 320, Ni0 = 92, S0 = 126, S1 = 236;
+  var GBX = [70, 145, 215, 278];
+  function base(id) {
+    var svg = document.getElementById(id); reset(svg);
+    mk('rect', { x: 0, y: 0, width: W, height: 268, fill: 'var(--pore-bg)' }, svg);
+    return mk('g', {}, svg);
+  }
+  function steelBody(g, notch) {
+    var d = 'M10 ' + S0;
+    if (notch) GBX.forEach(function (x) { d += ' L' + (x - 9) + ' ' + S0 + ' L' + x + ' ' + (S0 + 22) + ' L' + (x + 9) + ' ' + S0; });
+    d += ' L310 ' + S0 + ' L310 ' + S1 + ' L10 ' + S1 + ' Z';
+    mk('path', { d: d, fill: 'var(--steel)', stroke: 'var(--steel-dk)', 'stroke-width': 1.5 }, g);
+    var top = notch ? S0 + 22 : S0;
+    ['M70 ' + top + ' L64 168 L78 210 L68 ' + S1, 'M145 ' + top + ' L152 176 L138 ' + S1, 'M215 ' + top + ' L208 180 L222 ' + S1, 'M278 ' + top + ' L284 170 L276 ' + S1,
+      'M64 168 L10 190', 'M152 176 L208 180', 'M222 215 L310 205', 'M138 232 L78 210', 'M284 170 L310 160'].forEach(function (d2) {
+      mk('path', { d: d2, fill: 'none', stroke: 'var(--grain)', 'stroke-width': 1.3 }, g);
+    });
+  }
+  function nickel(g, segs) {
+    segs.forEach(function (s) {
+      var x1 = s[0], x2 = s[1];
+      mk('path', { d: 'M' + x1 + ' ' + S0 + ' L' + x1 + ' ' + (Ni0 + 6) + ' Q' + x1 + ' ' + Ni0 + ' ' + (x1 + 6) + ' ' + Ni0 + ' L' + (x2 - 6) + ' ' + Ni0 + ' Q' + x2 + ' ' + Ni0 + ' ' + x2 + ' ' + (Ni0 + 6) + ' L' + x2 + ' ' + S0 + ' Z', fill: 'var(--nickel)', stroke: 'var(--nickel-ln)', 'stroke-width': 1.5 }, g);
+    });
+  }
+  // label with an explicit leader: text at (x,y), leader from (lx,ly) to the feature at (px,py)
+  function label(g, s, x, y, anchor, lx, ly, px, py) {
+    tx(g, x, y, s, { anchor: anchor, size: 12.5, cls: 'b' });
+    ln(g, lx, ly, px, py, 'var(--text)', 1.2);
+    mk('circle', { cx: px, cy: py, r: 2.8, fill: 'var(--text)' }, g);
+  }
+  function rustBlob(g, x) {
+    mk('path', { d: 'M' + (x - 11) + ' ' + Ni0 + ' C' + (x - 15) + ' ' + (Ni0 - 14) + ' ' + (x - 6) + ' ' + (Ni0 - 24) + ' ' + x + ' ' + (Ni0 - 20) + ' C' + (x + 8) + ' ' + (Ni0 - 28) + ' ' + (x + 17) + ' ' + (Ni0 - 12) + ' ' + (x + 11) + ' ' + Ni0 + ' Z', fill: 'var(--rust)' }, g);
+  }
+  // a. correct activation
+  var a = base('fig6a'); steelBody(a, false); nickel(a, [[10, 310]]);
+  tx(a, 160, 114, 'nickel', { anchor: 'middle', size: 13, bold: true, fill: 'var(--on-nickel)' });
+  label(a, 'continuous nickel layer', 8, 22, 'start', 150, 28, 150, Ni0 + 8);
+  label(a, 'clean steel surface', 8, 56, 'start', 40, 62, 40, S0);
+  tx(a, 160, 200, 'steel', { anchor: 'middle', size: 14, bold: true, fill: 'var(--on-steel)' });
+  // b. over-activated
+  var b = base('fig6b'); steelBody(b, true);
+  nickel(b, [[10, 58], [82, 136], [154, 206], [224, 310]]);
+  mk('rect', { x: 136, y: Ni0 + 3, width: 18, height: S0 - Ni0 - 3, fill: 'var(--rust)' }, b);
+  rustBlob(b, 145);
+  mk('path', { d: 'M136 ' + S0 + ' L145 ' + (S0 + 22) + ' L154 ' + S0 + ' Z', fill: 'var(--rust)' }, b);
+  [[70, S0 + 15, 4.5], [64, S0 - 4, 3], [76, S0 - 3, 3.4], [215, S0 + 15, 4.5], [208, S0 - 3, 3], [222, S0 - 4, 3.2], [278, S0 + 14, 4.5], [283, S0 + 6, 3], [102, S0 - 3, 3], [182, S0 - 3, 3]].forEach(function (p) {
+    mk('circle', { cx: p[0], cy: p[1], r: p[2], fill: 'var(--smut)' }, b);
+  });
+  var defs = mk('defs', {}, b);
+  var mkr = mk('marker', { id: 'ah', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse' }, defs);
+  mk('path', { d: 'M0 0 L10 5 L0 10 Z', fill: 'var(--hyd)' }, mkr);
+  [[70, S0 + 30], [145, S0 + 30], [215, S0 + 30], [278, S0 + 30], [40, S0 + 10], [110, S0 + 10], [250, S0 + 10]].forEach(function (p) {
+    mk('line', { x1: p[0], y1: p[1], x2: p[0], y2: p[1] + 30, stroke: 'var(--hyd)', 'stroke-width': 2.6, 'marker-end': 'url(#ah)' }, b);
+  });
+  tx(b, 160, 258, 'hydrogen enters the steel', { anchor: 'middle', size: 13, cls: 'b', fill: 'var(--hyd)' });
+  label(b, 'etched grain boundary', 8, 22, 'start', 70, 28, 70, S0 + 12);
+  label(b, 'smut particle', 250, 22, 'end', 209, 28, 209, S0 - 4);
+  label(b, 'through-pore', 96, 48, 'start', 138, 54, 145, Ni0 + 24);
+  label(b, 'nickel over smut', 312, 48, 'end', 262, 54, 272, Ni0 + 14);
+  tx(b, 109, 114, 'nickel', { anchor: 'middle', size: 13, bold: true, fill: 'var(--on-nickel)' });
+  tx(b, 236, 214, 'steel', { anchor: 'middle', size: 14, bold: true, fill: 'var(--on-steel)' });
+  // c. under-activated
+  var c = base('fig6c'); steelBody(c, false);
+  nickel(c, [[10, 66], [78, 208], [220, 310]]);
+  mk('rect', { x: 208, y: Ni0, width: 12, height: S0 - Ni0, fill: 'var(--rust)' }, c);
+  [[66, 78], [208, 220]].forEach(function (g2) {
+    mk('path', { d: 'M' + g2[0] + ' ' + Ni0 + ' L' + g2[0] + ' ' + S0 + ' M' + g2[1] + ' ' + Ni0 + ' L' + g2[1] + ' ' + S0, stroke: 'var(--nickel-ln)', 'stroke-width': 1.5, fill: 'none' }, c);
+  });
+  rustBlob(c, 214);
+  mk('path', { d: 'M40 ' + S0 + ' Q44 ' + (S0 - 7) + ' 54 ' + (S0 - 8) + ' Q64 ' + (S0 - 13) + ' 74 ' + (S0 - 9) + ' Q86 ' + (S0 - 12) + ' 94 ' + (S0 - 6) + ' Q102 ' + (S0 - 4) + ' 104 ' + S0 + ' Z', fill: 'var(--oxide)' }, c);
+  mk('path', { d: 'M168 ' + S0 + ' Q174 ' + (S0 - 8) + ' 186 ' + (S0 - 8) + ' Q198 ' + (S0 - 13) + ' 212 ' + (S0 - 9) + ' Q226 ' + (S0 - 12) + ' 238 ' + (S0 - 7) + ' Q250 ' + (S0 - 4) + ' 254 ' + S0 + ' Z', fill: 'var(--oxide)' }, c);
+  mk('rect', { x: 209, y: S0 - 12, width: 10, height: 12, fill: 'var(--rust)' }, c);
+  label(c, 'oxide patch', 8, 22, 'start', 72, 28, 72, S0 - 7);
+  label(c, 'through-pore', 196, 22, 'start', 214, 28, 214, Ni0 + 14);
+  label(c, 'bridging nickel', 108, 52, 'start', 160, 58, 186, Ni0 + 12);
+  tx(c, 160, 200, 'steel', { anchor: 'middle', size: 14, bold: true, fill: 'var(--on-steel)' });
+}
+
+/* ---------- theme toggle ---------- */
+function theme() {
+  var btn = document.getElementById('themeBtn'), root = document.documentElement, modes = ['auto', 'light', 'dark'], i = 0;
+  try { var s = localStorage.getItem('theme-mode'); if (s && modes.indexOf(s) >= 0) i = modes.indexOf(s); } catch (e) {}
+  function apply() {
+    if (modes[i] === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', modes[i]);
+    btn.textContent = 'Theme: ' + modes[i];
+    try { localStorage.setItem('theme-mode', modes[i]); } catch (e) {}
+  }
+  btn.addEventListener('click', function () { i = (i + 1) % modes.length; apply(); });
+  apply();
+}
+
+panel1(); panel2(); panel3(); panel4(); panel5(); panel6(); theme();
+})();
+</script>
+</body>
+</html>

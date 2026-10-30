@@ -19,6 +19,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, readdirSync
 import { dirname, join, relative, resolve, basename, extname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { gzipSync } from 'node:zlib'
+import { SNAPSHOT_FIGS } from './tools/lint.mjs'
 
 const C = dirname(fileURLToPath(import.meta.url))
 const argv = process.argv.slice(2)
@@ -253,7 +254,7 @@ function shellParts(ctx, page) {
   const locator = `<nav class="loc" aria-label="Chapters" style="--lw:${lw}"><ol>${career.map((c) => `<li data-ch="${c.code}"><a href="${href(c.slug)}" data-slug="${c.slug}"${c === cur ? ' aria-current="location"' : ''}><span class="n">${c.no}</span><span class="sr-only"> ${esc(c.nav)}</span></a></li>`).join('')}</ol><span class="loc-lbl" aria-hidden="true"><span class="sep">·</span><span class="v">${cur ? esc(cur.nav) : ''}</span></span></nav>`
   const contentsHref = nf ? `${site.base}#contents` : dev && cur.slug !== chapters[0].slug ? 'index.html#contents' : '#contents'
   const idxbtn = cur
-    ? `<a class="idx hd-mono" href="${contentsHref}" style="--lw:${lw};--sw:${sw}" aria-label="Chapter index, current: ${cur.side ? '' : cur.no + ' '}${esc(cur.nav)}"><span class="k">Index </span><span class="n">${curNo}/${N}</span><span class="nm"><span class="sep"> · </span><span class="l">${esc(cur.nav)}</span><span class="s">${esc(cur.short)}</span></span>{{icon:chevron}}</a>`
+    ? `<a class="idx hd-mono${cur.side ? ' is-side' : ''}" href="${contentsHref}" style="--lw:${lw};--sw:${sw}" aria-label="Chapter index, current: ${cur.side ? '' : cur.no + ' '}${esc(cur.nav)}"><span class="k">Index </span><span class="n">${curNo}/${N}</span>${chapters.some((c) => c.side) ? '<span class="ns" hidden>Side</span>' : ''}<span class="nm"><span class="sep"> · </span><span class="l">${esc(cur.nav)}</span><span class="s">${esc(cur.short)}</span></span>{{icon:chevron}}</a>`
     : `<a class="idx hd-mono" href="${contentsHref}"><span class="n">Index</span>{{icon:chevron}}</a>`
   const strip = `<div class="strip" aria-hidden="true">${career.map((c) => `<i data-ch="${c.code}" data-slug="${c.slug}"${c === cur || (cur && cur.side) ? ' class="on"' : ''}></i>`).join('')}</div>`
   const yrs = (y) => `<span class="nw">${esc(y)}</span>`
@@ -442,7 +443,9 @@ function ogMeta(ctx) {
 // dated snapshot of real data, Fig. 9), which figures are which ("Figs. 1–8 are simulated; Fig. 9 is a dated snapshot of
 // real data.")
 function figNote(ctx) {
-  const all = [...ctx.figs.values()], snap = all.filter((f) => f.data === 'snapshot'), sim = all.filter((f) => f.data !== 'snapshot')
+  // only an allow-listed figure in a side chapter counts as real data (lint fails any other "snapshot" declaration)
+  const real = (f) => f.data === 'snapshot' && SNAPSHOT_FIGS.includes(f.id) && f.chapter.side
+  const all = [...ctx.figs.values()], snap = all.filter(real), sim = all.filter((f) => !real(f))
   const span = (l) => (l.length === 1 ? `Fig. ${l[0].n}` : l.every((f, i) => !i || f.n === l[i - 1].n + 1) ? `Figs. ${l[0].n}–${l[l.length - 1].n}` : `Figs. ${l.map((f) => f.n).join(', ')}`)
   if (!snap.length) return 'All figures are simulated; their results are computed from the inputs in Methods.'
   return `${span(sim)} ${sim.length > 1 ? 'are' : 'is'} simulated; ${span(snap)} ${snap.length > 1 ? 'are dated snapshots' : 'is a dated snapshot'} of real data. Every result is computed from the inputs in Methods.`

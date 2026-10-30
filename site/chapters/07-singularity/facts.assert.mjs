@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { factsOf, model, fmt } from './singularity.model.mjs'
+import { factsOf, model, fmt, lsq as lsqFit } from './singularity.model.mjs'
 import gen from './tools/plot.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -31,6 +31,8 @@ export default async function (facts, { eq, ok }) {
   ok('sing: the open gap is a lower bound', L.open_gap_is_lower_bound === true)
   const refits = [...S.omega.refits].sort((a, b) => (a.refit_date < b.refit_date ? -1 : 1)), last = refits[refits.length - 1]
   ok('sing: the latest refit is on or before the snapshot and not pinned', last.refit_date <= S.as_of && last.pinned === 'none', last)
+  ok('sing: every refit is badged backtest or live refit; the latest is live', refits.every((x) => x.kind === 'backtest' || x.kind === 'live_refit') && last.kind === 'live_refit', refits.map((x) => x.kind))
+  ok('sing: the list was fixed after its fixed rows and on or before the snapshot', rows.filter((x) => x.frozen).every((x) => x.date <= L.frozen_on) && L.frozen_on <= S.as_of, L.frozen_on)
   // ---- facts = the model, key by key (tools/snapshot.mjs writes them; a stale copy fails here)
   for (const [k, v] of Object.entries(F)) eq(`sing: facts ${k} = recomputed from snapshot.json`, JSON.stringify(facts[k]), JSON.stringify(v))
   // ---- independent arithmetic
@@ -65,7 +67,39 @@ export default async function (facts, { eq, ok }) {
   ok('sing: the fit is the quadratic (c ≤ 0)', M.fit.quad && cc <= 0, cc)
   ok('sing: model fit = independent fit (a, b, c within 1e-6)', Math.abs(ca - M.fit.a) < 1e-6 && Math.abs(cb - M.fit.b) < 1e-6 && Math.abs(cc - M.fit.c) < 1e-6, [ca, cb, cc])
   eq('sing: fit coefficients shown', [facts['sing.fit'].a, facts['sing.fit'].b, facts['sing.fit'].c].join(' '), [ca.toFixed(3), cb.toFixed(3), cc.toFixed(4)].join(' ').replace(/-/g, '−'))
-  ok('sing: the curve falls to under 0.25 day before the omega point', M.fit.g(tsD - 1) < 0.25 && M.fit.g(0) > M.fit.g(tsD / 2))
+  ok('sing: the curve falls to under 0.2 day (the zoomed floor) before the omega point', M.fit.g(tsD - 1) < 0.2 && M.fit.g(0) > M.fit.g(tsD / 2))
+  // Methods: the named date is where the curve fits best once the open wait since the last fixed-list release (a lower
+  // bound up to the refit day) also counts, as the tracker's censored refit does (quadfit.py: the open gap adds a residual
+  // only while the curve predicts a shorter wait). Scanned here over whole days, then to 0.05 day around the best; the
+  // tracker's own grid is not whole days, so the best must round to within a day of the named date
+  const cg = (ms(last.refit_date) - ms(tl)) / DAY, cu = (ms(tl) - ms(S.as_of)) / DAY
+  eq('sing: the censored open wait = refit day − last fixed-list release', facts['sing.omega'].open, String(cg))
+  const sseAt = (ts) => {
+    const xs = X.map((_, i) => Math.log(ts - pts[i][0])), uc = Math.log(ts - cu), lc = Math.log(cg)
+    const fit = (inc) => { const xx = inc ? xs.concat([uc]) : xs, yy = inc ? Y.concat([lc]) : Y, q = M.fit.quad ? lsqFit(xx, yy, 2) : null; return q && q[2] <= 0 ? q : lsqFit(xx, yy, 1) }
+    let inc = false, q = fit(false)
+    for (let it = 0; it < 30; it++) { const ni = q[0] + q[1] * uc + q[2] * uc * uc < lc; if (ni === inc) break; inc = ni; q = fit(inc) }
+    const pc = q[0] + q[1] * uc + q[2] * uc * uc
+    return xs.reduce((a, x, i) => a + (Y[i] - q[0] - q[1] * x - q[2] * x * x) ** 2, 0) + Math.max(0, lc - pc) ** 2
+  }
+  let best = 1, bs = Infinity
+  for (let dd = 1; dd <= 3000; dd++) { const v = sseAt(dd); if (v < bs) { bs = v; best = dd } }
+  for (let dd = best - 1; dd <= best + 1; dd += 0.05) { const v = sseAt(dd); if (v < bs) { bs = v; best = dd } }
+  ok('sing: the named date is where the curve fits best with the open wait counted (within a day)', Math.abs(best - tsD) <= 1, best.toFixed(2))
+  // the readout's one days-count (the tracker's rule): the days to the date at the snapshot beside the same count at the
+  // refit before the latest
+  const pv = refits[refits.length - 2]
+  eq('sing: previous refit\'s count = its date − its refit day', a.prevDays, String((ms(pv.point) - ms(pv.refit_date)) / DAY))
+  eq('sing: previous refit day as shown', a.prevRefit, fmt(pv.refit_date).replace(/, \d{4}$/, ''))
+  ok('sing: the previous refit is not pinned', pv.pinned === 'none')
+  // the caveats the figure carries, from the tracker's own data: the AI-only fit at the latest refit names no bounded date,
+  // the series' status label says so, and on the held-out waits the plain exponential beats the curve
+  ok('sing: AI models alone give no near-term date (the latest AI-only fit is unbounded or pinned)', last.ai_only && (last.ai_only.bounded === false || last.ai_only.pinned !== 'none'), last.ai_only)
+  ok('sing: the status label says the AI-only fit gives no near-term date', /AI-only fit gives no near-term date/.test(S.verdict.label), S.verdict.label)
+  eq('sing: status label quoted', facts['sing.verdict'].value, S.verdict.label)
+  ok('sing: on the held-out waits the plain exponential scores better than the curve', S.heldout.better === 'plain_exponential' && S.heldout.plain_exponential < S.heldout.quadratic, S.heldout)
+  eq('sing: held-out numbers shown', [facts['sing.heldout'].n, facts['sing.heldout'].exp, facts['sing.heldout'].quad].join(' '), [S.heldout.n, S.heldout.plain_exponential.toFixed(3), S.heldout.quadratic.toFixed(3)].join(' '))
+  eq('sing: the range is calibrated on the held-out errors (n)', facts['sing.range'].n, String(S.band50.n))
 
   // ---- the chapter's files
   const html = readFileSync(join(HERE, 'chapter.html'), 'utf8')
@@ -80,11 +114,14 @@ export default async function (facts, { eq, ok }) {
   eq('sing: Kurzweil rings drawn', (g9.match(/id="f9k" d="([^"]*)"/)[1].match(/h0/g) || []).length, 22)
   eq('sing: open gap drawn hollow in both views', (g9.match(/<g class="pk op"/g) || []).length, 2)
   const text = html.replace(/<!--gen:(\w+):start-->[^]*?<!--gen:\1:end-->/g, '').replace(/<!--[^]*?-->/g, '') // the copy, without generated markup
-  const typed = text.replace(/\{\{[^}]*\}\}/g, '').match(/\b(41|22|39|11|172|187|2027|2028)\b|\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d/)
+  const typed = text.replace(/\{\{[^}]*\}\}/g, '').match(/\b(41|22|39|38|60|31|15|11|172|169|187|2027|2028)\b|\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d/)
   ok('sing: every number in the copy is a placeholder (no typed dates or counts)', !typed, typed && typed[0])
   ok('sing: "intelligence explosion" stays in chapter 06 only', !/intelligence explosion/i.test(text))
   ok('sing: never "simulated" (real data)', !/simulated/i.test(text))
   ok('sing: "A fitted estimate, not a forecast" under the readout and in Methods', (text.match(/A fitted estimate, not a forecast\./g) || []).length === 2)
+  ok('sing: the line under the readout says AI models alone give no near-term date', /<p class="fe">A fitted estimate, not a forecast\. AI models alone give no near-term date; the date comes from adding Kurzweil's milestones\.<\/p>/.test(text))
+  ok('sing: Methods quotes the status label, the held-out result and the censored open wait', text.includes('{{fact:sing.verdict}}') && text.includes('{{fact:sing.heldout.exp}}') && text.includes('{{fact:sing.omega.open}}'))
+  ok('sing: no countdown ("to go", "left", "remaining") and no pass style on a fitted value', !/\b(to go|days left|remaining)\b/i.test(text.replace(/days left to the omega point/, '')) && !/class="status is-true"/.test(text))
   ok('sing: no claim that ASI arrives on the date', !/\b(will|guarantee|certain|predicts?)\b/i.test(text.replace(/<template>[^]*?<\/template>/, '')))
   ok('sing: title, kicker and link as specified', text.includes('<h2 id="sing-t">When does the wait hit zero?</h2>') && text.includes('<span class="no">Side project</span> <span class="yrs">· 2026–</span>') && text.includes('Visit singularity.joseqc.com {{icon:arrow-ne}}'))
   ok('sing: credits (Kurzweil 2005, Geogristle on X)', /Kurzweil[^]*2005/.test(text) && text.includes('Geogristle (@geogristle) on X'))

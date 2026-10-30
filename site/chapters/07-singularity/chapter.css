@@ -32,17 +32,26 @@
 #singularity .lb .c{color:var(--plate-ai)}
 #singularity .lb .a{color:var(--plate-fit)}
 #singularity .bg{background:var(--plate);box-shadow:0 0 0 2px var(--plate)}
-@container fig (width < 330px){#singularity .lb i{font-size:10px}#singularity .n3{display:none}}
+/* under 330 px: in-plot text 10 px (at 10.5 the y labels and the 50 % band label no longer fit a 288 px plate), the omega
+   point a little smaller (tools/plot.mjs HALO, CORE) and the labels and ticks that only fit wider (class n3) hidden */
+@container fig (width < 330px){#singularity .lb i{font-size:10px}#singularity .n3{display:none}#singularity .oh{stroke-width:14px}#singularity .oc{stroke-width:8px}}
 @container fig (width >= 450px){#singularity .lb i{font-size:11.5px}}
 #singularity .readout .lbl{min-width:calc(11 * (1ch + .06em))}
+/* the range never drops under its label: when it does not fit beside it, it breaks after the dash, in the value column */
+#singularity .rg{flex-wrap:nowrap}#singularity .rg .val{min-width:0;text-align:left}#singularity .rg .val>span{display:inline-block}
 #singularity .readout .status{margin-left:auto} /* a status that wraps (320 px) stays at the right */
 #singularity .fe{margin-top:8px;font:400 11.5px/1.4 var(--mono);color:var(--fg-2)}
 /* late:start */
-/* the zoom on a button press (motion on): 1.6 s; the outgoing layer fades in the first 65 %, the incoming one in the last
-   70 %, labels fade out at once and in at the end. Late (the figure carries data-needs-late, so late.css arrives while it
-   is 1.5 screens away): before it lands a press switches at once, as with motion off. The intro is WAAPI (chapter.js). */
-html.motion #singularity .al,html.motion #singularity .zl{transition:transform 1.6s var(--zoom),opacity 1.04s var(--zoom)}
-html.motion #singularity [data-state=all] .al,html.motion #singularity [data-state=zoomed] .zl{transition:transform 1.6s var(--zoom),opacity 1.12s var(--zoom) .48s}
+/* the controls (JS only; the figure carries data-needs-late) keep one row down to a 288 px plate: Replay is icon-only under
+   350 px (shell: under 330), and under 292 px the two state buttons lose 2 px of padding a side */
+@container fig (width < 350px){#singularity .ctrl .replay{width:44px;padding:0}#singularity .ctrl .replay .rt{display:none}}
+@container fig (width < 292px){#singularity .ctrl button:not(.replay){padding:0 12px}}
+/* the zoom on a button press (motion on): 1.6 s, the intro's timing (chapter.js): one data layer at a time, the outgoing
+   one gone by 0.64 s, the incoming one from 0.65 s; labels fade out at once and in at the end. Late (the figure carries
+   data-needs-late, so late.css arrives while it is 1.5 screens away): before it lands a press switches at once, as with
+   motion off. The intro is WAAPI (chapter.js). */
+html.motion #singularity .al,html.motion #singularity .zl{transition:transform 1.6s var(--zoom),opacity .64s var(--zoom)}
+html.motion #singularity [data-state=all] .al,html.motion #singularity [data-state=zoomed] .zl{transition:transform 1.6s var(--zoom),opacity .95s var(--ease) .65s}
 html.motion #singularity .lb{transition:opacity .24s}
 html.motion #singularity [data-state=all] .s-all,html.motion #singularity [data-state=zoomed] .s-zm{transition:opacity .24s 1.36s}
 html.motion #singularity .pre *{transition:none!important}

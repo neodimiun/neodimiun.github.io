@@ -87,6 +87,33 @@ async function scrollRest(page) {
   return res
 }
 
+// a button press after the intro has played (Fig. 9): with motion on it animates (CSS transitions; the stage must not
+// settle a played figure on input, which would snap it) and then rests with no animation left; under reduced motion it
+// switches at once. The figure ends back in its final state.
+const PRESS_ANIM = [['fig-singularity', 'all', 'zoomed']]
+async function pressAfterIntro(page, reduced) {
+  const res = {}
+  for (const [id, s, back] of PRESS_ANIM) {
+    if (!(await page.locator(`#${id}`).count())) continue
+    await page.evaluate((id) => document.getElementById(id).scrollIntoView({ block: 'center', behavior: 'instant' }), id)
+    await page.waitForTimeout(600)
+    const anims = () => page.evaluate((id) => { const f = document.getElementById(id); return document.getAnimations().filter((a) => a.playState === 'running' && f.contains(a.effect?.target)).length }, id)
+    const r = res[id] = { played: await page.evaluate((id) => (window.__stage?.state?.().figs || '').includes(`${id.slice(4)}:dom`) && !/\*|>/.test((window.__stage.state().figs.split(' ').find((x) => x.startsWith(id.slice(4) + ':')) || '')), id) }
+    await page.locator(`#${id} .ctrl [data-set="${s}"]`).click()
+    await page.waitForTimeout(400)
+    r.during = await anims()
+    await page.waitForTimeout(2400)
+    r.rest = await anims(); r.state = await page.evaluate((id) => document.getElementById(id).dataset.state, id)
+    await page.locator(`#${id} .ctrl [data-set="${back}"]`).click()
+    await page.waitForTimeout(2800)
+    r.back = await page.evaluate((id) => document.getElementById(id).dataset.state, id); r.restBack = await anims()
+    r.ok = r.state === s && r.back === back && !r.rest && !r.restBack && (reduced ? r.during === 0 : r.during > 0)
+  }
+  await page.mouse.move(2, 2)
+  await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }))
+  return res
+}
+
 // header stability (design review R5): hovering any locator number, or any chapter becoming current, must not move a
 // number (desktop) or resize the index button (phones); an anchor jump lands the chapter's seam just under the header
 async function headerAndAnchors(page) {
@@ -127,6 +154,10 @@ const pageHelpers = {
     const overlap = items.some((a, i) => items.slice(i + 1).some((b) => a.r > b.l + 0.5))
     const idx = document.querySelector('.idx')
     return { header: items, overlap, idxLabel: vis(idx) ? idx.innerText.replace(/\s+/g, ' ').trim() : null, idxClipped: vis(idx) ? idx.scrollWidth > idx.clientWidth : null }
+  },
+  // a focus indicator in a computed style: a visible outline (style, width, colour, offset) and the box-shadow
+  ringOf(c) {
+    return { outline: c.outlineStyle !== 'none' && parseFloat(c.outlineWidth) > 0 && !/^(transparent|rgba\(.*,\s*0\))$/.test(c.outlineColor) ? `${c.outlineStyle} ${c.outlineWidth} ${c.outlineColor} ${c.outlineOffset}` : '', shadow: c.boxShadow === 'none' ? '' : c.boxShadow }
   },
   // "In this page" rows: a part whose text is wider than its box
   contentsCut() {
@@ -223,6 +254,8 @@ async function run(name, ctxOpts, { throttle = 1, reduced = false } = {}) {
   flag(hdr.idxWidths.length <= 1, `index button width changes with the chapter: ${hdr.idxWidths.join(', ')}`, hard)
   for (const [id, d] of Object.entries(hdr.anchors)) if (id !== 'engineering') flag(d >= 0 && d <= 48, `#${id}: seam lands ${d} px under the header (0–48)`, hard)
   const sr = await scrollRest(page)
+  const press = await pressAfterIntro(page, reduced)
+  for (const [id, v] of Object.entries(press)) flag(v.ok, `${id}: a press after the intro ${reduced ? 'must switch at once' : 'must animate, then rest'}: ${JSON.stringify(v)}`, hard)
   for (const [id, v] of Object.entries(sr)) if (v) flag(!v.renders && !v.frames && !v.animations, `${id}: at rest renders ${v.renders} frames ${v.frames} animations ${v.animations}`, hard)
   const layout = await page.evaluate(() => {
     const p = window.__proto
@@ -251,7 +284,7 @@ async function run(name, ctxOpts, { throttle = 1, reduced = false } = {}) {
   const three = await page.evaluate(() => performance.getEntriesByType('resource').filter((e) => /js\/chunks\/chunk-|three/.test(e.name)).length)
   if (reduced) flag(three === 0 || !stage || /posters/.test(stage.quality), 'three.js requested under reduced motion', hard)
   if (hard.length) hardFail = true // page errors, console errors and HTTP errors are pushed straight into hard
-  console.log(JSON.stringify({ name, throttle, reduced, rendersAtRest, framesAtRest, firstScreen, stats, header: hdr, layout, scrollRest: sr, stage, readouts: nums.readouts, ledger: nums.ledger, hard, errors: errors.slice(0, 8) }))
+  console.log(JSON.stringify({ name, throttle, reduced, rendersAtRest, framesAtRest, firstScreen, stats, header: hdr, layout, scrollRest: sr, press, stage, readouts: nums.readouts, ledger: nums.ledger, hard, errors: errors.slice(0, 8) }))
   await ctx.close()
 }
 
@@ -267,26 +300,39 @@ async function freshPage(w, h, query = '') {
   return { ctx, page, hard }
 }
 
-// keyboard Tab-walk (WCAG 2.1.1, 2.1.2, 2.4.3, 2.4.7, 2.4.11) at 390 × 844 and 1440 × 900, motion on: from the top, Tab
-// through every focusable element until focus leaves the page or wraps to the start (cap 400 presses). Each one outside
-// the sticky header, the skip link and an open dialog must, once the browser has scrolled it into view, lie fully inside
-// the viewport and not under the header (top ≥ header bottom), and show a :focus-visible indicator (an outline of some
-// width, or a box-shadow). The walk must reach the footer's last focusable, every figure control and every <details>
-// summary, and must not return to an element before it ends (a focus trap).
+// keyboard Tab-walk (WCAG 2.1.1, 2.1.2, 2.4.1, 2.4.3, 2.4.7, 2.4.11) at 390 × 844 and 1440 × 900, motion on: from the top,
+// Tab through every focusable element until focus leaves the page or wraps to the start (cap 400 presses). Every focused
+// element, once the browser has scrolled it into view, must lie fully inside the viewport (the skip link included: it must
+// appear when focused) and show a :focus-visible indicator: an outline of some width, or a box-shadow, that it does not
+// wear at rest (each element's resting style is read again after the walk, when nothing is focused). Every one outside
+// the sticky header, the skip link and an open dialog must also not sit under the header (top ≥ header bottom). The walk
+// must reach the footer's last focusable, every figure control and every <details> summary, and must not return to an
+// element before it ends (a focus trap).
 const FOCUSABLE = 'a[href], area[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, iframe, [tabindex]:not([tabindex="-1"]), [contenteditable=""], [contenteditable="true"]'
 const tabStep = async (i) => {
+  const ringOf = window.__chk.ringOf
   // the focus scroll is smooth under html.motion: wait for 8 frames without movement (2 s at most)
   for (let y = scrollY, calm = 0, k = 0; k < 120 && calm < 8; k++) { await new Promise((r) => requestAnimationFrame(r)); calm = scrollY === y ? calm + 1 : 0; y = scrollY }
   const el = document.activeElement
   if (!el || el === document.body || el === document.documentElement) return { out: true }
   const name = window.__chk.label(el), seen = window.__tab || (window.__tab = new Map())
   if (seen.has(el)) return { name, again: seen.get(el) }
-  seen.set(el, i)
-  if (el.closest('.site-hd, dialog[open]') || el.matches('.skip')) return { name, exempt: true }
-  const R = el.getBoundingClientRect(), hd = document.querySelector('.site-hd').getBoundingClientRect().bottom, c = getComputedStyle(el)
+  const R = el.getBoundingClientRect(), hd = document.querySelector('.site-hd').getBoundingClientRect().bottom
   const W = document.documentElement.clientWidth, H = document.documentElement.clientHeight
-  const ring = el.matches(':focus-visible') && ((c.outlineStyle !== 'none' && parseFloat(c.outlineWidth) > 0 && !/^(transparent|rgba\(.*,\s*0\))$/.test(c.outlineColor)) || c.boxShadow !== 'none')
-  return { name, box: [R.left, R.top, R.right, R.bottom].map(Math.round), hd: Math.round(hd), inView: R.left >= -0.5 && R.top >= -0.5 && R.right <= W + 0.5 && R.bottom <= H + 0.5, belowHeader: R.top >= hd - 0.5, ring }
+  const focused = { ...ringOf(getComputedStyle(el)), fv: el.matches(':focus-visible') }
+  seen.set(el, { i, focused })
+  // the header, the skip link and an open dialog sit over the page: only the under-the-header rule does not apply to them
+  const over = !!el.closest('.site-hd, dialog[open]') || el.matches('.skip')
+  return { name, i, over, box: [R.left, R.top, R.right, R.bottom].map(Math.round), hd: Math.round(hd), inView: R.left >= -0.5 && R.top >= -0.5 && R.right <= W + 0.5 && R.bottom <= H + 0.5, belowHeader: over || R.top >= hd - 0.5 }
+}
+// after the walk (nothing focused): each step's indicator = a focused outline or box-shadow that differs from its rest
+const ringsAfter = () => {
+  const ringOf = window.__chk.ringOf, out = {}
+  for (const [el, { i, focused: f }] of window.__tab || []) {
+    const r = ringOf(getComputedStyle(el))
+    out[i] = f.fv && ((!!f.outline && f.outline !== r.outline) || (!!f.shadow && f.shadow !== r.shadow))
+  }
+  return out
 }
 const tabReach = (sel) => {
   const seen = window.__tab || new Map(), vis = (el) => el.checkVisibility({ visibilityProperty: true }), name = window.__chk.label
@@ -303,12 +349,15 @@ async function tabWalk(w, h) {
     await page.keyboard.press('Tab')
     const s = await page.evaluate(tabStep, i)
     if (s.out) { end = 'left the page'; break }
-    if (s.again != null) { end = s.again === 0 ? 'wrapped to the start' : `back to ${s.name} (press ${s.again + 1}) at press ${i + 1}`; break }
+    if (s.again != null) { end = s.again.i === 0 ? 'wrapped to the start' : `back to ${s.name} (press ${s.again.i + 1}) at press ${i + 1}`; break }
     steps.push(s)
   }
+  // focus has left the page (or wrapped): read every stepped element's resting style
+  await page.evaluate(() => document.activeElement?.blur?.())
+  const rings = await page.evaluate(ringsAfter)
   const reach = await page.evaluate(tabReach, FOCUSABLE)
-  const offscreen = steps.filter((s) => !s.exempt && !(s.inView && s.belowHeader)).map((s) => `${s.name} at ${s.box.join(',')} (header bottom ${s.hd})`)
-  const noRing = steps.filter((s) => !s.exempt && !s.ring).map((s) => s.name)
+  const offscreen = steps.filter((s) => !(s.inView && s.belowHeader)).map((s) => `${s.name} at ${s.box.join(',')} (header bottom ${s.hd})`)
+  const noRing = steps.filter((s) => !rings[s.i]).map((s) => s.name)
   flag(/^(left the page|wrapped)/.test(end), `focus trap: ${end}`, hard)
   flag(!offscreen.length, `focused outside the viewport or under the header: ${offscreen.slice(0, 4).join('; ')}`, hard)
   flag(!noRing.length, `no visible focus indicator: ${noRing.slice(0, 4).join('; ')}`, hard)
@@ -316,7 +365,7 @@ async function tabWalk(w, h) {
   flag(!reach.missedControls.length && reach.controls > 0, `figure controls not reached: ${reach.missedControls.slice(0, 6).join('; ') || 'none on the page'}`, hard)
   flag(!reach.missedSummaries.length && reach.summaries > 0, `summaries not reached: ${reach.missedSummaries.slice(0, 6).join('; ') || 'none on the page'}`, hard)
   if (hard.length) hardFail = true
-  console.log(JSON.stringify({ name: `keyboard-${w}x${h}`, presses: steps.length + 1, end, focused: steps.length, exempt: steps.filter((s) => s.exempt).length, offscreen, noRing, reach, ms: Date.now() - t0, hard }))
+  console.log(JSON.stringify({ name: `keyboard-${w}x${h}`, presses: steps.length + 1, end, focused: steps.length, overlays: steps.filter((s) => s.over).length, offscreen, noRing, reach, ms: Date.now() - t0, hard }))
   await ctx.close()
 }
 

@@ -37,8 +37,10 @@ export default function setup({ stage, root }) {
       // picture, through its delay. The buttons and the caption follow in settle(), when the zoom has ended.
       el.dataset.state = 'zoomed'
       const o = { dur: 1600, delay: 1200, easing: 'cubic-bezier(.55,0,.25,1)' }
-      anim(al, [{ transform: 'none', opacity: 1 }, { opacity: 0, offset: 0.65 }, { transform: T, opacity: 0 }], o)
-      anim(zl, [{ transform: I, opacity: 0 }, { opacity: 0, offset: 0.3 }, { transform: 'none', opacity: 1 }], o)
+      // one data layer at a time: all history is gone by 40 % of the eased zoom (0.63 s), the zoomed view starts at 45 %
+      // (0.65 s); the growing AI-era box carries the zoom between them
+      anim(al, [{ transform: 'none', opacity: 1 }, { opacity: 0, offset: 0.4 }, { transform: T, opacity: 0 }], o)
+      anim(zl, [{ transform: I, opacity: 0 }, { opacity: 0, offset: 0.45 }, { transform: 'none', opacity: 1 }], o)
       anim($('.s-all'), [{ opacity: 1 }, { opacity: 0 }], { dur: 240, delay: 1200 })
       fadeIn($('.s-zm'), { dur: 240, delay: 2560 })
       return finished(el)

@@ -80,10 +80,13 @@ The day-0 placeholders (`chapter.html/css/js` carrying `PLACEHOLDER (DS lead, da
 - `band: true` (chapter 06): the build adds `ch-band on-resin` to your root section.
 - `side: true` (07-singularity, the side project): a section after the career chapters that is not one of them. It needs no
   `no`; it gets no locator number and no strip segment, the hero contents and the index dialog list it last without a
-  number, and while it is in view the header reads its `nav` ("Side project") with the counter left at 06/06 (main.js).
+  number, and while it is in view the header reads its `nav` ("Side project") with the counter left at 06/06 (main.js); under
+  360 px, where only the counter shows, it reads SIDE in the counter's slot instead (nav.css `.is-side`).
 - A figure of real data declares `"data": "snapshot", "asOf": "<facts key>"`: its BR corner reads SNAPSHOT and its caption
-  says "snapshot" and the as-of date (that fact's value) instead of "simulated" (lint). The footer note names the
-  simulated figures and the snapshot ones from these declarations (build.mjs `figNote`).
+  says "snapshot" and the as-of date (that fact's value, a date like "Oct 30, 2026") instead of "simulated", in no text or
+  attribute (lint). Only a figure on the DS-owned allow-list `SNAPSHOT_FIGS` in `tools/lint.mjs` (today `singularity`) in
+  a `side` chapter may declare it; any other `data` value fails. The footer note names the simulated figures and the
+  snapshot ones from these declarations (build.mjs `figNote`).
 - `generators`: the ONLY scripts the build runs for you. `tools/posters.mjs` and `tools/ledger-sign.mjs` are run by hand
   and must never be listed here.
 
@@ -376,7 +379,8 @@ readout `aria-hidden`; resting `[data-fact-readout]` = facts; ledger cells = rea
 `node tools/check.mjs <index|dev-slug> [out-prefix] [--full]` prints one JSON line per profile (desktop 1440×900,
 Pixel 7 at 4× CPU, iPhone 13 reduced motion) with the prototype harness's fields (`rendersAtRest, firstScreen,
 stats, layout{overflowX, canvases, h1, drawCalls, triangles, pixelRatio, cpuMs, quality}, errors`) plus
-`framesAtRest`, `scrollRest` (renders/frames over 3 s idle at every figure), `animationsAtRest`, `stage`, `readouts`
+`framesAtRest`, `scrollRest` (renders/frames over 3 s idle at every figure), `press` (after Fig. 9's intro a button press
+zooms with CSS transitions, then rests with 0 animations; under reduced motion it switches at once), `animationsAtRest`, `stage`, `readouts`
 (each `[data-fact-readout]` vs facts) and `ledger` (cell = readout = facts). `--full` adds the overflow sweep
 (320–1920), header at 320/360, no-WebGL, forced context loss, hidden tab and the URL-bar (pinned `--svh`) test.
 Screenshots go to `<out-prefix>-<profile>-*.png` (default `.build/check/`).
@@ -384,9 +388,10 @@ Screenshots go to `<out-prefix>-<profile>-*.png` (default `.build/check/`).
 Two accessibility profiles follow (one JSON line each, hard failures like the rest; `--a11y` runs only these, about 40 s):
 
 - `keyboard-390x844`, `keyboard-1440x900`: a Tab-walk from the top until focus leaves the page (cap 400 presses). Every
-  focused element outside the sticky header, the skip link and an open dialog must end up fully in the viewport and not
-  under the header, with a `:focus-visible` outline or box-shadow; the walk must reach the footer's last link, every
-  figure control and every Methods summary, and never return to an element (focus trap).
+  focused element (the skip link and the header included) must end up fully in the viewport with a `:focus-visible`
+  outline or box-shadow it does not wear at rest (its resting style is read again after the walk); every one outside the
+  sticky header, the skip link and an open dialog must also not sit under the header. The walk must reach the footer's
+  last link, every figure control and every Methods summary, and never return to an element (focus trap).
 - `spacing-320x640`, `spacing-390x844`, `spacing-1280x800`: WCAG 1.4.12 text spacing (line height 1.5, letter spacing
   0.12em, word spacing 0.16em, 2em after paragraphs, `!important`) on HTML text, every chapter laid out and every
   Methods open. No horizontal overflow or text past the screen edge, no text cut by an `overflow: hidden / clip` box,
@@ -402,8 +407,11 @@ figure or its copy is typed: `chapters/07-singularity/data/snapshot.json` holds 
 hand-picked list's dates and waits, the last four calendar refits, the 50 % band's two multipliers, the as-of date and
 provenance: source revision + sha256 of the input), `singularity.model.mjs` ports the tracker's chart rules (wait, omega
 point, 50 % range, quadratic fit), `tools/plot.mjs` draws the figure, and `data/facts.json` `sing.*` holds every number the
-page prints. `facts.assert.mjs` recomputes all of them from the snapshot, twice. To refresh it (weekly, after the tracker's
-weekly refit):
+page prints. The snapshot also carries each refit's kind (backtest or live refit), the latest refit's AI-only status, the
+held-out result (plain exponential vs the curve), the series' status label and the day the list was fixed for the fit;
+Methods quotes them and the line under the readout says AI models alone give no near-term date. `facts.assert.mjs`
+recomputes every number from the snapshot, twice, and checks those caveats against it (it also re-finds the named date
+as the best fit with the censored open wait counted). To refresh it (weekly, after the tracker's weekly refit):
 
 ```sh
 # in the tracker: build the public site (writes site/dist/, data in site/dist/data/main_chart.json)
@@ -414,5 +422,8 @@ node build.mjs --gen --chapter singularity    # redraw Fig. 9
 npm run build -- --strict                     # asserts, lint, budgets; then npm run check
 ```
 
-The tool stops if the latest refit is pinned (no omega point to show) or the fit is no longer the quadratic (the copy says
-quadratic). The generator fails the build if a label no longer has a clear place at every plate width (288–644 px).
+The tool stops if the latest refit or the one before it is pinned (no omega point, no count to show beside it), the fit
+is no longer the quadratic (the copy says quadratic), or the tracker no longer states the day its list was fixed. The asserts
+fail if the AI-only fit starts naming a date or the plain exponential stops winning the held-out test: the caveats would
+then be wrong, so revise the copy. The generator fails the build if a label no longer has a clear place at every plate
+width (288–644 px); tick labels that collide (with a corner, each other or a mark) are hidden under 330 px or left out.

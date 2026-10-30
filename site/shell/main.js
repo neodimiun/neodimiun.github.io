@@ -59,6 +59,9 @@ function nav(list, lateNow) {
       $('.l', idx).textContent = c.nav
       $('.s', idx).textContent = c.short || c.nav
       idx.setAttribute('aria-label', `Chapter index, current: ${c.side ? '' : c.no + ' '}${c.nav}`)
+      // under 360 px the name is hidden and the counter alone would read as chapter 06: there the side project reads SIDE
+      // in the counter's slot (nav.css .is-side)
+      idx.classList.toggle('is-side', !!c.side)
     }
   }
   if (secs.length) {

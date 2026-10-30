@@ -241,12 +241,17 @@ function pageRules(cfg) {
     const corner = (c) => f.querySelector(`.plate .corner.${c}`)
     for (const c of ['tl', 'tr', 'bl', 'br']) if (!corner(c)) E(`#${f.id}: missing corner .${c}`)
     // a figure of real data declares it in chapter.json ("data": "snapshot", "asOf": "<facts key of its as-of date>"):
-    // BR reads SNAPSHOT and the caption says "snapshot" and the as-of date; it never says "simulated". Every other
-    // figure is simulated and says so.
+    // BR reads SNAPSHOT and the caption says "snapshot" and the as-of date; it never says "simulated", in text or in an
+    // attribute. Every other figure is simulated and says so. The exception is narrow: only a figure on the DS-owned
+    // allow-list (SNAPSHOT_FIGS) in a side chapter may declare it, and its as-of fact must be a date ("Oct 30, 2026").
+    if (decl.data !== 'simulated' && decl.data !== 'snapshot') E(`#${f.id}: chapter.json "data": "${decl.data}" (only "snapshot" is known; simulated figures leave it out)`)
     const snap = decl.data === 'snapshot', asOf = snap ? cfg.facts[decl.asOf]?.value : null
+    if (snap && !(cfg.snapshotFigs.includes(id) && decl.side)) E(`#${f.id}: "data": "snapshot" is allowed only for ${cfg.snapshotFigs.map((x) => `"${x}"`).join(', ')} in a side chapter (tools/lint.mjs SNAPSHOT_FIGS, DS lead)`)
     if (snap && !asOf) E(`#${f.id}: "data": "snapshot" needs "asOf", a facts key with the as-of date (got "${decl.asOf}")`)
+    else if (snap && !/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/.test(asOf)) E(`#${f.id}: as-of fact ${decl.asOf} must be a date like "Oct 30, 2026" (got "${asOf}")`)
     if (corner('br') && !(snap ? /^snapshot$/i : /^simulated$/i).test(txt(corner('br')))) E(`#${f.id}: BR corner must read ${snap ? 'SNAPSHOT' : 'SIMULATED'}`)
-    if (snap && /simulated/i.test(f.textContent)) E(`#${f.id}: a snapshot of real data must not say "simulated"`)
+    const said = snap && [f, ...f.querySelectorAll('*')].flatMap((e) => [...e.attributes].filter((a) => /^(aria-label|aria-description|title|alt|data-w)$/.test(a.name) && /simulated/i.test(a.value)).map((a) => a.name))
+    if (snap && (/simulated/i.test(f.textContent) || said.length)) E(`#${f.id}: a snapshot of real data must not say "simulated"${said.length ? ` (${said.join(', ')})` : ''}`)
     if (corner('tl') && txt(corner('tl')).toLowerCase() !== `fig. ${decl.n}`) E(`#${f.id}: TL corner "${txt(corner('tl'))}" ≠ "Fig. ${decl.n}" (use {{fig:${id}}})`)
     if (decl.n <= prevN) E(`#${f.id}: figure numbers out of document order`)
     prevN = decl.n
@@ -321,6 +326,28 @@ export function serve(root, port = 0, host = '127.0.0.1') {
   })
   return new Promise((r) => srv.listen(port, host, () => r({ srv, port: srv.address().port })))
 }
+// the only figures that may declare "data": "snapshot" (a dated snapshot of real data: no "simulated" anywhere, the footer
+// names it real). DS-owned, so a chapter team cannot re-label a simulated figure by editing its own chapter.json; the
+// figure's chapter must also be a side section. build.mjs (figNote) names only these as snapshots.
+export const SNAPSHOT_FIGS = ['singularity']
+// the same declaration rules from chapter.json alone (node side, before any page is opened): the figure (id, chapter.json
+// entry, its chapter) and facts; returns the problems
+export function figDataErrors(id, f, chapter, facts) {
+  const out = []
+  if (f.data === undefined || f.data === 'simulated') { if (f.asOf != null) out.push(`figure "${id}": "asOf" without "data": "snapshot"`); return out }
+  if (f.data !== 'snapshot') return [`figure "${id}": chapter.json "data": "${f.data}" (only "snapshot" is known; simulated figures leave it out)`]
+  if (!SNAPSHOT_FIGS.includes(id) || !chapter.side) out.push(`figure "${id}": "data": "snapshot" is allowed only for ${SNAPSHOT_FIGS.map((x) => `"${x}"`).join(', ')} in a side chapter (tools/lint.mjs SNAPSHOT_FIGS, DS lead)`)
+  const v = facts[f.asOf]?.value
+  if (!/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/.test(v || '')) out.push(`figure "${id}": "asOf" must name a facts key whose value is a date like "Oct 30, 2026" (got ${f.asOf} = ${JSON.stringify(v)})`)
+  return out
+}
+// negative fixtures: the rule must refuse a career chapter's figure, an id off the list, an unknown kind and a non-date as-of
+const FIXTURES = [
+  ['layers', { data: 'snapshot', asOf: 'x' }, { side: false }, { x: { value: 'Oct 30, 2026' } }],
+  ['other', { data: 'snapshot', asOf: 'x' }, { side: true }, { x: { value: 'Oct 30, 2026' } }],
+  ['singularity', { data: 'measured' }, { side: true }, {}],
+  ['singularity', { data: 'snapshot', asOf: 'x' }, { side: true }, { x: { value: '172' } }],
+]
 export async function lintPage(root, pageFile, cfg, { render = true } = {}) {
   let chromium, browser
   try { ({ chromium } = await import('playwright')) } catch (e) { return { errors: [], warnings: ['Playwright unavailable (npm install): page lint skipped'], info: {} } }
@@ -363,10 +390,12 @@ export async function lintPage(root, pageFile, cfg, { render = true } = {}) {
 // ------------------------------------------------------------------------------------------------ build entry
 export async function lintAll({ C, root = C, ctx, pageFile, scope, chapter, render }) {
   const src = lintSources(C, ctx.chapters)
-  const figures = Object.fromEntries([...ctx.figs.values()].map((f) => [f.id, { n: f.n, kind: f.kind, states: f.states, final: f.final, chapter: f.chapter.slug, data: f.data || 'simulated', asOf: f.asOf || null }]))
+  for (const f of ctx.figs.values()) src.errors.push(...figDataErrors(f.id, f, f.chapter, ctx.facts))
+  FIXTURES.forEach(([id, f, ch, facts], i) => { if (!figDataErrors(id, f, ch, facts).length) src.errors.push(`lint self-test: snapshot fixture ${i + 1} (${id}) was accepted`) })
+  const figures = Object.fromEntries([...ctx.figs.values()].map((f) => [f.id, { n: f.n, kind: f.kind, states: f.states, final: f.final, chapter: f.chapter.slug, side: !!f.chapter.side, data: f.data ?? 'simulated', asOf: f.asOf || null }]))
   const inScope = scope === 'full' ? ctx.chapters.map((c) => c.slug) : [chapter.slug]
   const cfg = {
-    figures, inScope, facts: ctx.facts, ledgerRows: ctx.facts.ledger.rows, full: scope === 'full', contact: true,
+    figures, inScope, facts: ctx.facts, ledgerRows: ctx.facts.ledger.rows, full: scope === 'full', contact: true, snapshotFigs: SNAPSHOT_FIGS,
     onceExpected: scope === 'full' || chapter?.slug === 'data-integrity' ? 1 : 0,
     iqcSentence: ctx.site.iqcSentence, iqcSentenceId: ctx.site.iqcSentenceId, origin: ctx.site.origin,
     glyphs: JSON.parse(read(join(C, 'tools/glyphs.json'))),

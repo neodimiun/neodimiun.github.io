@@ -31,6 +31,7 @@
  "lists": {
   "v3": {
    "label": "41 picks",
+   "frozen_on": "2026-10-22",
    "rows": [
     { "model": "GPT-3", "date": "2020-06-11", "frozen": true, "gap_to_next_days": 902 },
     { "model": "ChatGPT-3.5", "date": "2022-11-30", "frozen": true, "gap_to_next_days": 104 },
@@ -82,11 +83,19 @@
   "list": "v3",
   "method": "calendar",
   "refits": [
-   { "refit_date": "2026-10-17", "point": "2027-03-24", "pinned": "none" },
-   { "refit_date": "2026-10-24", "point": "2027-04-09", "pinned": "none" },
-   { "refit_date": "2026-10-26", "point": "2027-04-13", "pinned": "none" },
-   { "refit_date": "2026-10-30", "point": "2027-04-20", "pinned": "none" }
+   { "refit_date": "2026-10-17", "point": "2027-03-24", "pinned": "none", "kind": "backtest" },
+   { "refit_date": "2026-10-24", "point": "2027-04-09", "pinned": "none", "kind": "backtest" },
+   { "refit_date": "2026-10-26", "point": "2027-04-13", "pinned": "none", "kind": "backtest" },
+   {
+    "refit_date": "2026-10-30",
+    "point": "2027-04-20",
+    "pinned": "none",
+    "kind": "live_refit",
+    "ai_only": { "bounded": false, "pinned": "upper" }
+   }
   ]
  },
- "band50": { "lower_mult": 0.404, "upper_mult": 2.477 }
+ "band50": { "lower_mult": 0.404, "upper_mult": 2.477, "n": 31 },
+ "heldout": { "n": 31, "plain_exponential": 0.767, "quadratic": 1.066, "better": "plain_exponential" },
+ "verdict": { "label": "artifact of the chart's construction; fails the held-out test; AI-only fit gives no near-term date" }
 }

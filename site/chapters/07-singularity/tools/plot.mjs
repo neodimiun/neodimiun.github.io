@@ -7,7 +7,7 @@
 //   .al  all history: x = time before the snapshot, log (8 billion years to days, near-linear within TAU of the snapshot),
 //        y = wait until the next event, log (0.1 day to 8 billion years); Kurzweil's 22 rows (hollow rings), the picks
 //        (filled) inside the dashed AI-era box, the fit (solid, to the snapshot)
-//   .zl  zoomed in: x = calendar (Jan 1, 2020 to Mar 1, 2028), y = wait, log (0.25 day to 1,500 days); the picks, the open
+//   .zl  zoomed in: x = calendar (Jan 1, 2020 to Mar 1, 2028), y = wait, log (0.2 day to 1,500 days); the picks, the open
 //        gap (hollow, arrow up: a lower bound), the snapshot line, the 50 % range band, the fit (solid to the snapshot,
 //        dashed to zero wait at the omega point on the x axis), the omega point
 // The zoom maps the AI-era box onto the zoomed plot's 2020 .. snapshot span: --zt is that transform (all layer, out),
@@ -15,20 +15,28 @@
 // Dots are zero-length round-capped segments in ONE path per series (non-scaling strokes keep them round while a layer
 // is scaled); a ring is the same path again, narrower, in the plate colour (<use>).
 // Labels never sit on a dot, a line or another label: place() tries anchors around each point and the build fails if no
-// anchor is clear at every plate width from 288 px (a 320 px phone) to 644 px (the desktop cap).
+// anchor is clear at every plate width from 288 px (a 320 px phone) to 644 px (the desktop cap). Tick labels get the same
+// test along their axis (ticks()): 6 px from the corner labels and from each other, 2 px from every mark (the omega point's
+// halo included), else hidden under 330 px or left out; the plot floor (P.y1) leaves the corner row its room.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { model, YRD, isoMs, DAY, fmt } from '../singularity.model.mjs'
 
 export const VB = 360
-export const P = { x0: 50, x1: 346, y0: 34, y1: 312 }
+// the floor sits 60 units above the plate's bottom: at 288 px the tick row ends 6 px above the BL / BR corner labels
+export const P = { x0: 50, x1: 346, y0: 34, y1: 300 }
 const TAU = 10 // days: the all-history x axis is log10(days before + TAU), so the snapshot itself sits on the right edge
 const LA = Math.log10(8e9 * YRD) // left edge of the all-history x axis and top of its y axis (8 billion years, in days)
 const YA0 = Math.log10(0.1)
-const Z0 = '2020-01-01', Z1 = '2028-03-01', YZ0 = Math.log10(0.25), YZ1 = Math.log10(1500)
+const Z0 = '2020-01-01', Z1 = '2028-03-01', YZ0 = Math.log10(0.2), YZ1 = Math.log10(1500)
 const WIDTHS = [288, 358, 463, 596, 644] // plate px: 320 phone, 390 phone, 1024 two-column, 1440 desktop, the height cap
-const fontPx = (w) => (w < 330 ? 10 : w >= 450 ? 11.5 : 11) // chapter.css @container fig steps
-const CH = 0.6 // IBM Plex Mono advance, em
+const fontPx = (w) => (w < 330 ? 10 : w >= 450 ? 11.5 : 11) // chapter.css @container fig steps (10 px under 330: at 10.5 the y labels and the 50 % band label no longer fit a 288 px plate)
+const TX = 6, TY = 6 // chapter.css: a y tick label ends 6 px left of the axis (.yt), an x tick label starts 6 px below it (.xt)
+// px: the omega point's halo and core radii (non-scaling strokes): 8 and 5, or 7 and 4 on plates under 330 px (chapter.css)
+const HALO = (w) => (w < 330 ? 7 : 8), CORE = (w) => (w < 330 ? 4 : 5)
+// IBM Plex Mono's advance is 0.6 em; a renderer that hints glyphs (Linux, the headless checks) sets the size to whole
+// pixels and rounds the advance (10.5 px -> 7 px, not 6.3), so a box takes the wider of the two
+const chPx = (f) => Math.max(0.6 * f, Math.round(0.6 * Math.round(f)))
 
 const n1 = (v) => { const s = (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, ''); return s === '-0' ? '0' : s }
 const n2 = (v) => String(Math.round(v * 100) / 100)
@@ -80,16 +88,16 @@ const cssOf = (a, g) => ({ ne: [`${g + 2}px`, `calc(-100% - ${g}px)`], e: [`${g 
   sw: [`calc(-100% - ${g + 2}px)`, `${g}px`], w: [`calc(-100% - ${g + 5}px)`, '-50%'], nw: [`calc(-100% - ${g + 2}px)`, `calc(-100% - ${g}px)`], n: ['-50%', `calc(-100% - ${g + 3}px)`] })[a]
 // the four corner labels (shell figure.css: 11 px Plex Mono, .08em tracking, 10 px from the plate's edges), in px at width w
 const CORNERS = [[0, 0, 'Fig. 9'], [1, 0, 'Wait · log'], [0, 1, '22 + 41 events'], [1, 1, 'Snapshot']]
-const cornerBoxes = (w) => CORNERS.map(([r, b, t]) => { const cw = t.length * 11 * 0.68; return { x0: r ? w - 10 - cw : 10, x1: r ? w - 10 : 10 + cw, y0: b ? w - 21 : 10, y1: b ? w - 10 : 21 } })
+const cornerBoxes = (w) => CORNERS.map(([r, b, t]) => { const cw = t.length * (chPx(11) + 0.08 * 11); return { x0: r ? w - 10 - cw : 10, x1: r ? w - 10 : 10 + cw, y0: b ? w - 21 : 10, y1: b ? w - 10 : 21 } })
 export function boxAt(L, w) {
-  const k = w / VB, f = fontPx(w), lines = L.text.split('\n'), bw = Math.max(...lines.map((s) => s.length)) * f * CH, bh = lines.length * f * 1.25
+  const k = w / VB, f = fontPx(w), lines = L.text.split('\n'), bw = Math.max(...lines.map((s) => s.length)) * chPx(f), bh = lines.length * f * 1.25
   const [ox, oy] = ANCHORS[L.anchor](bw, bh, L.gap ?? 3)
   const x = L.x * k + ox, y = L.y * k + oy
   return { x0: x, y0: y, x1: x + bw, y1: y + bh }
 }
 const segDist = (px, py, [ax, ay], [bx, by]) => { const dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy || 1))); return Math.hypot(px - ax - t * dx, py - ay - t * dy) }
 export function hitsBox(B, ob, k, pad = 2) {
-  if (ob.dot) { const [cx, cy] = [ob.dot[0] * k, ob.dot[1] * k], r = ob.r + pad; return cx > B.x0 - r && cx < B.x1 + r && cy > B.y0 - r && cy < B.y1 + r && Math.hypot(Math.max(B.x0 - cx, 0, cx - B.x1), Math.max(B.y0 - cy, 0, cy - B.y1)) < r }
+  if (ob.dot) { const [cx, cy] = [ob.dot[0] * k, ob.dot[1] * k], r = (typeof ob.r === 'function' ? ob.r(k * VB) : ob.r) + pad; return cx > B.x0 - r && cx < B.x1 + r && cy > B.y0 - r && cy < B.y1 + r && Math.hypot(Math.max(B.x0 - cx, 0, cx - B.x1), Math.max(B.y0 - cy, 0, cy - B.y1)) < r }
   if (ob.seg) {
     const [a, b] = ob.seg.map(([x, y]) => [x * k, y * k])
     // the segment meets the padded box: sample it (segments are short polyline pieces)
@@ -122,6 +130,34 @@ export function place(L, order, obstacles, inside, gaps = [3, 6, 10], ws = WIDTH
 }
 const segsOf = (pts) => pts.slice(1).map((p, i) => ({ seg: [pts[i], p] }))
 
+// ------------------------------------------------------------------------------------------------ tick labels
+export function tickBox(T, w) {
+  const k = w / VB, f = fontPx(w), bw = T.text.length * chPx(f), bh = f * 1.25
+  return /^yt/.test(T.cls) ? { x0: T.x * k - TX - bw, x1: T.x * k - TX, y0: T.y * k - bh / 2, y1: T.y * k + bh / 2 }
+    : { x0: T.x * k - bw / 2, x1: T.x * k + bw / 2, y0: T.y * k + TY, y1: T.y * k + TY + bh }
+}
+const gapOf = (A, B) => Math.max(B.x0 - A.x1, A.x0 - B.x1, B.y0 - A.y1, A.y0 - B.y1) // < 0: the boxes overlap
+// list: one axis' ticks in priority order; shown: plate width -> the tick boxes already shown in this layer. A tick shows at
+// a width when it stays inside the plate, 6 px from the corner labels and from every tick already shown (two characters
+// when either label has a space in it, "1M yr ago": one word space would read as one label), and 2 px from every mark. One that fits only from 358 px up is hidden under 330 px (class n3); one that does not fit at 358 px or
+// wider is left out. Returned in axis order.
+export function ticks(list, marks, shown) {
+  const out = []
+  for (const [i, T] of list.entries()) {
+    const fits = (w) => {
+      const B = tickBox(T, w), k = w / VB
+      const sp = / /.test(T.text), apart = (R) => gapOf(B, R) >= (sp || R.sp ? Math.max(6, 2 * chPx(fontPx(w))) : 6)
+      return B.x0 >= 2 && B.x1 <= w - 2 && !cornerBoxes(w).some((R) => gapOf(B, R) < 6) && shown.get(w).every(apart) && !marks.some((m) => hitsBox(B, m, k, 2))
+    }
+    if (!WIDTHS.slice(1).every(fits)) continue
+    const all = fits(WIDTHS[0]), C = { ...T, cls: all ? T.cls : `${T.cls} n3`, i }
+    for (const w of WIDTHS) if (all || w >= 330) shown.get(w).push({ ...tickBox(C, w), sp: / /.test(C.text) })
+    out.push(C)
+  }
+  return out.sort((a, b) => a.x - b.x || b.y - a.y).map(({ i, ...T }) => T)
+}
+const byPriority = (l) => (l.length < 3 ? l : [l[0], l[l.length - 1], ...l.slice(1, -1)]) // the ends first
+
 // ------------------------------------------------------------------------------------------------ markup
 export default async function gen({ facts, root }) {
   const S = JSON.parse(readFileSync(join(root, 'data/snapshot.json'), 'utf8'))
@@ -138,9 +174,10 @@ export default async function gen({ facts, root }) {
   const gA = gridA.y.map(([g]) => `M${P.x0} ${n1(ay(g))}H${P.x1}`).join('') + gridA.x.map(([d]) => `M${n1(ax(-d))} ${P.y0}V${P.y1}`).join('')
   // labels: ticks, the AI-era box, Kurzweil's key milestones (placed clear of every dot, the fit and each other)
   const labA = []
-  for (const [g, t] of gridA.y) labA.push({ x: P.x0, y: ay(g), text: t, cls: 'yt' })
-  for (const [d, t] of gridA.x) labA.push({ x: ax(-d), y: P.y1, text: t, cls: 'xt' })
   const obA = [...kzPts.map((dot) => ({ dot, r: 5 })), ...aiPts.concat(aiOpen).map((dot) => ({ dot, r: 4 })), ...segsOf(fitA), { rect: box }]
+  const shA = new Map(WIDTHS.map((w) => [w, []])), marksA = obA.filter((o) => o.dot)
+  labA.push(...ticks(byPriority(gridA.y.map(([g, t]) => ({ x: P.x0, y: ay(g), text: t, cls: 'yt' }))), marksA, shA))
+  labA.push(...ticks(byPriority(gridA.x.map(([d, t]) => ({ x: ax(-d), y: P.y1, text: t, cls: 'xt' }))), marksA, shA))
   const era = place({ x: (box.x0 + box.x1) / 2, y: box.y0, text: 'AI era', cls: 'c' }, ['n', 'nw'], obA, P)
   if (!era) problems.push('no clear place for "AI era"')
   else { labA.push(era); obA.push({ label: era }) }
@@ -160,7 +197,7 @@ export default async function gen({ facts, root }) {
   const zPts = M.picks.map((p) => [zx(p.d), zy(p.g)]), zOpen = M.open.map((p) => [zx(p.d), zy(p.g)])
   const om = [zx(M.omega.d), P.y1]
   const fitZs = rdp(sample((d) => zx(d), (d) => zy(M.fit.g(d)), G.zd0, 0, 200), 0.15)
-  // dashed: from the snapshot down to the floor of the plot (wait 0.25 day), then along the floor to the omega point
+  // dashed: from the snapshot down to the floor of the plot (wait 0.2 day), then along the floor to the omega point
   let dF = 0; for (let lo = 0, hi = M.omega.d; hi - lo > 1e-6;) { dF = (lo + hi) / 2; if (M.fit.g(dF) > 10 ** YZ0) lo = dF; else hi = dF }
   const fitZd = rdp(sample((d) => zx(d), (d) => zy(Math.max(M.fit.g(d), 10 ** YZ0)), 0, dF, 120), 0.15).concat([om])
   const years = []; for (let y = 2020; y <= 2028; y++) years.push(y)
@@ -168,9 +205,17 @@ export default async function gen({ facts, root }) {
   const gz = gZ.map(([g]) => `M${P.x0} ${n1(zy(g))}H${P.x1}`).join('') + years.map((y) => `M${n1(zx(G.dz(`${y}-01-01`)))} ${P.y0}V${P.y1}`).join('')
   const xNow = zx(0), band = { x0: zx(G.dz(M.range.lo)), x1: zx(G.dz(M.range.hi)) }
   const labZ = []
-  for (const [g, t] of gZ) labZ.push({ x: P.x0, y: zy(g), text: t, cls: 'yt' })
-  for (const y of years) labZ.push({ x: zx(G.dz(`${y}-01-01`)), y: P.y1, text: String(y), cls: y % 2 ? 'xt n3' : 'xt' })
-  const obZ = [...zPts.concat(zOpen).map((dot) => ({ dot, r: 4 })), ...segsOf(fitZs), ...segsOf(fitZd), { dot: om, r: 7 }, { seg: [[xNow, P.y0], [xNow, P.y1]] }]
+  const obZ = [...zPts.concat(zOpen).map((dot) => ({ dot, r: 4 })), ...segsOf(fitZs), ...segsOf(fitZd), { dot: om, r: HALO }, { seg: [[xNow, P.y0], [xNow, P.y1]] }]
+  const shZ = new Map(WIDTHS.map((w) => [w, []])), marksZ = obZ.filter((o) => o.dot)
+  labZ.push(...ticks(byPriority(gZ.map(([g, t]) => ({ x: P.x0, y: zy(g), text: t, cls: 'yt' }))), marksZ, shZ))
+  // the years: the even ones first (2020 … 2028), then the odd ones between them
+  const yearTicks = years.map((y) => ({ x: zx(G.dz(`${y}-01-01`)), y: P.y1, text: String(y), cls: 'xt' }))
+  labZ.push(...ticks([...yearTicks.filter((_, i) => i % 2 === 0), ...yearTicks.filter((_, i) => i % 2)], marksZ, shZ))
+  // every plate width keeps a readable scale: at least three y and two x tick labels in each view
+  for (const [v, l] of [['all history', labA], ['zoomed', labZ]]) for (const w of WIDTHS) {
+    const on = (c) => l.filter((L) => L.cls && L.cls.split(' ')[0] === c && (w >= 330 || !L.cls.includes('n3'))).length
+    if (on('yt') < 3 || on('xt') < 2) problems.push(`${v}: only ${on('yt')} y and ${on('xt')} x tick labels fit at ${w} px`)
+  }
   // the open gap's arrow (up: the wait is at least this long)
   const [ox, oy] = zOpen[0] || [0, 0], arrowTop = oy - 22
   if (zOpen[0]) obZ.push({ seg: [[ox, oy], [ox, arrowTop]] })
@@ -204,7 +249,7 @@ export default async function gen({ facts, root }) {
     + `<path class="be" stroke-dasharray="2 3" d="M${n1(band.x0)} ${P.y0}V${P.y1}M${n1(band.x1)} ${P.y0}V${P.y1}"/><path class="now" d="M${n1(xNow)} ${P.y0}V${P.y1}"/>`
     + `<path class="fit" stroke-width="2" d="${poly(fitZs)}"/><path class="fit" stroke-width="2" stroke-dasharray="5 4" d="${poly(fitZd)}"/><path class="pk" stroke-width="6" d="${dots(zPts)}"/>`
     + (zOpen[0] ? `<path class="ar" stroke-width="1.5" d="M${n1(ox)} ${n1(oy - 6)}V${n1(arrowTop)}M${n1(ox - 3.5)} ${n1(arrowTop + 4)}l3.5-4 3.5 4"/><g class="pk op" stroke-width="9"><path id="f9z" d="${dots(zOpen)}"/></g><use href="#f9z" class="in" stroke-width="5.5"/>` : '')
-    + `<path class="fit" stroke-width="20" opacity=".25" d="M${n1(om[0])} ${n1(om[1])}h0"/><path class="fit" stroke-width="10" d="M${n1(om[0])} ${n1(om[1])}h0"/></g></g>`
+    + `<path class="fit oh" stroke-width="${HALO(VB) * 2}" opacity=".25" d="M${n1(om[0])} ${n1(om[1])}h0"/><path class="fit oc" stroke-width="${CORE(VB) * 2}" d="M${n1(om[0])} ${n1(om[1])}h0"/></g></g>`
     + `<path class="ax" d="M${P.x0} ${P.y0}V${P.y1}H${P.x1}"/></svg>`
   const html = svg + `<div class="lb s-all" aria-hidden="true">${labA.map(lab).join('')}</div><div class="lb s-zm" aria-hidden="true">${labZ.map(lab).join('')}</div>`
   // the screen-reader summary table: counts, first and last events, the omega point and its range

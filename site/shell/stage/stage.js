@@ -135,7 +135,8 @@ export function createStage({ params = new URLSearchParams(location.search), dev
   }
   function finishIntro(F) {
     const was = F.running
-    F.running = false; F.played = true
+    // played: no longer armed, so a later button press is a plain set() (setState settles only a pending or running intro)
+    F.running = false; F.played = true; F.armed = false
     if (F.kind === 'dom') { try { F.desc.settle && F.desc.settle(F.fig) } catch (e) { console.error(e) } }
     else if (F.scene) applySnap(F, F.scene.snapshot())
     if (was) S.introLog.push(`${Math.round(performance.now())} end ${F.id}`)

@@ -47,4 +47,10 @@
   .idx .l{display:none}.idx .s{display:inline-block}
 }
 @media (max-width:359px){.idx .nm{display:none}}
+/* late:start */
+/* under 360 px only the counter shows; in the side project (main.js sets .is-side as it scrolls in, after late.css) the
+   06/06 it keeps would read as chapter 06, so it reads SIDE there (.ns, hidden otherwise), in a slot as wide as 06/06:
+   the button never changes width */
+@media (max-width:359px){.idx.is-side .n{display:none}.idx.is-side .ns{display:inline-block;min-width:calc(5 * (1ch + .06em))}}
+/* late:end */
 /* the index dialog styles live in dialog.css, which ships in late.css (main.js loads it before the first open) */

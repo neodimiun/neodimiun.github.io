@@ -1,9 +1,13 @@
 // tools/check.mjs (DS lead) — the Path C harness. Extends the prototype harness (same JSON fields per profile) with the stage,
 // rest checks at every figure, readout/ledger/facts equality and, with --full, the SPEC-C §14 layout and fallback profiles.
-//   node tools/check.mjs <index | dev-<slug> | path.html> [out-prefix] [--full] [--root=<dir> | --base=<url>]
+// Two accessibility profiles follow the three device profiles: a keyboard Tab-walk (keyboard-WxH) and WCAG 1.4.12 text
+// spacing (spacing-WxH), one JSON line each.
+//   node tools/check.mjs <index | dev-<slug> | path.html> [out-prefix] [--full] [--a11y] [--root=<dir> | --base=<url>]
 //   Without --base it serves --root itself (relative to site/; default .build/www; `npm run check` passes --root=..).
+//   --a11y runs only the accessibility profiles (with --full, the --full block too).
 //   Every HTTP response >= 400 and every failed request is a hard failure (missing asset).
-// Exit code 1 when a hard check fails (renders/frames at rest, overflow, readout/ledger mismatch, page errors).
+// Exit code 1 when a hard check fails (renders/frames at rest, overflow, readout/ledger mismatch, page errors, focus
+// order / visibility, text spacing).
 import { chromium, devices } from 'playwright'
 import { readFileSync, mkdirSync, existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
@@ -18,6 +22,7 @@ const file = target.endsWith('.html') ? target : `${target}.html`
 const out = pos[1] || join(C, '.build/check', target)
 mkdirSync(dirname(out), { recursive: true })
 const FULL = args.includes('--full')
+const A11Y = args.includes('--a11y') // only the keyboard and text-spacing profiles
 let base = (args.find((a) => a.startsWith('--base=')) || '').slice(7)
 let srv = null
 if (!base) {
@@ -112,6 +117,60 @@ async function headerAndAnchors(page) {
   return out
 }
 
+// in-page helpers shared by the --full layout checks and the accessibility checks below. chk(page) installs them as
+// window.__chk (each is sent as its source text, so it may use only the page and window.__chk)
+const pageHelpers = {
+  // the header row (R5, §14 item 56): its visible items left to right, whether two overlap, the index button's label
+  headerRow() {
+    const hd = document.querySelector('.hd-row'), vis = (el) => el && getComputedStyle(el).display !== 'none'
+    const items = [...hd.children].filter(vis).map((el) => { const r = el.getBoundingClientRect(); return { c: el.className.split(' ')[0], l: Math.round(r.left), r: Math.round(r.right), h: Math.round(r.height) } })
+    const overlap = items.some((a, i) => items.slice(i + 1).some((b) => a.r > b.l + 0.5))
+    const idx = document.querySelector('.idx')
+    return { header: items, overlap, idxLabel: vis(idx) ? idx.innerText.replace(/\s+/g, ' ').trim() : null, idxClipped: vis(idx) ? idx.scrollWidth > idx.clientWidth : null }
+  },
+  // "In this page" rows: a part whose text is wider than its box
+  contentsCut() {
+    return [...document.querySelectorAll('.contents a > span')].filter((e) => getComputedStyle(e).display !== 'none' && e.scrollWidth > e.clientWidth + 1).map((e) => e.textContent)
+  },
+  // visible text runs under root: one box per SVG <text>, and per HTML text node (or, with lines, per line of it)
+  runs(root, { lines = false } = {}) {
+    const vis = (el) => el.checkVisibility({ opacityProperty: true, visibilityProperty: true })
+    const runs = []
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    for (let n; (n = tw.nextNode());) {
+      const el = n.parentElement
+      if (!n.data.trim() || !el || el.closest('.sr-only,[aria-hidden="true"] title') || !vis(el)) continue
+      const t = n.data.trim().slice(0, 24)
+      if (el instanceof SVGElement) {
+        const R = (el.closest('text') || el).getBoundingClientRect()
+        if (R.width >= 1 && R.height >= 1) runs.push({ t, R, el: el.closest('text') || el })
+        continue
+      }
+      const rg = document.createRange(); rg.selectNodeContents(n)
+      for (const R of lines ? rg.getClientRects() : [rg.getBoundingClientRect()]) if (R.width >= 1 && R.height >= 1) runs.push({ t, R, el })
+    }
+    return runs
+  },
+  // a short name for a finding: section, tag.firstClass and (text) the accessible name or text
+  label(el, text = true) {
+    const s = el.closest('section[id], #contact, footer, header'), c = typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/)[0] : ''
+    return `${s && s !== el ? `${s.id || s.tagName.toLowerCase()} ` : ''}${el.tagName.toLowerCase()}${c}${text ? ` "${(el.getAttribute('aria-label') || el.textContent).replace(/\s+/g, ' ').trim().slice(0, 28)}"` : ''}`
+  },
+  // pairs of runs from unrelated elements whose boxes share more than 2 × 3 px (a text box is taller than its glyphs)
+  overlaps(runs) {
+    const out = []
+    for (let i = 0; i < runs.length; i++) {
+      for (let j = i + 1; j < runs.length; j++) {
+        const a = runs[i], b = runs[j]
+        const x = Math.min(a.R.right, b.R.right) - Math.max(a.R.left, b.R.left), y = Math.min(a.R.bottom, b.R.bottom) - Math.max(a.R.top, b.R.top)
+        if (x > 2 && y > 3 && a.el !== b.el && !a.el.contains(b.el) && !b.el.contains(a.el)) out.push({ a, b, x, y })
+      }
+    }
+    return out
+  },
+}
+const chk = (page) => page.evaluate(`window.__chk = {${Object.values(pageHelpers).map(String).join(',\n')}}`)
+
 async function run(name, ctxOpts, { throttle = 1, reduced = false } = {}) {
   const ctx = await browser.newContext({ ...ctxOpts, reducedMotion: reduced ? 'reduce' : 'no-preference' })
   const page = await ctx.newPage()
@@ -196,25 +255,156 @@ async function run(name, ctxOpts, { throttle = 1, reduced = false } = {}) {
   await ctx.close()
 }
 
-await run('desktop', { viewport: { width: 1440, height: 900 } })
-await run('mobile', { ...devices['Pixel 7'] }, { throttle: 4 })
-await run('mobile-reduced', { ...devices['iPhone 13'] }, { reduced: true })
+// a fresh page for an accessibility profile: page errors and HTTP errors are hard failures, as in run()
+async function freshPage(w, h, query = '') {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } })
+  const page = await ctx.newPage(), hard = []
+  page.on('pageerror', (e) => hard.push(`pageerror: ${e}`))
+  page.on('response', (r) => { if (r.status() >= 400) hard.push(`HTTP ${r.status()} ${r.url()}`) })
+  page.on('requestfailed', (r) => { if (!/ERR_ABORTED/.test(r.failure()?.errorText || '')) hard.push(`request failed ${r.url()} (${r.failure()?.errorText})`) })
+  await page.goto(url + (query ? (url.includes('?') ? '&' : '?') + query : ''), { waitUntil: 'load' })
+  await page.waitForTimeout(1000); await chk(page)
+  return { ctx, page, hard }
+}
+
+// keyboard Tab-walk (WCAG 2.1.1, 2.1.2, 2.4.3, 2.4.7, 2.4.11) at 390 × 844 and 1440 × 900, motion on: from the top, Tab
+// through every focusable element until focus leaves the page or wraps to the start (cap 400 presses). Each one outside
+// the sticky header, the skip link and an open dialog must, once the browser has scrolled it into view, lie fully inside
+// the viewport and not under the header (top ≥ header bottom), and show a :focus-visible indicator (an outline of some
+// width, or a box-shadow). The walk must reach the footer's last focusable, every figure control and every <details>
+// summary, and must not return to an element before it ends (a focus trap).
+const FOCUSABLE = 'a[href], area[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, iframe, [tabindex]:not([tabindex="-1"]), [contenteditable=""], [contenteditable="true"]'
+const tabStep = async (i) => {
+  // the focus scroll is smooth under html.motion: wait for 8 frames without movement (2 s at most)
+  for (let y = scrollY, calm = 0, k = 0; k < 120 && calm < 8; k++) { await new Promise((r) => requestAnimationFrame(r)); calm = scrollY === y ? calm + 1 : 0; y = scrollY }
+  const el = document.activeElement
+  if (!el || el === document.body || el === document.documentElement) return { out: true }
+  const name = window.__chk.label(el), seen = window.__tab || (window.__tab = new Map())
+  if (seen.has(el)) return { name, again: seen.get(el) }
+  seen.set(el, i)
+  if (el.closest('.site-hd, dialog[open]') || el.matches('.skip')) return { name, exempt: true }
+  const R = el.getBoundingClientRect(), hd = document.querySelector('.site-hd').getBoundingClientRect().bottom, c = getComputedStyle(el)
+  const W = document.documentElement.clientWidth, H = document.documentElement.clientHeight
+  const ring = el.matches(':focus-visible') && ((c.outlineStyle !== 'none' && parseFloat(c.outlineWidth) > 0 && !/^(transparent|rgba\(.*,\s*0\))$/.test(c.outlineColor)) || c.boxShadow !== 'none')
+  return { name, box: [R.left, R.top, R.right, R.bottom].map(Math.round), hd: Math.round(hd), inView: R.left >= -0.5 && R.top >= -0.5 && R.right <= W + 0.5 && R.bottom <= H + 0.5, belowHeader: R.top >= hd - 0.5, ring }
+}
+const tabReach = (sel) => {
+  const seen = window.__tab || new Map(), vis = (el) => el.checkVisibility({ visibilityProperty: true }), name = window.__chk.label
+  const ft = [...document.querySelectorAll('.site-ft')].flatMap((f) => [...f.querySelectorAll(sel)]).filter(vis), last = ft[ft.length - 1]
+  const controls = [...document.querySelectorAll('figure.fig .ctrl button')].filter((b) => vis(b) && !b.disabled)
+  const summaries = [...document.querySelectorAll('details > summary:first-of-type')].filter(vis)
+  return { footerLast: last ? name(last) : null, footerLastReached: !!last && seen.has(last), controls: controls.length, summaries: summaries.length,
+    missedControls: controls.filter((e) => !seen.has(e)).map((e) => name(e)), missedSummaries: summaries.filter((e) => !seen.has(e)).map((e) => name(e)) }
+}
+async function tabWalk(w, h) {
+  const t0 = Date.now(), { ctx, page, hard } = await freshPage(w, h)
+  const steps = []; let end = 'cap of 400 presses'
+  for (let i = 0; i < 400; i++) {
+    await page.keyboard.press('Tab')
+    const s = await page.evaluate(tabStep, i)
+    if (s.out) { end = 'left the page'; break }
+    if (s.again != null) { end = s.again === 0 ? 'wrapped to the start' : `back to ${s.name} (press ${s.again + 1}) at press ${i + 1}`; break }
+    steps.push(s)
+  }
+  const reach = await page.evaluate(tabReach, FOCUSABLE)
+  const offscreen = steps.filter((s) => !s.exempt && !(s.inView && s.belowHeader)).map((s) => `${s.name} at ${s.box.join(',')} (header bottom ${s.hd})`)
+  const noRing = steps.filter((s) => !s.exempt && !s.ring).map((s) => s.name)
+  flag(/^(left the page|wrapped)/.test(end), `focus trap: ${end}`, hard)
+  flag(!offscreen.length, `focused outside the viewport or under the header: ${offscreen.slice(0, 4).join('; ')}`, hard)
+  flag(!noRing.length, `no visible focus indicator: ${noRing.slice(0, 4).join('; ')}`, hard)
+  flag(reach.footerLastReached, `the footer's last focusable was not reached: ${reach.footerLast}`, hard)
+  flag(!reach.missedControls.length && reach.controls > 0, `figure controls not reached: ${reach.missedControls.slice(0, 6).join('; ') || 'none on the page'}`, hard)
+  flag(!reach.missedSummaries.length && reach.summaries > 0, `summaries not reached: ${reach.missedSummaries.slice(0, 6).join('; ') || 'none on the page'}`, hard)
+  if (hard.length) hardFail = true
+  console.log(JSON.stringify({ name: `keyboard-${w}x${h}`, presses: steps.length + 1, end, focused: steps.length, exempt: steps.filter((s) => s.exempt).length, offscreen, noRing, reach, ms: Date.now() - t0, hard }))
+  await ctx.close()
+}
+
+// WCAG 1.4.12 text spacing at 320 × 640, 390 × 844 and 1280 × 800, figures final (?intro=0), every chapter laid out (as
+// main.js does before a jump) and every <details> open: line height 1.5, letter spacing 0.12em, word spacing 0.16em and
+// 2em after paragraphs, all !important, on HTML text only (each outer <svg> keeps the spacing it inherited, so drawings
+// and their SVG text are unchanged). Asserts: no horizontal page overflow and no visible text past the viewport (body
+// clips x, so scrollWidth alone misses it); no text line cut by an overflow hidden / clip box (the box's scrollWidth or
+// scrollHeight exceeds its client box because of that text, by more than the 3 px a text box is taller than its glyphs);
+// no two unrelated text lines overlap (runs / overlaps, as in the --full figure-label check); header items neither
+// overlap nor leave the viewport, the index label and the "In this page" rows are not cut (headerRow / contentsCut, as
+// in the --full sweep). A finding inside a SPACING_ALLOW selector is reported under `allowed`, not failed.
+const TEXT_SPACING = 'body *:not(svg, svg *){line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}body p{margin-bottom:2em!important}'
+const SPACING_ALLOW = [
+  ['.plate', 'in-plot text (A6) is placed on measured fixed metrics inside the drawing, like the SVG text the override skips'],
+]
+const applySpacing = (css) => {
+  document.documentElement.classList.remove('c0')
+  for (const s of document.querySelectorAll('main > .ch, #contact, .site-ft')) s.style.contentVisibility = 'visible'
+  for (const d of document.querySelectorAll('details')) d.open = true
+  const keep = [...document.querySelectorAll('svg')].filter((s) => !s.parentElement?.closest('svg')).map((s) => { const c = getComputedStyle(s); return [s, c.letterSpacing, c.wordSpacing] })
+  document.head.append(Object.assign(document.createElement('style'), { textContent: css }))
+  for (const [s, l, ws] of keep) { s.style.setProperty('letter-spacing', l, 'important'); s.style.setProperty('word-spacing', ws, 'important') }
+}
+const spacingAudit = (allow) => {
+  const H = window.__chk, W = document.documentElement.clientWidth, cs = new Map(), cutBy = new Map()
+  const st = (e) => { if (!cs.has(e)) cs.set(e, getComputedStyle(e)); return cs.get(e) }
+  const res = { overflowX: document.documentElement.scrollWidth > W, beyond: [], clipped: [], overlaps: [], ...H.headerRow(), contentsCut: H.contentsCut(), allowed: [] }
+  res.headerOut = res.header.filter((i) => i.l < -0.5 || i.r > W + 0.5).map((i) => i.c)
+  const add = (key, els, msg) => { const a = allow.find(([sel]) => els.some((e) => e.closest(sel))); if (a) res.allowed.push(`${key}: ${msg} [${a[0]}]`); else res[key].push(msg) }
+  const runs = H.runs(document.body, { lines: true }).filter((r) => !r.el.closest('.skip'))
+  for (const r of runs) {
+    if (r.el instanceof SVGElement) continue // not overridden; still an overlap partner
+    // clip the line to every overflow hidden / clip box above it (below body: body's x clip is the viewport, `beyond`)
+    let { left, right, top, bottom } = r.R
+    for (let a = r.el; a && a !== document.body; a = a.parentElement) {
+      const c = st(a), cx = c.overflowX !== 'visible', cy = c.overflowY !== 'visible'
+      if (!cx && !cy) continue
+      const B = a.getBoundingClientRect(), m = c.overflowX === 'clip' && c.overflowY === 'clip' ? parseFloat(c.overflowClipMargin) || 0 : 0
+      const bl = B.left + a.clientLeft - m, bt = B.top + a.clientTop - m, br = bl + a.clientWidth + 2 * m, bb = bt + a.clientHeight + 2 * m
+      // only hidden / clip lose the text (auto / scroll scroll to it); every box limits what is visible
+      const lx = c.overflowX === 'hidden' || c.overflowX === 'clip', ly = c.overflowY === 'hidden' || c.overflowY === 'clip'
+      if ((lx && (left < bl - 3 || right > br + 3)) || (ly && (top < bt - 3 || bottom > bb + 3))) {
+        const done = cutBy.get(a) || new Set()
+        if (!done.has(r.el)) add('clipped', [r.el], `${H.label(r.el)} cut by ${H.label(a, false)} (${c.overflowX}/${c.overflowY}, scroll ${a.scrollWidth}×${a.scrollHeight}, client ${a.clientWidth}×${a.clientHeight})`)
+        cutBy.set(a, done.add(r.el))
+      }
+      if (cx) { left = Math.max(left, bl); right = Math.min(right, br) }
+      if (cy) { top = Math.max(top, bt); bottom = Math.min(bottom, bb) }
+    }
+    r.R = { left, right, top, bottom }
+    if (right - left >= 1 && (right > W + 1 || left < -1)) add('beyond', [r.el], `${H.label(r.el)} ${Math.round(left)}–${Math.round(right)} (viewport ${W})`)
+  }
+  for (const { a, b, x, y } of H.overlaps(runs.filter((r) => r.R.right - r.R.left >= 1 && r.R.bottom - r.R.top >= 1))) add('overlaps', [a.el, b.el], `${H.label(a.el)} × ${H.label(b.el)} (${Math.round(x)}×${Math.round(y)})`)
+  return res
+}
+async function textSpacing(w, h) {
+  const t0 = Date.now(), { ctx, page, hard } = await freshPage(w, h, 'intro=0')
+  await page.evaluate(applySpacing, TEXT_SPACING)
+  await page.waitForTimeout(300)
+  const r = await page.evaluate(spacingAudit, SPACING_ALLOW)
+  flag(!r.overflowX && !r.beyond.length, `horizontal overflow${r.overflowX ? ' (scrollWidth)' : ''}: ${r.beyond.slice(0, 4).join('; ')}`, hard)
+  flag(!r.clipped.length, `text cut by its box: ${r.clipped.slice(0, 4).join('; ')}`, hard)
+  flag(!r.overlaps.length, `overlapping text: ${r.overlaps.slice(0, 4).join('; ')}`, hard)
+  flag(!r.overlap && !r.headerOut.length && !r.idxClipped && !r.contentsCut.length, `header / contents: ${JSON.stringify({ header: r.header, idxClipped: r.idxClipped, contentsCut: r.contentsCut })}`, hard)
+  if (hard.length) hardFail = true
+  console.log(JSON.stringify({ name: `spacing-${w}x${h}`, ...r, ms: Date.now() - t0, hard }))
+  await ctx.close()
+}
+
+if (!A11Y) {
+  await run('desktop', { viewport: { width: 1440, height: 900 } })
+  await run('mobile', { ...devices['Pixel 7'] }, { throttle: 4 })
+  await run('mobile-reduced', { ...devices['iPhone 13'] }, { reduced: true })
+}
+for (const [w, h] of [[390, 844], [1440, 900]]) await tabWalk(w, h)
+for (const [w, h] of [[320, 640], [390, 844], [1280, 800]]) await textSpacing(w, h)
 
 if (FULL) {
   const res = {}, problems = []
   // overflow sweep (§14 item 41) + header at 320 / 360 (item 56)
   for (const w of [320, 360, 375, 390, 768, 1024, 1180, 1280, 1440, 1920]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: w < 768 ? 640 : 900 } })
-    const p = await ctx.newPage(); await p.goto(url); await p.waitForTimeout(800)
+    const p = await ctx.newPage(); await p.goto(url); await p.waitForTimeout(800); await chk(p)
     res[`w${w}`] = await p.evaluate(() => {
-      const hd = document.querySelector('.hd-row'), vis = (el) => el && getComputedStyle(el).display !== 'none'
-      const items = [...hd.children].filter(vis).map((el) => { const r = el.getBoundingClientRect(); return { c: el.className.split(' ')[0], l: Math.round(r.left), r: Math.round(r.right), h: Math.round(r.height) } })
-      const overlap = items.some((a, i) => items.slice(i + 1).some((b) => a.r > b.l + 0.5))
-      const idx = document.querySelector('.idx')
-      return { overflowX: document.documentElement.scrollWidth > innerWidth, header: items, overlap,
-        idxLabel: vis(idx) ? idx.innerText.replace(/\s+/g, ' ').trim() : null, idxClipped: vis(idx) ? idx.scrollWidth > idx.clientWidth : null,
+      return { overflowX: document.documentElement.scrollWidth > innerWidth, ...window.__chk.headerRow(),
         summariesOneLine: [...document.querySelectorAll('details.methods > summary')].every((s) => s.getBoundingClientRect().height <= 46),
-        contentsCut: [...document.querySelectorAll('.contents a > span')].filter((e) => vis(e) && e.scrollWidth > e.clientWidth + 1).map((e) => e.textContent),
+        contentsCut: window.__chk.contentsCut(),
         frameEdge: innerWidth < 1024 ? [] : [...document.querySelectorAll('.fig--plate')].filter((f) => getComputedStyle(f).getPropertyValue('--aspect').trim()).flatMap((f) => { const pr = f.querySelector(':scope > .plate')?.getBoundingClientRect().right; return [...f.querySelectorAll(':scope > .readout, :scope > .ctrl, :scope > figcaption')].filter((e) => e.getBoundingClientRect().right > pr + 1).map((e) => `${f.id} .${e.className.split(' ')[0] || e.tagName.toLowerCase()}`) }) }
     })
     flag(!res[`w${w}`].overflowX && !res[`w${w}`].overlap && !res[`w${w}`].idxClipped && !res[`w${w}`].contentsCut.length && !res[`w${w}`].frameEdge.length, `layout at ${w}: ${JSON.stringify(res[`w${w}`])}`, problems)
@@ -227,31 +417,16 @@ if (FULL) {
   // stays on one line
   for (const [w, h] of [[1024, 600], [1280, 720], [1366, 657], [1440, 900], [1920, 1080], [390, 844]]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h } })
-    const p = await ctx.newPage(); await p.goto(url + (url.includes('?') ? '&' : '?') + 'intro=0'); await p.waitForTimeout(800)
+    const p = await ctx.newPage(); await p.goto(url + (url.includes('?') ? '&' : '?') + 'intro=0'); await p.waitForTimeout(800); await chk(p)
     const r = res[`fig${w}x${h}`] = await p.evaluate(() => {
       const vis = (el) => el.checkVisibility({ opacityProperty: true, visibilityProperty: true })
       const out = { overlaps: [], clipped: [], ctrlRows: [] }
       for (const f of document.querySelectorAll('figure.fig')) {
         const plate = f.querySelector(':scope > .plate'); if (!plate) continue
         f.scrollIntoView({ block: 'center', behavior: 'instant' })
-        const P = plate.getBoundingClientRect(), runs = []
-        const tw = document.createTreeWalker(plate, NodeFilter.SHOW_TEXT)
-        for (let n; (n = tw.nextNode());) {
-          const el = n.parentElement
-          if (!n.data.trim() || !el || el.closest('.sr-only,[aria-hidden="true"] title') || !vis(el)) continue
-          const rg = document.createRange(); rg.selectNodeContents(n)
-          const R = el instanceof SVGElement ? (el.closest('text') || el).getBoundingClientRect() : rg.getBoundingClientRect()
-          if (R.width < 1 || R.height < 1) continue
-          runs.push({ t: n.data.trim().slice(0, 24), R, el: el instanceof SVGElement ? el.closest('text') || el : el })
-        }
-        for (const [i, a] of runs.entries()) {
-          if (a.R.left < P.left - 3 || a.R.right > P.right + 3 || a.R.top < P.top - 3 || a.R.bottom > P.bottom + 3) out.clipped.push(`${f.id} "${a.t}"`)
-          for (const b of runs.slice(i + 1)) {
-            if (a.el === b.el || a.el.contains(b.el) || b.el.contains(a.el)) continue
-            const x = Math.min(a.R.right, b.R.right) - Math.max(a.R.left, b.R.left), y = Math.min(a.R.bottom, b.R.bottom) - Math.max(a.R.top, b.R.top)
-            if (x > 2 && y > 3) out.overlaps.push(`${f.id} "${a.t}" × "${b.t}" (${Math.round(x)}×${Math.round(y)})`)
-          }
-        }
+        const P = plate.getBoundingClientRect(), runs = window.__chk.runs(plate)
+        for (const a of runs) if (a.R.left < P.left - 3 || a.R.right > P.right + 3 || a.R.top < P.top - 3 || a.R.bottom > P.bottom + 3) out.clipped.push(`${f.id} "${a.t}"`)
+        for (const { a, b, x, y } of window.__chk.overlaps(runs)) out.overlaps.push(`${f.id} "${a.t}" × "${b.t}" (${Math.round(x)}×${Math.round(y)})`)
         const c = f.querySelector(':scope > .ctrl')
         if (c && vis(c) && innerWidth >= 1024) { const tops = new Set([...c.querySelectorAll('button')].filter((b) => b.getClientRects().length && vis(b)).map((b) => Math.round(b.getBoundingClientRect().top))); if (tops.size > 1) out.ctrlRows.push(`${f.id}: ${tops.size} rows`) }
       }
@@ -334,7 +509,7 @@ if (FULL) {
   // Fig. 8 verifier probes (§14 items 10(b)/(c), 12, 13, 50): crypto.subtle call counts per state, fault injection, the
   // no-subtle fallback. They live in DI's review tool; run it against this page when the page carries the ledger.
   const diTool = join(C, 'chapters/06-data-integrity/tools/verify.mjs')
-  if (existsSync(diTool) && /id="fig-record"/.test(readFileSync(join(C, file), 'utf8'))) {
+  if (existsSync(diTool) && /id="fig-record"/.test(await (await fetch(url)).text())) {
     const r = spawnSync(process.execPath, [diTool, file.replace(/\.html$/, ''), `--base=${base}`], { encoding: 'utf8', timeout: 300000 })
     const tail = (r.stdout + r.stderr).trim().split('\n').slice(-3).join(' | ')
     res.ledgerVerifier = { exit: r.status, tail: tail.slice(0, 600) }

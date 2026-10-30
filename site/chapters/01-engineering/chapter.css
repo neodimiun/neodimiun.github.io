@@ -33,8 +33,12 @@
 #engineering .hero > .eyebrow{--ls:.08em;--sep:calc(2ch + 2 * var(--ls));letter-spacing:var(--ls)}
 #engineering .eyebrow .ey{display:block;margin-left:calc(-1 * var(--sep))}
 #engineering .eyebrow .nw::before{content:"·" / ", ";display:inline-block;width:var(--sep);text-align:left}
-/* one clause per line at every width (28 px at 320: "Under the number," is 9.6 em = 269 px of 288) */
-#engineering .hero h1 .s{display:inline-block;white-space:nowrap}
+/* one clause per line at every width (28 px at 320: "Under the number," is 9.6 em = 269 px of 288). Below 1024 the h1
+   is as wide as the screen: there the inline-block alone keeps a clause whole, and a clause wider than the line (user
+   text spacing, WCAG 1.4.12) wraps inside its box instead of running off the screen. On desktop a clause may run past
+   the five text columns (from 1400 px) into the empty sixth, so it never wraps there */
+#engineering .hero h1 .s{display:inline-block}
+@media (min-width:1024px){#engineering .hero h1 .s{white-space:nowrap}}
 #engineering #fig-field{--d:min(100cqi, clamp(232px, var(--svh) * 100 - 344px, 358px));margin-top:12px}
 #engineering #fig-field .fig-row,#engineering #fig-field figcaption{width:min(100%, max(var(--d), 280px));margin-inline:auto}
 #engineering .fig-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;column-gap:16px;row-gap:8px;margin-top:calc(var(--d) * .044 + 12px)}

@@ -3,6 +3,8 @@
 html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:calc(var(--header) + 16px)}
 @media (prefers-reduced-motion:no-preference){html.motion{scroll-behavior:smooth}}
 body{margin:0;background:var(--surface);color:var(--fg);font:420 17px/1.55 var(--serif);overflow-x:clip;font-kerning:normal}
+/* selection takes the chapter's accent mark on paper; resin bands keep their own rule (band.css) */
+::selection{background:color-mix(in srgb,var(--a-mark) 30%,var(--paper));color:var(--ink)}
 @media (min-width:1024px){body{font-size:18px}}
 img,svg,canvas{display:block;max-width:100%}
 p,ol,ul,figure,blockquote,h1,h2,h3{margin:0}

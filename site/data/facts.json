@@ -21,7 +21,7 @@
                    "pool":["192.168.1.100","192.168.1.199"], "resolver":"203.0.113.53", "speed":"1.0 Gbps",
                    "nsTimeout":2, "layers":[1,2,3,7] },
   "iqc":         { "tagline":"Tokenized lab data.", "status":"Independent project · open alpha · public test network · synthetic demo data",
-                   "roadmap":"Next: agentic workflows that hand verified experiment data to AI agents, plus Filecoin integration.",
+                   "roadmap":"Next: agentic workflows that feed verified experiment data to AI research agents, plus Filecoin integration.",
                    "stage":"open alpha", "data":"synthetic demo data", "network":"public test network" },
   "ledger":      { "rows":["eng.hv","chem.burette","micro.key","env.key","it.key"],
                    "tamper":{"row":"chem.burette","to":"24.60"} }

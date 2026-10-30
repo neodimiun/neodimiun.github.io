@@ -28,6 +28,7 @@ node tools/lint.mjs dev-it.html         # lint a page built into .build/www (sta
 npm run check                           # = node tools/check.mjs index --root=..  (serves the root itself)
 node tools/check.mjs dev-it             # harness on .build/www (stage, readouts, ledger, layout, HTTP errors)
 node tools/check.mjs index --full       # + 320–1920 overflow sweep, no-WebGL, context loss, hidden tab, URL-bar, header
+node tools/check.mjs index --a11y       # only the keyboard Tab-walk and WCAG 1.4.12 text-spacing profiles (§12)
 node tools/cvd.mjs index                # rendered colour-vision check of Figs. 7 and 8 (needs a server: --base=<url>)
 node data/facts.assert.mjs              # every displayed number recomputed (npm run facts)
 node tools/scaffold.mjs                 # writes day-0 placeholders ONLY for missing chapter files (never overwrites)
@@ -379,6 +380,19 @@ stats, layout{overflowX, canvases, h1, drawCalls, triangles, pixelRatio, cpuMs, 
 (each `[data-fact-readout]` vs facts) and `ledger` (cell = readout = facts). `--full` adds the overflow sweep
 (320–1920), header at 320/360, no-WebGL, forced context loss, hidden tab and the URL-bar (pinned `--svh`) test.
 Screenshots go to `<out-prefix>-<profile>-*.png` (default `.build/check/`).
+
+Two accessibility profiles follow (one JSON line each, hard failures like the rest; `--a11y` runs only these, about 40 s):
+
+- `keyboard-390x844`, `keyboard-1440x900`: a Tab-walk from the top until focus leaves the page (cap 400 presses). Every
+  focused element outside the sticky header, the skip link and an open dialog must end up fully in the viewport and not
+  under the header, with a `:focus-visible` outline or box-shadow; the walk must reach the footer's last link, every
+  figure control and every Methods summary, and never return to an element (focus trap).
+- `spacing-320x640`, `spacing-390x844`, `spacing-1280x800`: WCAG 1.4.12 text spacing (line height 1.5, letter spacing
+  0.12em, word spacing 0.16em, 2em after paragraphs, `!important`) on HTML text, every chapter laid out and every
+  Methods open. No horizontal overflow or text past the screen edge, no text cut by an `overflow: hidden / clip` box,
+  no overlapping text, no header item overlapping or off screen. In-plot text inside a `.plate` is reported under
+  `allowed` (`SPACING_ALLOW` in the tool), not failed: chapter teams, check yours there. So no `nowrap` on running text
+  that can be as wide as the screen; let it wrap when it does not fit.
 
 ## 13. Fig. 9: the weekly snapshot of singularity.joseqc.com
 

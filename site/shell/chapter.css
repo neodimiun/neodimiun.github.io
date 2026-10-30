@@ -39,7 +39,10 @@ html.motion .seam.in::after{animation:seam var(--t-seam) var(--ease)}
 .hero .dek,.ch-body,.pull,.bridge,.band-text,.methods > :not(summary),.iqc,.site-ft{text-wrap-style:pretty}
 .fig,.ch > .fig{margin-top:48px}
 .methods{margin-top:24px;border-top:1px solid var(--hair)}
-.methods summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:44px;font:400 12px/1.5 var(--mono);letter-spacing:0;color:var(--fg-2);white-space:nowrap}
+/* a summary is one line (≤ 40 characters) and wraps only when it is wider than its line (user text spacing, WCAG
+   1.4.12; three of six at 320 px, open ones with their inset below about 350) rather than squeeze its chevron and run
+   off the screen */
+.methods summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:44px;font:400 12px/1.5 var(--mono);letter-spacing:0;color:var(--fg-2)}
 .methods summary::-webkit-details-marker{display:none}
 .methods summary::before{content:'';width:6px;height:6px;border:solid var(--fg-2);border-width:0 1.5px 1.5px 0;transform:rotate(-45deg);margin:0 4px 0 2px;transition:transform var(--t-state)}
 .methods[open] summary::before{transform:rotate(45deg)}
@@ -80,8 +83,9 @@ html.motion .seam.in::after{animation:seam var(--t-seam) var(--ease)}
 /* late:end */
 @media (min-width:1024px){.contents a{min-height:28px;font-size:11.5px}}
 /* an organisation is never cut: it wraps right-aligned when its row is short (only AEL, at 1180 px and up); 1024–1179
-   the five-column text column is too narrow for three rows, so the column drops there as it does below 600 */
-@media (max-width:599px),(min-width:1024px) and (max-width:1179px){.contents .org{display:none}}
+   the five-column text column is too narrow for three rows, so the column drops there as it does below 600, and with
+   nothing left to give way a chapter name wraps rather than push its years off the screen (user text spacing) */
+@media (max-width:599px),(min-width:1024px) and (max-width:1179px){.contents .org{display:none}.contents .nm{white-space:normal}}
 /* every chapter, the contact section and the footer lay out only near the viewport (SPEC-C §14 item 33: the first
    layout, and the relayout when late.css adds the italic face, stay on-screen sized); `auto` keeps each box's real
    height once it has rendered. Chapter 01 starts inside the browser's render margin even on a phone, so there its

@@ -83,7 +83,7 @@ export default async function (facts, { eq, ok }) {
     '|Sample|Blank|0.50|1.00|2.50|5.00|10.0|', '|Fluoride|', '|Chloride|', '|Nitrate|', '|Sulfate|',
     '|Window 3.15–3.25 min|', '|3.48 sample|', '|5.90 spiked|+2.42 found|3.48 sample|', '|Bromide| · |2.90 min|outside window|',
     // methods (§7.2)
-    'area = 0.7481 × C + 0.007 (area in µS·min, C in mg/L as N). Sample (2.610 − 0.007) ÷ 0.7481 = 3.48 mg/L. Laboratory fortified sample matrix (LFM, the matrix spike) 2.50 mg/L: found 5.90, (5.90 − 3.48) ÷ 2.50 = 96.8 % (80–120 %). Retention window 3.20 ± 3 SD = 3.15–3.25 min.',
+    'area = 0.7481 × C + 0.007 (area in µS·min, C in mg/L as N). Sample (2.610 − 0.007) ÷ 0.7481 = 3.48 mg/L. Laboratory fortified sample matrix (LFM, the matrix spike) 2.50 mg/L: found 5.90; (5.90 − 3.48) ÷ 2.50 = 96.8 % (80–120 %). Retention window 3.20 ± 3 SD = 3.15–3.25 min.',
     'nitrate calibrated 0.50–10.0 mg/L as N, fit to 5 standards (blank run separately)', 'Drinking-water MCL 10 mg/L as N (40 CFR 141.62)',
   ]
   for (const s of want) ok(`env: chapter.html shows "${s.replace(/\|/g, ' ').trim().slice(0, 60)}"`, has(s))

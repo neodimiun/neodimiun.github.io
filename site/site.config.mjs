@@ -52,7 +52,7 @@ export const site = {
   iqcUrl: 'https://immutableqc.com',
   iqcCode: null, // Q10: the repository link; also needs gate G6b
   title: 'José A. Fernández Abreu · Materials & Process Engineer',
-  description: 'José A. Fernández Abreu, materials and process engineer for aerospace special processes, with a career across water chemistry, pharmaceutical microbiology, environmental testing and IT.',
+  description: 'José A. Fernández Abreu: aerospace materials and process engineer. Background in water chemistry, pharmaceutical microbiology, environmental testing and IT.',
   now: { label: 'Now', date: 'Oct 2026', role: 'Senior Engineer, Materials & Process Technologies', org: 'Collins Aerospace' },
   year: '2026',
   origin: 'https://joseqc.com',

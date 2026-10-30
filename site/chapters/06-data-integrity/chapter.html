@@ -8,12 +8,12 @@
     <p class="kicker"><span class="no">06</span> — Compliance &amp; <span class="nw">data integrity <span class="yrs">· 2015–present</span></span></p>
     <h2 id="di-t">Undocumented work did not happen.</h2>
   </header>
-  <div class="ch-body"><p>Accreditation, a discharge permit, cGMP, Nadcap: four rulebooks, one rule. Calibrate first, keep chain of custody, correct by appending, never overwriting. A promise is not an answer; a record anyone can check is. The weak point was always the gap between instrument and record; I am trying to close it.</p></div>
+  <div class="ch-body"><p>Accreditation, a discharge permit, cGMP, Nadcap: four rulebooks, one rule. Calibrate first, keep chain of custody, correct by appending, never overwriting. A promise is not an answer; a record anyone can check is. The weak point was always the gap between instrument and record; I'm trying to close it.</p></div>
   <div class="iqc" data-once="iqc">
     <p class="tag" data-iqc="tagline"><span class="k">Immutable QC</span>: {{fact:iqc.tagline}}</p>
     <p class="what" data-iqc="sentence">{{site.iqcSentence}}</p>
     <p class="stat" data-iqc="status">{{fact:iqc.status}}</p>
-    <p class="next" data-iqc="why">In an intelligence explosion, human review can't keep up with every result; records have to verify themselves.</p>
+    <p class="next" data-iqc="why">In an intelligence explosion, human review won't scale to every result; records have to carry their own proof.</p>
     <p class="next" data-iqc="roadmap">{{fact:iqc.roadmap}}</p>
     {{#if site.iqcVisit}}<p class="go"><a href="{{site.iqcUrl}}">Visit immutableqc.com {{icon:arrow-ne}}</a></p>{{/if}}
     {{#if site.iqcCodeLink}}<p class="go"><a href="{{site.iqcCode}}">Read the code {{icon:arrow-ne}}</a></p>{{/if}}
@@ -33,7 +33,7 @@
   </figure>
   <details class="methods"><summary><span class="k">Methods</span> · SHA-256, P-256 signatures</summary>
     <p>r = SHA-256(<code>figure-id|quantity|value|unit</code>), UTF-8, no spaces around the bars (for record 01 the figure id is <code>fig-indent</code>). h<sub>n</sub> = SHA-256 of the lowercase ASCII hex of h<sub>n−1</sub>, then the lowercase ASCII hex of r<sub>n</sub>, then the decimal n, with no separators, starting from 64 zeros. That is Immutable QC's reading-ledger construction (HPLC ingest), minus the capture time. Check record 01: <code>printf '%s' 'fig-indent|Vickers hardness, 316L|180|HV0.5' | sha256sum</code> gives <code>1c5ec779…7c68</code>; then <code>printf '%s' "$(printf '0%.0s' $(seq 64))1c5ec779ab07ae437884481785ad9f74d50aa284a44bd56b21d59c53c4c57c681" | sha256sum</code> gives <code>e7819b87…e79e</code> (on macOS use <code>shasum -a 256</code>). Shown: 8 hex; compared: all 64.</p>
-    <p>Each r was signed (ECDSA P-256) when this record set was prepared, with a one-time demo key that was then discarded and never reaches your browser. The same key also signed the {{fact:ledger.tamper.to}} version of record 02 at that time, standing in for an insider who holds the key (the Re-signed state). Your browser checks every signature with the public key. Signatures cover each result; links cover order; the anchor covers the whole. The anchor is a stored copy of the head standing in for a public timestamp: even someone holding the key can't rewrite the record and still match it. The right way to change {{fact:chem.burette}} is a new signed record that amends 02; records 01 to 05 keep verifying.</p>
-    <p>Shows the ability to discern altered records (21 CFR 11.10(a)) and records safeguarded against tampering (ISO/IEC 17025:2017 7.11.3(b)). The practice above follows ALCOA+, 21 CFR 11.10(e) and ISO/IEC 17025:2017 7.5.2. SHA-256: FIPS 180-4. ECDSA: FIPS 186-5.</p>
+    <p>Each r was signed (ECDSA P-256) when this record set was prepared, with a one-time demo key that was then discarded and never reaches your browser. The same key also signed the {{fact:ledger.tamper.to}} version of record 02, to stand in for an insider who holds the key (the Re-signed state). Your browser checks every signature with the public key. Signatures cover each result; links cover order; the anchor covers the whole. The anchor is a stored copy of the head standing in for a public timestamp: even someone holding the key can't rewrite the record and still match it. The right way to change {{fact:chem.burette}} is a new signed record that amends 02; records 01 to 05 keep verifying.</p>
+    <p>The demo shows the ability to discern altered records (21 CFR 11.10(a)) and records safeguarded against tampering (ISO/IEC 17025:2017 7.11.3(b)). The practice above follows ALCOA+, 21 CFR 11.10(e) and ISO/IEC 17025:2017 7.5.2. SHA-256: FIPS 180-4. ECDSA: FIPS 186-5.</p>
   </details>
 </section>

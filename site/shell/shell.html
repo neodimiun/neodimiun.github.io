@@ -38,10 +38,10 @@
   <div class="in">
     <p class="who">{{site.name}} · {{site.place}}</p>
     <p class="note">Views are my own and do not represent my employer. Immutable QC is an independent project built on my own time; it is not affiliated with or endorsed by my employer.</p>
-    {{#if build.figs}}<p class="note">All figures are simulated; their results are computed from the inputs in Methods.</p>{{/if}}
+    {{#if build.figs}}<p class="note">{{build.figNote}}</p>{{/if}}
     <p class="note">Set in Archivo, Newsreader and IBM Plex Mono (SIL Open Font License).</p>
     <p class="row"><button class="motion-t" type="button" aria-pressed="true" data-motion>Motion: <span class="v">on</span></button></p>
-    <p class="row"><a href="mailto:{{site.email}}">Email</a> <a href="{{site.linkedin}}">LinkedIn</a> <a href="{{site.github}}">GitHub · fabreu08</a> <a href="{{site.github2}}">GitHub · neodimiun</a>{{#if build.iqcVisit}} <a href="{{site.iqcUrl}}">immutableqc.com {{icon:arrow-ne}}</a>{{/if}} <span>© {{site.year}}</span></p>
+    <p class="row"><a href="mailto:{{site.email}}">Email</a> <a href="{{site.linkedin}}">LinkedIn</a> <a href="{{site.github}}">GitHub · fabreu08</a> <a href="{{site.github2}}">GitHub · neodimiun</a>{{#if build.iqcVisit}} <a href="{{site.iqcUrl}}">immutableqc.com {{icon:arrow-ne}}</a>{{/if}} <a href="{{site.singUrl}}">singularity.joseqc.com {{icon:arrow-ne}}</a> <span>© {{site.year}}</span></p>
   </div>
 </footer>
 {{build.hud}}

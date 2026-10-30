@@ -1,0 +1,50 @@
+/* Side project (singularity.joseqc.com). Tokens only; every selector starts with #singularity. The whole section is resin
+   (.ch-band.on-resin, chapter.json "band"). Fig. 9: SVG geometry in a 360 × 360 view box that fills the 1:1 plate; in-plot
+   text is DOM, placed in % of the same box (tools/plot.mjs). Its marks wear the tracker's own palette (a visual handshake
+   with singularity.joseqc.com): Kurzweil's rows purple rings, the AI picks cyan dots, the fit and the omega point amber.
+   On the resin plate (#15171A) they measure 6.7:1, 10.6:1 and 11.7:1. */
+#singularity{--plate-kz:#A08FFF;--plate-ai:#38D9F5;--plate-fit:#FFC861}
+#singularity .go a{display:inline-flex;align-items:center;gap:6px;min-height:44px;font:500 13px/1 var(--mono);letter-spacing:.02em}
+#singularity .go .i{width:14px;height:14px}
+#singularity .s9{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke-linecap:round;stroke-linejoin:round}
+#singularity .s9 path,#singularity .s9 rect{vector-effect:non-scaling-stroke}
+/* colours only: widths and dashes are attributes in the generated SVG. Dots are zero-length round-capped segments; a ring
+   is the same path again in the plate colour (<use class="in">) */
+#singularity .gr{stroke:var(--hair)}
+#singularity .ax{stroke:var(--steel)}
+#singularity .now{stroke:var(--fg)}
+#singularity .kz{stroke:var(--plate-kz)}
+#singularity .pk,#singularity .box,#singularity .ar{stroke:var(--plate-ai)}
+#singularity .fit,#singularity .be{stroke:var(--plate-fit)}
+#singularity .bd{fill:var(--plate-fit)}
+#singularity .in{stroke:var(--plate)}
+/* the two views share the plot: zoomed in, the all-history layer is scaled so its AI-era box fills the plot (--zt, written
+   on the <svg> by tools/plot.mjs); all history, the zoomed layer sits shrunk inside that box (--zi) */
+#singularity .al,#singularity .zl{transform-box:view-box;transform-origin:0 0}
+#singularity [data-state=zoomed] .al{transform:var(--zt);opacity:0}
+#singularity [data-state=all] .zl{transform:var(--zi);opacity:0}
+#singularity [data-state=zoomed] .s-all,#singularity [data-state=all] .s-zm{opacity:0}
+#singularity .lb{position:absolute;inset:0;pointer-events:none}
+#singularity .lb i{position:absolute;left:calc(var(--x) * 100% / 360);top:calc(var(--y) * 100% / 360);transform:translate(var(--tx,0),var(--ty,-50%));font:400 11px/1.25 var(--mono);color:var(--fg-2);white-space:nowrap}
+#singularity .yt{--tx:calc(-100% - 6px)}
+#singularity .xt{--tx:-50%;--ty:6px}
+#singularity .lb .k{color:var(--fg)}
+#singularity .lb .c{color:var(--plate-ai)}
+#singularity .lb .a{color:var(--plate-fit)}
+#singularity .bg{background:var(--plate);box-shadow:0 0 0 2px var(--plate)}
+@container fig (width < 330px){#singularity .lb i{font-size:10px}#singularity .n3{display:none}}
+@container fig (width >= 450px){#singularity .lb i{font-size:11.5px}}
+#singularity .readout .lbl{min-width:calc(11 * (1ch + .06em))}
+#singularity .readout .status{margin-left:auto} /* a status that wraps (320 px) stays at the right */
+#singularity .fe{margin-top:8px;font:400 11.5px/1.4 var(--mono);color:var(--fg-2)}
+/* late:start */
+/* the zoom on a button press (motion on): 1.6 s; the outgoing layer fades in the first 65 %, the incoming one in the last
+   70 %, labels fade out at once and in at the end. Late (the figure carries data-needs-late, so late.css arrives while it
+   is 1.5 screens away): before it lands a press switches at once, as with motion off. The intro is WAAPI (chapter.js). */
+html.motion #singularity .al,html.motion #singularity .zl{transition:transform 1.6s var(--zoom),opacity 1.04s var(--zoom)}
+html.motion #singularity [data-state=all] .al,html.motion #singularity [data-state=zoomed] .zl{transition:transform 1.6s var(--zoom),opacity 1.12s var(--zoom) .48s}
+html.motion #singularity .lb{transition:opacity .24s}
+html.motion #singularity [data-state=all] .s-all,html.motion #singularity [data-state=zoomed] .s-zm{transition:opacity .24s 1.36s}
+html.motion #singularity .pre *{transition:none!important}
+#singularity{--zoom:cubic-bezier(.55,0,.25,1)}
+/* late:end */

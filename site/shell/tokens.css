@@ -9,6 +9,7 @@
   --env:#1F4FB0;   --env-mark:#3566E0;   --env-tint:#DDE5F6;   --env-dk:#73AEFF;
   --it:#3A6B12;    --it-mark:#4B8F1C;    --it-tint:#E2EBD5;    --it-dk:#96D85E;
   --di:#006E5A;    --di-mark:#009278;    --di-tint:#D5ECE5;    --di-dk:#52D6B6;
+  --sing:#7C5300;  --sing-mark:#B07A0E;  --sing-tint:#F5E7C6;  --sing-dk:#FFC861; /* side project: the tracker's amber */
   --display:'Archivo', 'Archivo C', 'Archivo C fb', sans-serif;
   --serif:'Newsreader', 'Newsreader C', 'Newsreader C fb', serif;
   --mono:'IBM Plex Mono', 'Plex Mono C', 'Plex Mono C fb', ui-monospace, monospace;
@@ -31,6 +32,7 @@
 [data-ch=env]  {--acc:var(--env);  --acc-mark:var(--env-mark);  --acc-tint:var(--env-tint);  --acc-dk:var(--env-dk)}
 [data-ch=it]   {--acc:var(--it);   --acc-mark:var(--it-mark);   --acc-tint:var(--it-tint);   --acc-dk:var(--it-dk)}
 [data-ch=di]   {--acc:var(--di);   --acc-mark:var(--di-mark);   --acc-tint:var(--di-tint);   --acc-dk:var(--di-dk)}
+[data-ch=sing] {--acc:var(--sing); --acc-mark:var(--sing-mark); --acc-tint:var(--sing-tint); --acc-dk:var(--sing-dk)}
 [data-ch]{--a:var(--acc); --a-mark:var(--acc-mark); --a-fill:var(--acc); --a-hover:var(--acc-tint)}
 .on-resin{--surface:var(--resin); --plate:var(--resin-plate); --fg:var(--polished); --fg-2:var(--resin-muted);
   --hair:var(--resin-rule); --a:var(--acc-dk); --a-mark:var(--acc-dk); --a-fill:var(--acc-dk); --a-on:var(--resin);

@@ -2,7 +2,8 @@
 // own chapters/NN-slug/chapter.json, and the locator, index dialog, contents list and dev pages are generated
 // from those files, so no team edits the shell to add itself.
 
-export const chapters = ['01-engineering', '02-chemistry', '03-microbiology', '04-environmental', '05-it', '06-data-integrity']
+// '07-singularity' is a side section (chapter.json "side": true): after the six career chapters, outside their 01–06 numbering
+export const chapters = ['01-engineering', '02-chemistry', '03-microbiology', '04-environmental', '05-it', '06-data-integrity', '07-singularity']
 
 // Immutable QC launch gate (SPEC-C §15), recorded as it stands today (2026-10-06). The build picks the one
 // blockchain sentence (§9.3) and the IQC links from this record.
@@ -50,6 +51,7 @@ export const site = {
   github: 'https://github.com/fabreu08', // most active
   github2: 'https://github.com/neodimiun', // hosts this site
   iqcUrl: 'https://immutableqc.com',
+  singUrl: 'https://singularity.joseqc.com', // the side project (chapter 07-singularity, Fig. 9)
   iqcCode: null, // Q10: the repository link; also needs gate G6b
   title: 'José A. Fernández Abreu · Materials & Process Engineer',
   description: 'José A. Fernández Abreu: aerospace materials and process engineer. Background in water chemistry, pharmaceutical microbiology, environmental testing and IT.',

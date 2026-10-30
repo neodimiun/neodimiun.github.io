@@ -172,8 +172,8 @@ export default async function assertFacts(facts) {
     ok('site config has no CV link (item 2)', !('cv' in cfg.site), cfg.site.cv)
   }
   // ---------------------------------------------------------------- team hooks: chapters/*/facts.assert.mjs (optional)
-  const chapters = join(HERE, '../chapters')
-  for (const dir of ['01-engineering', '02-chemistry', '03-microbiology', '04-environmental', '05-it', '06-data-integrity']) {
+  const chapters = join(HERE, '../chapters'), order = (await import(pathToFileURL(join(HERE, '../site.config.mjs')).href + `?t=${Date.now()}`)).chapters
+  for (const dir of order) {
     const p = join(chapters, dir, 'facts.assert.mjs')
     if (!existsSync(p)) continue
     const mod = await import(pathToFileURL(p).href + `?t=${Date.now()}`)

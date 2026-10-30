@@ -77,6 +77,12 @@ The day-0 placeholders (`chapter.html/css/js` carrying `PLACEHOLDER (DS lead, da
   poster shows from first paint when motion is on; the authored HTML stays in the `final` state.
 - `reduced`: name of the small-multiples poster state shown instead of the final poster under reduced motion / Motion off.
 - `band: true` (chapter 06): the build adds `ch-band on-resin` to your root section.
+- `side: true` (07-singularity, the side project): a section after the career chapters that is not one of them. It needs no
+  `no`; it gets no locator number and no strip segment, the hero contents and the index dialog list it last without a
+  number, and while it is in view the header reads its `nav` ("Side project") with the counter left at 06/06 (main.js).
+- A figure of real data declares `"data": "snapshot", "asOf": "<facts key>"`: its BR corner reads SNAPSHOT and its caption
+  says "snapshot" and the as-of date (that fact's value) instead of "simulated" (lint). The footer note names the
+  simulated figures and the snapshot ones from these declarations (build.mjs `figNote`).
 - `generators`: the ONLY scripts the build runs for you. `tools/posters.mjs` and `tools/ledger-sign.mjs` are run by hand
   and must never be listed here.
 
@@ -359,7 +365,8 @@ crypto, on-chain, chain(s) except "chain of custody", Sepolia, Ethereum, NFT, we
 CV / résumé, compliance ready, cannot be altered, guaranteed, lowercase immutable, airworthy, TrueChem, voice bans…) in text, attributes, title, meta, JSON-LD and template content; unaccented name; Spanish once;
 glyphs (no ≥ → ≈ ✓ ✗ ◆ ▾ ● ⁻ ⁰ ₁ ^ in text, no `%` right after a digit, every rendered character in its face's cmap
 from `tools/glyphs.json`, after `text-transform`); `.ch-body` ≤ 90 words, titles ≤ 8, pull/bridge ≤ 14, methods summary
-≤ 40 characters; every figure: four corners, BR SIMULATED, TL `Fig. N`, caption starts `Fig. N`, says simulated,
+≤ 40 characters; every figure: four corners, BR SIMULATED (a `"data": "snapshot"` figure: BR SNAPSHOT, caption says
+"snapshot" and its as-of date, never "simulated"), TL `Fig. N`, caption starts `Fig. N`, says simulated,
 ≤ 40 words, GL posters per state with width/height, `.ctrl` role=group + label, 44 × 44 buttons, `aria-pressed`,
 readout `aria-hidden`; resting `[data-fact-readout]` = facts; ledger cells = readouts = facts.
 
@@ -372,3 +379,26 @@ stats, layout{overflowX, canvases, h1, drawCalls, triangles, pixelRatio, cpuMs, 
 (each `[data-fact-readout]` vs facts) and `ledger` (cell = readout = facts). `--full` adds the overflow sweep
 (320–1920), header at 320/360, no-WebGL, forced context loss, hidden tab and the URL-bar (pinned `--svh`) test.
 Screenshots go to `<out-prefix>-<profile>-*.png` (default `.build/check/`).
+
+## 13. Fig. 9: the weekly snapshot of singularity.joseqc.com
+
+Fig. 9 shows real data: a dated snapshot of the main chart on singularity.joseqc.com, the owner's tracker (private repository
+`fabreu08/singularity-tracker`; its built `site/dist/data/main_chart.json` is the file the public site serves). Nothing in the
+figure or its copy is typed: `chapters/07-singularity/data/snapshot.json` holds the trimmed data (Kurzweil's 22 rows, the
+hand-picked list's dates and waits, the last four calendar refits, the 50 % band's two multipliers, the as-of date and
+provenance: source revision + sha256 of the input), `singularity.model.mjs` ports the tracker's chart rules (wait, omega
+point, 50 % range, quadratic fit), `tools/plot.mjs` draws the figure, and `data/facts.json` `sing.*` holds every number the
+page prints. `facts.assert.mjs` recomputes all of them from the snapshot, twice. To refresh it (weekly, after the tracker's
+weekly refit):
+
+```sh
+# in the tracker: build the public site (writes site/dist/, data in site/dist/data/main_chart.json)
+python3 site/build.py
+# here, in site/: trim it into data/snapshot.json and rewrite facts.json "sing.*" (only those lines)
+node chapters/07-singularity/tools/snapshot.mjs <tracker>/site/dist/data/main_chart.json --rev=$(git -C <tracker> rev-parse --short HEAD)
+node build.mjs --gen --chapter singularity    # redraw Fig. 9
+npm run build -- --strict                     # asserts, lint, budgets; then npm run check
+```
+
+The tool stops if the latest refit is pinned (no omega point to show) or the fit is no longer the quadratic (the copy says
+quadratic). The generator fails the build if a label no longer has a clear place at every plate width (288–644 px).

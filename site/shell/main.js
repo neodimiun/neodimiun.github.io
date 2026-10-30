@@ -38,7 +38,10 @@ function nav(list, lateNow) {
   const label = $('.loc-lbl .v')
   const idx = $('.idx')
   const strip = $$('.strip i')
-  const n = list.length
+  // a side section (chapter.json "side": the side project) is outside the 01–06 numbering: no locator number is current,
+  // every strip segment is lit, and the counter keeps the last chapter's number (06/06) while its name shows
+  const career = list.filter((c) => !c.side)
+  const n = career.length, lastNo = career.length ? career[career.length - 1].no : ''
   let cur = null
   const show = (c, transient) => {
     if (!label || label.textContent === c.nav) return
@@ -50,12 +53,12 @@ function nav(list, lateNow) {
     cur = c
     for (const a of locLinks) { if (a.dataset.slug === c.slug) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current') }
     show(c)
-    for (const i of strip) i.classList.toggle('on', i.dataset.slug === c.slug)
+    for (const i of strip) i.classList.toggle('on', !!c.side || i.dataset.slug === c.slug)
     if (idx) {
-      $('.n', idx).textContent = `${c.no}/${String(n).padStart(2, '0')}`
+      $('.n', idx).textContent = `${c.side ? lastNo : c.no}/${String(n).padStart(2, '0')}`
       $('.l', idx).textContent = c.nav
       $('.s', idx).textContent = c.short || c.nav
-      idx.setAttribute('aria-label', `Chapter index, current: ${c.no} ${c.nav}`)
+      idx.setAttribute('aria-label', `Chapter index, current: ${c.side ? '' : c.no + ' '}${c.nav}`)
     }
   }
   if (secs.length) {

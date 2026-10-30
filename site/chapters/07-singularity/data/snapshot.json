@@ -1,0 +1,92 @@
+{
+ "_about": "Fig. 9 data: a trimmed, dated snapshot of the main chart on singularity.joseqc.com. Written by tools/snapshot.mjs; do not edit by hand.",
+ "provenance": { "source": "fabreu08/singularity-tracker@8f5a222 site/build.py -> dist/data/main_chart.json", "sha256": "7288c2c160502c2f8d3e6603af0bd1d7828d29cea80a1dcdb5d9baa41e90d2ed", "as_of": "2026-10-30" },
+ "as_of": "2026-10-30",
+ "kurzweil": {
+  "rows": [
+   { "label": "Life", "years_before_today": 3700000021.0849, "time_to_next_event_years": 2400000000, "key": true },
+   { "label": "Eukaryotes/multicellular", "years_before_today": 1300000021.0849, "time_to_next_event_years": 750000000, "key": false },
+   { "label": "Cambrian", "years_before_today": 550000021.0849, "time_to_next_event_years": 220000000, "key": true },
+   { "label": "Reptiles", "years_before_today": 330000021.0849, "time_to_next_event_years": 135000000, "key": false },
+   { "label": "Mammalia", "years_before_today": 195000021.0849, "time_to_next_event_years": 113500000, "key": false },
+   { "label": "Primates", "years_before_today": 81500021.0849, "time_to_next_event_years": 49000000, "key": false },
+   { "label": "Hominoidea", "years_before_today": 32500021.0849, "time_to_next_event_years": 25500000, "key": false },
+   { "label": "Hominidae", "years_before_today": 7000021.0849, "time_to_next_event_years": 3100000, "key": false },
+   { "label": "Upright", "years_before_today": 3900021.0849, "time_to_next_event_years": 2100000, "key": false },
+   { "label": "Homo erectus/tools", "years_before_today": 1800021.0849, "time_to_next_event_years": 800000, "key": false },
+   { "label": "Spoken language", "years_before_today": 1000021.0849, "time_to_next_event_years": 700000, "key": false },
+   { "label": "Homo sapiens", "years_before_today": 300021.0849, "time_to_next_event_years": 200000, "key": true },
+   { "label": "H. s. sapiens", "years_before_today": 100021.0849, "time_to_next_event_years": 75000, "key": false },
+   { "label": "Art, early cities", "years_before_today": 25021.0849, "time_to_next_event_years": 15000, "key": false },
+   { "label": "Agriculture", "years_before_today": 10021.0849, "time_to_next_event_years": 5000, "key": true },
+   { "label": "Writing, wheel", "years_before_today": 5021.0849, "time_to_next_event_years": 2490, "key": true },
+   { "label": "City states", "years_before_today": 2531.0849, "time_to_next_event_years": 1960, "key": false },
+   { "label": "Printing", "years_before_today": 571.0849, "time_to_next_event_years": 325, "key": true },
+   { "label": "Industrial Revolution", "years_before_today": 246.0849, "time_to_next_event_years": 95, "key": false },
+   { "label": "Telephone/electricity/radio", "years_before_today": 151.0849, "time_to_next_event_years": 65, "key": false },
+   { "label": "Computer", "years_before_today": 86.0849, "time_to_next_event_years": 38, "key": true },
+   { "label": "Personal computer", "years_before_today": 48.0849, "time_to_next_event_years": 14, "key": true }
+  ]
+ },
+ "lists": {
+  "v3": {
+   "label": "41 picks",
+   "rows": [
+    { "model": "GPT-3", "date": "2020-06-11", "frozen": true, "gap_to_next_days": 902 },
+    { "model": "ChatGPT-3.5", "date": "2022-11-30", "frozen": true, "gap_to_next_days": 104 },
+    { "model": "GPT-4", "date": "2023-03-14", "frozen": true, "gap_to_next_days": 426 },
+    { "model": "GPT-4o", "date": "2024-05-13", "frozen": true, "gap_to_next_days": 38 },
+    { "model": "Claude 3.5 Sonnet", "date": "2024-06-20", "frozen": true, "gap_to_next_days": 33 },
+    { "model": "Llama 3.1 405B", "date": "2024-07-23", "frozen": true, "gap_to_next_days": 156 },
+    { "model": "DeepSeek-V3", "date": "2024-12-26", "frozen": true, "gap_to_next_days": 25 },
+    { "model": "DeepSeek-R1", "date": "2025-01-20", "frozen": true, "gap_to_next_days": 75 },
+    { "model": "Llama 4 Maverick", "date": "2025-04-05", "frozen": true, "gap_to_next_days": 23 },
+    { "model": "Qwen3-235B-A22B", "date": "2025-04-28", "frozen": true, "gap_to_next_days": 74 },
+    { "model": "Kimi K2", "date": "2025-07-11", "frozen": true, "gap_to_next_days": 17 },
+    { "model": "GLM-4.5", "date": "2025-07-28", "frozen": true, "gap_to_next_days": 8 },
+    { "model": "gpt-oss-120b", "date": "2025-08-05", "frozen": true, "gap_to_next_days": 16 },
+    { "model": "DeepSeek-V3.1", "date": "2025-08-21", "frozen": true, "gap_to_next_days": 39 },
+    { "model": "Claude Sonnet 4.5", "date": "2025-09-29", "frozen": true, "gap_to_next_days": 38 },
+    { "model": "Kimi K2 Thinking", "date": "2025-11-06", "frozen": true, "gap_to_next_days": 25 },
+    { "model": "DeepSeek-V3.2", "date": "2025-12-01", "frozen": true, "gap_to_next_days": 10 },
+    { "model": "GPT-5.2", "date": "2025-12-11", "frozen": true, "gap_to_next_days": 11 },
+    { "model": "GLM-4.7", "date": "2025-12-22", "frozen": true, "gap_to_next_days": 36 },
+    { "model": "Kimi K2.5", "date": "2026-01-27", "frozen": true, "gap_to_next_days": 15 },
+    { "model": "GLM-5", "date": "2026-02-11", "frozen": true, "gap_to_next_days": 1 },
+    { "model": "MiniMax M2.5", "date": "2026-02-12", "frozen": true, "gap_to_next_days": 1 },
+    { "model": "Qwen3.5-397B-A17B", "date": "2026-02-13", "frozen": true, "gap_to_next_days": 20 },
+    { "model": "GPT-5.4", "date": "2026-03-05", "frozen": true, "gap_to_next_days": 33 },
+    { "model": "GLM-5.1", "date": "2026-04-07", "frozen": true, "gap_to_next_days": 13 },
+    { "model": "Kimi K2.6", "date": "2026-04-20", "frozen": true, "gap_to_next_days": 4 },
+    { "model": "DeepSeek V4 Pro/Flash", "date": "2026-04-24", "frozen": true, "gap_to_next_days": 38 },
+    { "model": "MiniMax M3", "date": "2026-06-01", "frozen": true, "gap_to_next_days": 15 },
+    { "model": "GLM-5.2", "date": "2026-06-16", "frozen": true, "gap_to_next_days": 10 },
+    { "model": "GPT-5.6", "date": "2026-06-26", "frozen": true, "gap_to_next_days": 20 },
+    { "model": "Kimi K3", "date": "2026-07-16", "frozen": true, "gap_to_next_days": 23 },
+    { "model": "Qwen3.8-2.4T-A95B", "date": "2026-08-08", "frozen": false, "gap_to_next_days": 6 },
+    { "model": "GLM-5.3", "date": "2026-08-14", "frozen": true, "gap_to_next_days": 20 },
+    { "model": "GPT-6 Astra", "date": "2026-09-03", "frozen": true, "gap_to_next_days": 7 },
+    { "model": "DeepSeek V4.1 Flash", "date": "2026-09-10", "frozen": true, "gap_to_next_days": 12 },
+    { "model": "Claude Opus 5.5", "date": "2026-09-22", "frozen": true, "gap_to_next_days": 6 },
+    { "model": "Claude Sonnet 5.5", "date": "2026-09-28", "frozen": true, "gap_to_next_days": 1 },
+    { "model": "GPT-6.1 Sol", "date": "2026-09-29", "frozen": true, "gap_to_next_days": 8 },
+    { "model": "Claude Haiku 5.5", "date": "2026-10-07", "frozen": true, "gap_to_next_days": 8 },
+    { "model": "Muse Spark Open", "date": "2026-10-15", "frozen": true, "gap_to_next_days": 4 },
+    { "model": "MiniMax M3.1 Flash", "date": "2026-10-19", "frozen": false, "gap_to_next_days": null }
+   ],
+   "open_days_at_today": 11,
+   "open_gap_is_lower_bound": true
+  }
+ },
+ "omega": {
+  "list": "v3",
+  "method": "calendar",
+  "refits": [
+   { "refit_date": "2026-10-17", "point": "2027-03-24", "pinned": "none" },
+   { "refit_date": "2026-10-24", "point": "2027-04-09", "pinned": "none" },
+   { "refit_date": "2026-10-26", "point": "2027-04-13", "pinned": "none" },
+   { "refit_date": "2026-10-30", "point": "2027-04-20", "pinned": "none" }
+  ]
+ },
+ "band50": { "lower_mult": 0.404, "upper_mult": 2.477 }
+}

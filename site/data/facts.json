@@ -24,5 +24,11 @@
                    "roadmap":"Next: agentic workflows that feed verified experiment data to AI research agents, plus Filecoin integration.",
                    "stage":"open alpha", "data":"synthetic demo data", "network":"public test network" },
   "ledger":      { "rows":["eng.hv","chem.burette","micro.key","env.key","it.key"],
-                   "tamper":{"row":"chem.burette","to":"24.60"} }
+                   "tamper":{"row":"chem.burette","to":"24.60"} },
+  "sing.omega":  { "value":"Apr 20, 2027", "iso":"2027-04-20", "refit":"Oct 30, 2026", "days":"172", "label":"Omega point (fitted)" },
+  "sing.range":  { "value":"Dec 30, 2026 – Jan 21, 2028", "lo":"Dec 30, 2026", "hi":"Jan 21, 2028", "tl":"Oct 15, 2026", "R":"187", "lower":"0.404", "upper":"2.477", "loN":"76", "hiN":"463" },
+  "sing.asof":   { "value":"Oct 30, 2026", "iso":"2026-10-30", "days":"172" },
+  "sing.data":   { "kurzweil":"22", "picks":"41", "frozen":"39", "added":"2", "waits":"38", "n":"60", "open":"11", "first":"Jun 11, 2020", "firstModel":"GPT-3", "last":"Oct 19, 2026", "lastModel":"MiniMax M3.1 Flash", "firstYear":"2020" },
+  "sing.fit":    { "kind":"quadratic", "a":"−6.646", "b":"1.661", "c":"−0.0167" },
+  "sing.refits": { "value":"Mar 24, Apr 9, Apr 13 and Apr 20, 2027", "refits":"Oct 17, 24, 26 and 30, 2026", "n":"4", "drift":"later" }
 }

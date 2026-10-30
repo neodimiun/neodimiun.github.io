@@ -1,15 +1,16 @@
 {
-  "_note": "SYSTEM-C §7 as amended by SPEC-C A7 and §14 items 29–40. KB = 1024 bytes, gzip level 9 unless noted. build.mjs and tools/check.mjs read this file. Integration rebalance (A7 total unchanged at 16.0): Fig. 4 1.0 -> 1.1 (its required title, caption, readout and 8-animation late group measure 1.08), Fig. 7 3.4 -> 3.3 (measured 2.97).",
-  "indexHtmlKB": 40,
+  "_note": "SYSTEM-C §7 as amended by SPEC-C A7 and §14 items 29–40. KB = 1024 bytes, gzip level 9 unless noted. build.mjs and tools/check.mjs read this file. Integration rebalance (A7 total unchanged at 16.0): Fig. 4 1.0 -> 1.1 (its required title, caption, readout and 8-animation late group measure 1.08), Fig. 7 3.4 -> 3.3 (measured 2.97). Side project (2026-10-30): Fig. 9 singularity 3.2 (measured 3.10) and its chapter.js 0.6 (measured 0.53) added; figureMarkupTotalKB 16.0 -> 17.3 and indexHtmlKB 40 -> 42.5 by the measured growth of the section (Fig. 9 markup 3.10 KB, copy, methods and screen-reader table about 1 KB: index.html 38.3 -> 42.4 KB).",
+  "indexHtmlKB": 42.5,
   "inlineCssKB": 12.5,
   "figureMarkupKB": {
     "calibration": 1.1,
     "disinfectant": 5.4,
     "chromatogram": 4.2,
     "layers": 3.3,
-    "record": 2.0
+    "record": 2.0,
+    "singularity": 3.2
   },
-  "figureMarkupTotalKB": 16.0,
+  "figureMarkupTotalKB": 17.3,
   "eagerJsKB": 22,
   "threeChunkKB": 145,
   "sceneKB": 10,
@@ -20,7 +21,8 @@
     "microbiology": 2.5,
     "environmental": 2.0,
     "it": 2.0,
-    "data-integrity": 1.2
+    "data-integrity": 1.2,
+    "singularity": 0.6
   },
   "fontsKB": 100,
   "firstScreenFontsKB": 70,

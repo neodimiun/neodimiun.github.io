@@ -240,14 +240,21 @@ function pageRules(cfg) {
     if (!rendered && f.dataset.state !== decl.final) E(`#${f.id}: authored data-state must be the final state "${decl.final}" (no-JS shows the final state)`)
     const corner = (c) => f.querySelector(`.plate .corner.${c}`)
     for (const c of ['tl', 'tr', 'bl', 'br']) if (!corner(c)) E(`#${f.id}: missing corner .${c}`)
-    if (corner('br') && !/^simulated$/i.test(txt(corner('br')))) E(`#${f.id}: BR corner must read SIMULATED`)
+    // a figure of real data declares it in chapter.json ("data": "snapshot", "asOf": "<facts key of its as-of date>"):
+    // BR reads SNAPSHOT and the caption says "snapshot" and the as-of date; it never says "simulated". Every other
+    // figure is simulated and says so.
+    const snap = decl.data === 'snapshot', asOf = snap ? cfg.facts[decl.asOf]?.value : null
+    if (snap && !asOf) E(`#${f.id}: "data": "snapshot" needs "asOf", a facts key with the as-of date (got "${decl.asOf}")`)
+    if (corner('br') && !(snap ? /^snapshot$/i : /^simulated$/i).test(txt(corner('br')))) E(`#${f.id}: BR corner must read ${snap ? 'SNAPSHOT' : 'SIMULATED'}`)
+    if (snap && /simulated/i.test(f.textContent)) E(`#${f.id}: a snapshot of real data must not say "simulated"`)
     if (corner('tl') && txt(corner('tl')).toLowerCase() !== `fig. ${decl.n}`) E(`#${f.id}: TL corner "${txt(corner('tl'))}" ≠ "Fig. ${decl.n}" (use {{fig:${id}}})`)
     if (decl.n <= prevN) E(`#${f.id}: figure numbers out of document order`)
     prevN = decl.n
     const cap = f.querySelector('figcaption')
     if (!cap) E(`#${f.id}: no figcaption`)
     else {
-      if (!/simulated/i.test(cap.textContent)) E(`#${f.id}: caption must say "simulated"`)
+      if (snap) { if (!/snapshot/i.test(cap.textContent) || (asOf && !cap.textContent.includes(asOf))) E(`#${f.id}: caption must say "snapshot" and its as-of date "${asOf}"`) }
+      else if (!/simulated/i.test(cap.textContent)) E(`#${f.id}: caption must say "simulated"`)
       if (words(cap.textContent) > 40) E(`#${f.id}: caption has ${words(cap.textContent)} words (≤ 40)`)
       if (!new RegExp(`^Fig\\. ${decl.n}\\b`, 'i').test(txt(cap))) E(`#${f.id}: caption must start "Fig. ${decl.n}"`)
     }
@@ -356,7 +363,7 @@ export async function lintPage(root, pageFile, cfg, { render = true } = {}) {
 // ------------------------------------------------------------------------------------------------ build entry
 export async function lintAll({ C, root = C, ctx, pageFile, scope, chapter, render }) {
   const src = lintSources(C, ctx.chapters)
-  const figures = Object.fromEntries([...ctx.figs.values()].map((f) => [f.id, { n: f.n, kind: f.kind, states: f.states, final: f.final, chapter: f.chapter.slug }]))
+  const figures = Object.fromEntries([...ctx.figs.values()].map((f) => [f.id, { n: f.n, kind: f.kind, states: f.states, final: f.final, chapter: f.chapter.slug, data: f.data || 'simulated', asOf: f.asOf || null }]))
   const inScope = scope === 'full' ? ctx.chapters.map((c) => c.slug) : [chapter.slug]
   const cfg = {
     figures, inScope, facts: ctx.facts, ledgerRows: ctx.facts.ledger.rows, full: scope === 'full', contact: true,

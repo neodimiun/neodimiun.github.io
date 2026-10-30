@@ -1,0 +1,28 @@
+{
+ "slug": "singularity",
+ "code": "sing",
+ "side": true,
+ "band": true,
+ "nav": "Side project",
+ "years": "2026–",
+ "contents": "singularity.joseqc.com",
+ "indexContents": "singularity.joseqc.com",
+ "figures": [
+  {
+   "id": "singularity",
+   "kind": "dom",
+   "states": [
+    "all",
+    "zoomed"
+   ],
+   "initial": "all",
+   "final": "zoomed",
+   "data": "snapshot",
+   "asOf": "sing.asof"
+  }
+ ],
+ "facts": [],
+ "generators": [
+  "tools/plot.mjs"
+ ]
+}

@@ -70,7 +70,7 @@ html.motion .seam.in::after{animation:seam var(--t-seam) var(--ease)}
 .contents ol{margin-top:8px;border-top:1px solid var(--hair)}
 .contents a{display:flex;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--fg);font:400 12px/1.2 var(--mono);letter-spacing:0;font-variant-numeric:tabular-nums}
 .contents a::before{content:'';width:3px;height:14px;background:var(--acc-mark);flex:none}
-.contents .no{color:var(--fg-2)}
+.contents .no{color:var(--fg-2);min-width:2ch} /* a side section has no number: its name still lines up */
 .contents .nm{white-space:nowrap}
 .contents .lead{flex:1;min-width:12px;border-bottom:1px dotted var(--steel);align-self:center;transform:translateY(3px)}
 .contents .org{color:var(--fg-2);min-width:0;text-align:right;padding-block:5px}

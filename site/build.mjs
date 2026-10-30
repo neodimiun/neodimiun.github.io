@@ -47,8 +47,10 @@ async function load() {
     const p = join(C, 'chapters', dir, 'chapter.json')
     if (!existsSync(p)) throw new BuildError(`missing ${relative(C, p)}`)
     const j = JSON.parse(read(p))
-    for (const k of ['slug', 'code', 'no', 'nav', 'years', 'figures']) if (j[k] == null) throw new BuildError(`${dir}/chapter.json: "${k}" is required`)
-    return { ...j, dir, path: join(C, 'chapters', dir), short: j.navShort || j.nav }
+    // "side": true marks a section that follows the career chapters without joining their 01–06 numbering (the side
+    // project): no "no", no locator number or strip segment; the header reads its nav name while it is in view
+    for (const k of ['slug', 'code', ...(j.side ? [] : ['no']), 'nav', 'years', 'figures']) if (j[k] == null) throw new BuildError(`${dir}/chapter.json: "${k}" is required`)
+    return { ...j, no: j.side ? '' : j.no, dir, path: join(C, 'chapters', dir), short: j.navShort || j.nav }
   })
   const facts = JSON.parse(read(join(C, 'data/facts.json')))
   const assertFacts = (await import(pathToFileURL(join(C, 'data/facts.assert.mjs')).href + `?t=${Date.now()}`)).default
@@ -242,21 +244,24 @@ function shellParts(ctx, page) {
   // the 404 page is served at any depth (/a/b): its links go to the home page, and nothing is "current"
   const cur = nf ? null : page.chapter || chapters[0]
   const href = (slug) => (nf ? site.base : dev && slug !== cur.slug ? 'index.html' : '') + '#' + slug
-  const N = String(chapters.length).padStart(2, '0')
+  // the numbered career chapters; a side section (chapter.json "side") gets no number, locator link or strip segment, and
+  // the counter stays at the last chapter's (06/06) while it is current
+  const career = chapters.filter((c) => !c.side)
+  const N = String(career.length).padStart(2, '0'), curNo = cur && cur.side ? career[career.length - 1].no : cur && cur.no
   // label slots are as wide as the longest name (Plex Mono: one character = 1ch + tracking), so nothing in the header moves
   const lw = Math.max(...chapters.map((c) => [...c.nav].length)), sw = Math.max(...chapters.map((c) => [...c.short].length))
-  const locator = `<nav class="loc" aria-label="Chapters" style="--lw:${lw}"><ol>${chapters.map((c) => `<li data-ch="${c.code}"><a href="${href(c.slug)}" data-slug="${c.slug}"${c === cur ? ' aria-current="location"' : ''}><span class="n">${c.no}</span><span class="sr-only"> ${esc(c.nav)}</span></a></li>`).join('')}</ol><span class="loc-lbl" aria-hidden="true"><span class="sep">·</span><span class="v">${cur ? esc(cur.nav) : ''}</span></span></nav>`
+  const locator = `<nav class="loc" aria-label="Chapters" style="--lw:${lw}"><ol>${career.map((c) => `<li data-ch="${c.code}"><a href="${href(c.slug)}" data-slug="${c.slug}"${c === cur ? ' aria-current="location"' : ''}><span class="n">${c.no}</span><span class="sr-only"> ${esc(c.nav)}</span></a></li>`).join('')}</ol><span class="loc-lbl" aria-hidden="true"><span class="sep">·</span><span class="v">${cur ? esc(cur.nav) : ''}</span></span></nav>`
   const contentsHref = nf ? `${site.base}#contents` : dev && cur.slug !== chapters[0].slug ? 'index.html#contents' : '#contents'
   const idxbtn = cur
-    ? `<a class="idx hd-mono" href="${contentsHref}" style="--lw:${lw};--sw:${sw}" aria-label="Chapter index, current: ${cur.no} ${esc(cur.nav)}"><span class="k">Index </span><span class="n">${cur.no}/${N}</span><span class="nm"><span class="sep"> · </span><span class="l">${esc(cur.nav)}</span><span class="s">${esc(cur.short)}</span></span>{{icon:chevron}}</a>`
+    ? `<a class="idx hd-mono" href="${contentsHref}" style="--lw:${lw};--sw:${sw}" aria-label="Chapter index, current: ${cur.side ? '' : cur.no + ' '}${esc(cur.nav)}"><span class="k">Index </span><span class="n">${curNo}/${N}</span><span class="nm"><span class="sep"> · </span><span class="l">${esc(cur.nav)}</span><span class="s">${esc(cur.short)}</span></span>{{icon:chevron}}</a>`
     : `<a class="idx hd-mono" href="${contentsHref}"><span class="n">Index</span>{{icon:chevron}}</a>`
-  const strip = `<div class="strip" aria-hidden="true">${chapters.map((c) => `<i data-ch="${c.code}" data-slug="${c.slug}"${c === cur ? ' class="on"' : ''}></i>`).join('')}</div>`
+  const strip = `<div class="strip" aria-hidden="true">${career.map((c) => `<i data-ch="${c.code}" data-slug="${c.slug}"${c === cur || (cur && cur.side) ? ' class="on"' : ''}></i>`).join('')}</div>`
   const yrs = (y) => `<span class="nw">${esc(y)}</span>`
   const dialog = `<dialog class="idx-dlg" id="idx-dlg" aria-label="Chapter index"><div class="in"><div class="hd"><p class="kicker">Index</p><button class="x hd-mono" type="button">Close</button></div><ol>${chapters.map((c) => {
     const d = c.indexContents ?? c.contents
-    return `<li data-ch="${c.code}"><a href="${href(c.slug)}"><span>${c.no} ${esc(c.nav)}</span><span class="d"><span class="dt">· </span>${d ? esc(d) + ' · ' : ''}${yrs(c.years)}</span></a></li>`
+    return `<li data-ch="${c.code}"><a href="${href(c.slug)}"><span>${c.side ? '' : c.no + ' '}${esc(c.nav)}</span><span class="d"><span class="dt">· </span>${d ? esc(d) + ' · ' : ''}${yrs(c.years)}</span></a></li>`
   }).join('')}</ol><p class="more"><a href="${nf ? site.base : ''}#contact">Contact</a><a href="mailto:${esc(site.email)}">Email</a><a href="${esc(site.linkedin)}">LinkedIn</a></p></div></dialog>`
-  const contents = `<nav class="contents" id="contents" aria-label="Career chapters"><p class="kicker">In this page</p><ol>${chapters.map((c) => `<li data-ch="${c.code}"><a href="${href(c.slug)}"><span class="no">${c.no}</span> <span class="nm">${esc(c.nav)}</span><span class="lead"></span><span class="org">${esc(c.contents || '')}</span><span class="yr">${esc(c.years)}</span></a></li>`).join('')}</ol></nav>`
+  const contents = `<nav class="contents" id="contents" aria-label="Contents"><p class="kicker">In this page</p><ol>${chapters.map((c) => `<li data-ch="${c.code}"${c.side ? ' class="side"' : ''}><a href="${href(c.slug)}"><span class="no">${c.no}</span> <span class="nm">${esc(c.nav)}</span><span class="lead"></span><span class="org">${esc(c.contents || '')}</span><span class="yr">${esc(c.years)}</span></a></li>`).join('')}</ol></nav>`
   return { locator, idxbtn, strip, dialog, contents }
 }
 
@@ -433,6 +438,15 @@ function ogMeta(ctx) {
   if (img) m.push(['og:image', img.url], ['og:image:type', img.type], ['og:image:width', img.w], ['og:image:height', img.h], ['og:image:alt', img.alt])
   return m.filter(([, v]) => v != null && v !== '').map(([k, v]) => `<meta property="${k}" content="${esc(v)}">`).join('\n') + `\n<meta name="twitter:card" content="${img ? 'summary_large_image' : 'summary'}">`
 }
+// the footer's figure note: "All figures are simulated", or, when a chapter.json figure declares "data": "snapshot" (a
+// dated snapshot of real data, Fig. 9), which figures are which ("Figs. 1–8 are simulated; Fig. 9 is a dated snapshot of
+// real data.")
+function figNote(ctx) {
+  const all = [...ctx.figs.values()], snap = all.filter((f) => f.data === 'snapshot'), sim = all.filter((f) => f.data !== 'snapshot')
+  const span = (l) => (l.length === 1 ? `Fig. ${l[0].n}` : l.every((f, i) => !i || f.n === l[i - 1].n + 1) ? `Figs. ${l[0].n}–${l[l.length - 1].n}` : `Figs. ${l.map((f) => f.n).join(', ')}`)
+  if (!snap.length) return 'All figures are simulated; their results are computed from the inputs in Methods.'
+  return `${span(sim)} ${sim.length > 1 ? 'are' : 'is'} simulated; ${span(snap)} ${snap.length > 1 ? 'are dated snapshots' : 'is a dated snapshot'} of real data. Every result is computed from the inputs in Methods.`
+}
 function page(ctx, { kind, chapter, cssText, js }) {
   const parts = shellParts(ctx, { kind, chapter })
   ctx.contents = parts.contents
@@ -443,13 +457,13 @@ function page(ctx, { kind, chapter, cssText, js }) {
   const fontFiles = ['archivo-c-115-620.woff2', 'newsreader-c-420.woff2', 'ibm-plex-mono-latin-400-normal.woff2']
   const preloads = fontFiles.map((f) => `<link rel="preload" href="${ctx.assets.url(join(C, 'fonts', f))}" as="font" type="font/woff2" crossorigin>`).join('\n')
   const google = ARGS.fonts === 'google' ? '\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@115,620&amp;family=Newsreader:ital,opsz,wght@0,16,420;1,20,420&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">' : ''
-  const manifest = { ...(js ? js.manifest : {}), late: ctx.lateCss, ch: ctx.chapters.map((c) => ({ slug: c.slug, code: c.code, no: c.no, nav: c.nav, short: c.short })) }
+  const manifest = { ...(js ? js.manifest : {}), late: ctx.lateCss, ch: ctx.chapters.map((c) => ({ slug: c.slug, code: c.code, no: c.no, nav: c.nav, short: c.short, ...(c.side ? { side: 1 } : {}) })) }
   const prepaint = esbuild.transformSync(read(join(C, 'shell/prepaint.js')).replace('__MANIFEST__', JSON.stringify(manifest)), { minify: true, target: 'es2017' }).code.trim()
   ctx.build = {
     title: kind === 'dev' ? `Dev · ${chapter.nav} · ${ctx.site.title}` : kind === '404' ? `Not found · ${ctx.site.title}` : ctx.site.title,
     og: kind === 'full' ? ogMeta(ctx) : '', favicon: ctx.favicon ? (kind === '404' ? ctx.site.base : '') + ctx.favicon : '',
     prepaint, preloads: preloads + google, css: cssText, printcss: !ctx.lateCss ? '' : js ? `<noscript><link rel="stylesheet" href="${ctx.lateCss}"></noscript>` : `<link rel="stylesheet" href="${ctx.lateCss}">`, jsonld: jsonld(ctx.site),
-    sprite: read(join(C, 'shell/icons.svg')).trim(), home: kind === '404' ? ctx.site.base : '', figs: kind === '404' ? '' : 'yes', iqcVisit: ctx.site.iqcVisit ? 'yes' : '',
+    sprite: read(join(C, 'shell/icons.svg')).trim(), home: kind === '404' ? ctx.site.base : '', figs: kind === '404' ? '' : 'yes', figNote: figNote(ctx), iqcVisit: ctx.site.iqcVisit ? 'yes' : '',
     locator: parts.locator, idxbtn: parts.idxbtn, strip: parts.strip, dialog: parts.dialog, chapters: main,
     contact: read(join(C, 'shell/contact.html')).trim(),
     hud: '', script: js ? `<script type="module" src="${js.main.file}"></script>` : '',
@@ -490,7 +504,7 @@ function budgets(ctx, html, cssText, js, page) {
       figs[id] = gz(m) / 1024
       add(`Fig. ${ctx.figs.get(id)?.n} ${id} inline markup (gzip)`, figs[id], kb0)
     }
-    add('inline figure markup, Figs. 4–8 together (gzip)', gz(all) / 1024, B.figureMarkupTotalKB)
+    add(`inline figure markup, Figs. ${Object.keys(figs).map((id) => ctx.figs.get(id)?.n).join(', ')} together (gzip)`, gz(all) / 1024, B.figureMarkupTotalKB)
   }
   if (page === 'full') { // JS budgets apply to the minified production bundle only (dev bundles are unminified)
     add('eager JS main (gzip)', js.main.gz / 1024, B.eagerJsKB)
